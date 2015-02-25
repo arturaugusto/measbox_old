@@ -1,0 +1,1 @@
+json.extract! @company, :laboratory_id, :custom_forms

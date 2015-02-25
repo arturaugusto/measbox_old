@@ -1,0 +1,28 @@
+<fieldset class="value_chooser_feature">
+  <%- association_str = association.to_s -%>
+
+  <%= f.association association, as: :string, input_html: { class: 'value_reference hidden' } %>
+  <div class="input-group" data-toggle="modal" data-target=".modal_<%=association_str%>" style="cursor: pointer">
+    <span type="text" class="value_label form-control"><%= value %></span>
+    <span class="glyphicon glyphicon-search input-group-addon" style="top: 0px;"></span>
+  </div>
+
+
+  <div class="modal modal_<%=association_str%> fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          <h4 class="modal-title">Choose a <%= association.to_s %></h4>
+        </div>
+        <div class="modal-body">
+          <%= render "shared/values_datatable", :klass => association_str.classify.constantize, :cols => cols %>
+          <br>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>    
+</fieldset>

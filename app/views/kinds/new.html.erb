@@ -1,0 +1,10 @@
+<%- model_class = Kind -%>
+<div class="page-header">
+  <%= link_to kinds_path, :class => 'btn btn-default' do %>
+    <span class="glyphicon glyphicon-list-alt"></span>
+    Back
+  <% end %>
+  <h1>New <%= model_class.model_name.human %></h1>
+</div>
+
+<%= render 'form' %>

@@ -1,0 +1,12 @@
+<%- model_class = Role -%>
+
+<div class="page-header">
+  <%= link_to new_role_path, :class => 'btn btn-primary' do %>
+    <span class="glyphicon glyphicon-plus"></span>
+    New <%=t '.title', :default => model_class.model_name.human %>
+  <% end %>
+  <h1>Listing <%=t '.title', :default => model_class.model_name.human.pluralize.titleize %></h1>
+</div>
+
+
+<%= render "shared/values_datatable", :klass => model_class, :cols => [:name, :created_at] %>

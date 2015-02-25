@@ -1,0 +1,11 @@
+<table class="datatable table table-striped table-hover table-bordered values_datatables_feature" data-klass="<%= klass %>" data-source="<%= url_for(klass) %>.json">
+	<thead>
+		<tr>
+			<% cols.each do |col| %>
+				<th class="values_datatables_header"><%= klass.human_attribute_name(col) %></th>
+			<% end %>
+		</tr>
+	</thead>
+	<tbody>
+	</tbody>
+</table>

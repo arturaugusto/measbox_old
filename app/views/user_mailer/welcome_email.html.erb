@@ -1,0 +1,5 @@
+<p>Hi <%= @user.email %>!</p>
+
+<p>Someone from <%= @user.laboratory.name %> has invited you join Measbox!</p>
+
+<p><%= link_to 'Set my password', edit_password_url(@user, :reset_password_token => @token, :subdomain => @user.laboratory.subdomain, :initial => true) %></p>

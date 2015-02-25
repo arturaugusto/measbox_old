@@ -1,0 +1,54 @@
+<%= simple_form_for @service do |f| %>
+  <%= f.input :order_number, input_html: { class: 'form-control' } %>
+  <%= f.input :details, input_html: { class: 'form-control'} %>
+  <br>
+  <%= f.input :validated, as: :boolean, boolean_style: :inline, label: false, input_html: { :data => {toggle: 'toggle', on: 'Validated', off: 'Unvalidated', onstyle: 'success'} } %>  
+  <br>
+  <div class="laboratory_id" data-lab-id="<%= current_user.laboratory_id %>"></div>
+  <%= f.input :information, as: :hidden %>
+  <div class="information_holder"></div>
+  <%= render "shared/modal_choose_value", f: f, :association => :user, :cols => [:name] , :value => (@service.user.nil? ? "Calibrated by..." : @service.user.name) %>
+  <br>
+  <%= render "shared/datepicker", f: f, :field => :calibration_date %><br>
+  <%= raw_template :assets %>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Click on the asset to put it on your workbench:</h3>
+    </div>
+    <div class="panel-body">
+      <%= render "shared/assets_datatable" %>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Workbench</h3>
+        </div>
+        <div class="panel-body">
+          <div class="service_assets">
+            <%= f.fields_for :assets do |builder| %>
+              <%= render "shared/asset_fields", {:f => builder, :role => 'remove'} %>
+            <% end %>
+            <div class="assets-holder assets_holder_feature"></div>
+            <%# 
+            hidden field needed to allow remove all assets from the service 
+            
+            http://asciicasts.com/episodes/17-habtm-checkboxes 
+            
+            --One Small Gotcha
+            There is still one small problem with our update method. If we uncheck all of the checkboxes to remove a product from all categories then the update fails to remove any categories the product was in. This is because a checkbox on an HTML form will not have its value sent back if it is unchecked and therefore no category_ids will appear in the product’s parameters hash, meaning that the category_ids are not updated.
+
+            To fix this we have to modify our products controller to set the category_ids parameter to be an empty array if it is not passed to the update action. We can do this using Ruby’s ||= operator and add the following like at the top of the update action.            
+            %>
+            <input id="service_asset_ids_null" name="service[asset_ids][]" type="hidden">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+ 
+  <br>
+  <%= f.button :submit, :class => 'btn btn-primary' %>
+  <%= link_to t('.cancel', :default => t("helpers.links.cancel")),
+                :back, :class => 'btn btn-default' %>
+<% end %>

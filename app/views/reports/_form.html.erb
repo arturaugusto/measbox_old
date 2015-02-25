@@ -1,0 +1,18 @@
+<%= simple_form_for @report, :remote => true, :html => { :class => 'report_feature' } do |f| %>
+  <%= f.error_notification %>
+
+  <div class="form-inputs">
+    <%= f.input :name, input_html: { class: 'form-control' } %>
+  </div>
+  <%= f.hidden_field :service_id_ref, value: @report.service_id %>
+  
+  
+	<%= render "shared/modal_choose_value", f: f, :association => :report_template, :cols => [:name, :created_at] , :value => (@report.report_template.nil? ? "Choose a report template..." : @report.report_template.name) %>
+
+  <div class="form-inputs">
+    <%= f.input :value, input_html: { class: 'form-control report_editor_feature' } %>
+  </div>  
+  <br>
+  <a href="#" class="btn btn-primary getdata">Update Report</a>
+  <%= link_to t('.cancel', :default => t("helpers.links.cancel")), service_path(@report.service, :tab => 'reports'), :class => 'btn btn-default' %>
+<% end %>

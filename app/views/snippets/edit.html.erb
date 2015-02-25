@@ -1,0 +1,22 @@
+<div class="page-header">
+	<span class="edit_snippet_feature"></span>
+  <%= link_to snippets_path, :class => 'btn btn-default' do %>
+    <span class="glyphicon glyphicon-list-alt"></span>
+    Back
+  <% end %>
+
+  <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+      snippet_path(@snippet), :method => 'delete', :data => { :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')) },
+      :class => 'btn btn-danger' %>
+
+  <%= link_to new_snippet_path(:clone => @snippet.id), :class => 'btn btn-primary' do %>
+    <span class="fa fa-files-o"></span>
+    Clone Snippet
+  <% end %> 
+
+  <h1>Editing snippet</h1>
+</div>
+
+<%= render 'form' %>
+
+

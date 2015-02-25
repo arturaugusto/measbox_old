@@ -1,0 +1,374 @@
+{
+  "id": "9b8e8c3f-8d85-46df-aa92-f65773efee0d",
+  "flavor": 2,
+  "value": {
+    "variables": [
+      {
+        "kind": [
+          "UUT"
+        ],
+        "name": "VI",
+        "color": "#f4ffa9"
+      },
+      {
+        "kind": [],
+        "name": "VR",
+        "color": "#c4d1ff"
+      }
+    ],
+    "influence_quantities": [
+      {
+        "name": "aaa",
+        "color": "#ffffff"
+      }
+    ],
+    "replications": 4,
+    "formula": "e <- VI - VR",
+    "automation": "",
+    "script": "library('devtools')\nsrc <- source_url(\"https://raw.githubusercontent.com/arturaugusto/Uncertainty-Calculator/master/unc_cal.r\")\nmain <- src$value",
+    "output_columns": [
+      {
+        "name": "VI",
+        "color": "#ffffff"
+      },
+      {
+        "name": "VC",
+        "color": "#ffffff"
+      },
+      {
+        "name": "e",
+        "color": "#ffffff"
+      },
+      {
+        "name": "MPE",
+        "color": "#ffffff"
+      },
+      {
+        "name": "U",
+        "color": "#ffffff"
+      },
+      {
+        "name": "k",
+        "color": "#ffffff"
+      },
+      {
+        "name": "veff",
+        "color": "#ffffff"
+      }
+    ],
+    "format_operations": [
+      {
+        "output_column": "U",
+        "operation": "toPrecision",
+        "argument": "2"
+      },
+      {
+        "output_column": "VC",
+        "operation": "toFixed",
+        "argument": "U.resolution"
+      },
+      {
+        "output_column": "VI",
+        "operation": "toFixed",
+        "argument": "VI 1.resolution"
+      },
+      {
+        "output_column": "e",
+        "operation": "toFixed",
+        "argument": "VI 1.resolution"
+      },
+      {
+        "output_column": "MPE",
+        "operation": "toFixed",
+        "argument": "VI 1.resolution"
+      },
+      {
+        "output_column": "k",
+        "operation": "toFixed",
+        "argument": "2"
+      }
+    ]
+  },
+  "validated": true,
+  "laboratory_id": "72f53507-2095-42b1-a8d4-31f03dd9fe8e",
+  "created_at": "2014-12-09T23:34:04.414Z",
+  "updated_at": "2014-12-21T21:08:11.459Z",
+  "table_data": [
+    {
+      "VI Snippet": "444 - DCV",
+      "VI 1": "4.006",
+      "VI 2": "4.006",
+      "VI 3": "4.006",
+      "VI 4": "4.006",
+      "VR Snippet": "123 - DCV",
+      "VR 1": "4",
+      "VR 2": "4",
+      "VR 3": "4",
+      "VR 4": "4",
+      "VI": "4.006",
+      "VC": "4.000",
+      "e": "0.006",
+      "U": "0.053",
+      "k": "2.00",
+      "veff": 16535,
+      "aaa": "1",
+      "MPE": "0.060"
+    },
+    {
+      "VI Snippet": "444 - DCV",
+      "VI 1": "7.07",
+      "VI 2": "7",
+      "VI 3": "7",
+      "VI 4": "7",
+      "VR Snippet": "123 - DCV",
+      "VR 1": "7",
+      "VR 2": "7",
+      "VR 3": "7",
+      "VR 4": "7",
+      "VI": "7.02",
+      "VC": "7.000",
+      "e": "0.02",
+      "U": "0.066",
+      "k": "2.07",
+      "veff": 33,
+      "aaa": "1",
+      "MPE": "0.06"
+    },
+    {
+      "VI Snippet": "444 - DCV",
+      "VI 1": "9.02m",
+      "VI 2": "9m",
+      "VI 3": "9m",
+      "VI 4": "9.03m",
+      "VR Snippet": "123 - DCV",
+      "VR 1": "9",
+      "VR 2": "9",
+      "VR 3": "9",
+      "VR 4": "9",
+      "aaa": "",
+      "VI": "9.01",
+      "VC": "9.000",
+      "e": "0.01",
+      "U": "0.055",
+      "k": "2.00",
+      "veff": 539,
+      "MPE": "0.06"
+    },
+    {
+      "VI Snippet": null,
+      "VI 1": null,
+      "VI 2": null,
+      "VI 3": null,
+      "VI 4": null,
+      "VR Snippet": null,
+      "VR 1": null,
+      "VR 2": null,
+      "VR 3": null,
+      "VR 4": null,
+      "aaa": null,
+      "VI": null,
+      "VC": null,
+      "e": "",
+      "U": null,
+      "k": null,
+      "veff": null
+    }
+  ],
+  "asset_snippets": {
+    "snippets": [
+      {
+        "label": "123 - DCV",
+        "asset_id": "579a72d3-40f9-41cc-b34e-df28485c39ac",
+        "snippet_id": "23bf1898-1e09-41e4-8c54-ad7e5604723e",
+        "position": "1413082414408",
+        "value": {
+          "ranges": [
+            {
+              "name": "10 V",
+              "limits": {
+                "start": 0,
+                "end": 10,
+                "fullscale": 0,
+                "autorange_conditions": "(readout >= range_start) and (readout <= range_end)"
+              },
+              "prefix": "",
+              "unit": "V",
+              "uncertainty_text": "",
+              "kind": "Source",
+              "nominal_value": "if (is_fixed) readout <- 0",
+              "uncertainties": [
+                {
+                  "name": "Resolution",
+                  "description": "Half of minimum step size",
+                  "distribution": "Rect.",
+                  "formula": "u <- 0.01/2"
+                },
+                {
+                  "name": "MPE",
+                  "description": "MPE",
+                  "distribution": "Rect.",
+                  "formula": "if(is_UUT){\n  u <- 0.04\n  mpe <- u\n}"
+                }
+              ],
+              "reclassifications": [
+                {
+                  "condition": "asset.certificate = '11111-101'",
+                  "uncertainties": [
+                    {
+                      "name": "EMA",
+                      "description": "EMA",
+                      "distribution": "Rect.",
+                      "formula": "u <- 0.015"
+                    },
+                    {
+                      "name": "MPE",
+                      "description": "MPE",
+                      "distribution": "Rect.",
+                      "formula": "u <- 0.005\nif(is_UUT) mpe <- u"
+                    }
+                  ],
+                  "correction": "correct_readout <- readout + 0"
+                }
+              ],
+              "automation": []
+            }
+          ]
+        }
+      },
+      {
+        "label": "444 - DCV",
+        "asset_id": "36468f36-2bae-4969-b3bd-0c38775a2a76",
+        "snippet_id": "2da5affa-5514-404f-9af6-148a5201bf14",
+        "position": "1419188588219",
+        "value": {
+          "ranges": [
+            {
+              "name": "Blabla",
+              "limits": {
+                "start": 0,
+                "end": 10,
+                "fullscale": 10,
+                "autorange_conditions": "(readout >= range_start) and (readout <= range_end) or is_fixed"
+              },
+              "prefix": "k",
+              "unit": "V",
+              "uncertainty_text": "",
+              "kind": "Measurement",
+              "nominal_value": "if (is_fixed) readout <- 0",
+              "uncertainties": [
+                {
+                  "name": "Resolution",
+                  "description": "Half of minimum step size",
+                  "distribution": "Rect.",
+                  "formula": "u <- 0.01"
+                },
+                {
+                  "name": "MPE",
+                  "description": "MPE",
+                  "distribution": "Rect.",
+                  "formula": "if (is_UUT){\n  u <- 0.02\n  mpe <- u\n}"
+                }
+              ],
+              "reclassifications": [
+                {
+                  "condition": "asset.certificate = '?'",
+                  "uncertainties": [
+                    {
+                      "name": "Resolution",
+                      "description": "Half of minimum step size",
+                      "distribution": "Rect.",
+                      "formula": "u <- 10.101/2"
+                    },
+                    {
+                      "name": "MPE",
+                      "description": "Maximum Permissible Error",
+                      "distribution": "Rect.",
+                      "formula": "u <- 10.101\nif(is_UUT) mpe <- u"
+                    }
+                  ],
+                  "correction": "correct_readout <- readout + 0"
+                }
+              ],
+              "automation": []
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "assets": {
+    "579a72d3-40f9-41cc-b34e-df28485c39ac": {
+      "id": "579a72d3-40f9-41cc-b34e-df28485c39ac",
+      "serial": "123",
+      "company_id": "0f52be76-78ef-4af9-9455-106ab33ce967",
+      "identification": "123",
+      "certificate": "11111-101",
+      "calibration_date": null,
+      "due_date": null,
+      "laboratory_id": "72f53507-2095-42b1-a8d4-31f03dd9fe8e",
+      "visa_address": "",
+      "created_at": "2014-10-05T19:55:13.978Z",
+      "updated_at": "2014-10-14T22:57:20.542Z",
+      "model_id": "75c69f2c-134c-496e-b732-77f4dc04f5d3"
+    },
+    "36468f36-2bae-4969-b3bd-0c38775a2a76": {
+      "id": "36468f36-2bae-4969-b3bd-0c38775a2a76",
+      "serial": "aa",
+      "company_id": "0f52be76-78ef-4af9-9455-106ab33ce967",
+      "identification": "444",
+      "certificate": "",
+      "calibration_date": null,
+      "due_date": null,
+      "laboratory_id": "72f53507-2095-42b1-a8d4-31f03dd9fe8e",
+      "visa_address": "",
+      "created_at": "2014-10-06T11:32:11.240Z",
+      "updated_at": "2014-10-13T12:38:38.783Z",
+      "model_id": "ce439f25-220d-4461-ae46-ba00306e9d4b"
+    }
+  },
+  "lookup": [
+    {
+      "var": "VI",
+      "row_index": 0,
+      "snippet_index": 1,
+      "range_index": 0,
+      "reklass_index": null
+    },
+    {
+      "var": "VI",
+      "row_index": 1,
+      "snippet_index": 1,
+      "range_index": 0,
+      "reklass_index": null
+    },
+    {
+      "var": "VI",
+      "row_index": 2,
+      "snippet_index": 1,
+      "range_index": 0,
+      "reklass_index": null
+    },
+    {
+      "var": "VR",
+      "row_index": 0,
+      "snippet_index": 0,
+      "range_index": 0,
+      "reklass_index": 0
+    },
+    {
+      "var": "VR",
+      "row_index": 1,
+      "snippet_index": 0,
+      "range_index": 0,
+      "reklass_index": 0
+    },
+    {
+      "var": "VR",
+      "row_index": 2,
+      "snippet_index": 0,
+      "range_index": 0,
+      "reklass_index": 0
+    }
+  ],
+  "table_offset": 11
+} 

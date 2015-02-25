@@ -1,0 +1,13 @@
+<%= simple_form_for @laboratory, :html => { :role => 'form' } do |f| %>
+	<div class="form-group">
+	  <%= f.input :name, input_html: { class: 'form-control' } %>
+	</div>
+	<div class="form-group">  
+	  <%= f.input :subdomain, input_html: { class: 'form-control'} %>
+	</div>
+	<div class="form-group">
+	  <%= recaptcha_tags ajax: true %>
+	</div>
+  <%= f.button :submit, :class => 'btn btn-lg btn-primary btn-block' %>
+  <br><br>
+<% end %>

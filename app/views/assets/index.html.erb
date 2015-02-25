@@ -1,0 +1,9 @@
+<div class="page-header">
+  <%= link_to new_asset_path, :class => 'btn btn-primary' do %>
+    <span class="glyphicon glyphicon-plus"></span>
+    New Asset
+  <% end %>
+  <h1>Listing assets</h1>
+</div>
+
+<%= render "shared/assets_datatable" %>

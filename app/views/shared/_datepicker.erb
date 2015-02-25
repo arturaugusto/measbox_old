@@ -1,0 +1,5 @@
+<%= f.label field %>
+<div class="input-group date">
+  <%= f.text_field field, :class => 'form-control', :value => f.object[field].nil? ? "" : f.object[field].strftime("%B %e, %Y") %>
+  <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+</div>

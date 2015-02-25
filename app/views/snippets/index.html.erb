@@ -1,0 +1,13 @@
+<%- model_class = Snippet -%>
+<div class="page-header">
+  <%= link_to new_snippet_path, :class => 'btn btn-primary' do %>
+    <span class="glyphicon glyphicon-plus"></span>
+    New Snippet
+  <% end %>
+  <h1>Listing Snippets</h1>
+</div>
+<label for="global_snippets">Display:</label>
+<input id="global_snippets" name="accept" type="checkbox" value="1" data-toggle="toggle" data-on="All public snippets" data-off="Yours lab snippets" data-size="small" />
+<br><br>
+
+<%= render "shared/snippets_datatable" %>

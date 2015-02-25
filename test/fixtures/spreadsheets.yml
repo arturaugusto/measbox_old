@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  id: 
+  description: MyString
+  mathematical_model: MyString
+  table_json: MyText
+  service_id: 
+
+two:
+  id: 
+  description: MyString
+  mathematical_model: MyString
+  table_json: MyText
+  service_id: 

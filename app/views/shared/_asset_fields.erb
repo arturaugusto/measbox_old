@@ -1,0 +1,28 @@
+<fieldset>
+
+	<!-- Share template for new asset input using mustache -->
+	<% template = '
+	<span class="label label-primary {{changeable}}" style="font-size: small" data-model="{{model.manufacturer.name}} {{model.name}}">{{model.manufacturer.name}}, {{model.name}} {{model.kind.name}}</span>
+	<span class="label label-default" style="font-size: small">{{identification}}</span>
+	<span class="{{button_role}}_fields glyphicon glyphicon-{{button_role}}" style="cursor: pointer;"></span>
+	<input class="form-control" id="service_asset_ids_{{id}}" name="service[asset_ids][]" type="hidden" value="{{id}}">
+	<input class="position_map" id="asset_positions_{{id}}" asset_id="{{id}}" name="asset_positions[]" type="hidden" value="{{position}}">
+	<br><br>
+	'
+	%>
+	<!-- if its been rendered from fields_for (at page load), sent the rendered mustache templeta with the object -->
+	<% if defined?(f) %>
+		<% f.object.button_role = role %>
+		<% f.object.changeable = "changeable" %>
+		<%# Setting the position will keep the choosen assets on spreadsheets tied with the asset_service relation and keep possible to refresh data %>
+		<% wb = f.object.workbenches.where(:service_id => @service.id).first %>
+		<% wb_position = ( (wb == 'null') or wb.nil? ?  "" : wb.position) %>
+		<% f.object.position = wb_position %>
+		<%= raw ( Mustache.render(template, f.object) ) %>
+		<%= hidden_field_tag(:address, nil, data:{json: f.object.to_json}, class: 'asset_json_data', asset_id: f.object.id )%>
+	<!-- Else, render the template. It will be used when the raw_template method is called, and the template will became avaliabpe to javascript 
+	render json objects to new added items -->
+	<% else %>
+		<%= raw ( template ) %>
+	<% end %>
+</fieldset>

@@ -1,0 +1,242 @@
+GIT
+  remote: git://github.com/Nerian/bootstrap-datepicker-rails.git
+  revision: ce35ce0abb21ddd78154936905ab547446b3539d
+  specs:
+    bootstrap-datepicker-rails (1.3.1.1)
+      railties (>= 3.0)
+
+GIT
+  remote: git://github.com/arturaugusto/the_role_multi_tenancy.git
+  revision: 3792b897f539ca148629d9c3b3120942711e1ca1
+  specs:
+    the_role (2.5.4)
+      rails (>= 3, < 5)
+      the_string_to_slug (~> 1.2)
+
+GIT
+  remote: git://github.com/rails/activerecord-session_store.git
+  revision: 1cc0daf77d542045da4f6a43cba9ce04c27453dd
+  specs:
+    activerecord-session_store (0.1.1)
+      actionpack (>= 4.0.0, < 5)
+      activerecord (>= 4.0.0, < 5)
+      railties (>= 4.0.0, < 5)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    actionmailer (4.1.0)
+      actionpack (= 4.1.0)
+      actionview (= 4.1.0)
+      mail (~> 2.5.4)
+    actionpack (4.1.0)
+      actionview (= 4.1.0)
+      activesupport (= 4.1.0)
+      rack (~> 1.5.2)
+      rack-test (~> 0.6.2)
+    actionview (4.1.0)
+      activesupport (= 4.1.0)
+      builder (~> 3.1)
+      erubis (~> 2.7.0)
+    activemodel (4.1.0)
+      activesupport (= 4.1.0)
+      builder (~> 3.1)
+    activerecord (4.1.0)
+      activemodel (= 4.1.0)
+      activesupport (= 4.1.0)
+      arel (~> 5.0.0)
+    activesupport (4.1.0)
+      i18n (~> 0.6, >= 0.6.9)
+      json (~> 1.7, >= 1.7.7)
+      minitest (~> 5.1)
+      thread_safe (~> 0.1)
+      tzinfo (~> 1.1)
+    acts-as-taggable-on (3.4.3)
+      activerecord (>= 3.2, < 5)
+    acts_as_list (0.6.0)
+      activerecord (>= 3.0)
+    arel (5.0.1.20140414130214)
+    bcrypt (3.1.9)
+    bootstrap-generators (3.1.1.3)
+      railties (>= 3.1.0)
+    bootstrap-sass (3.1.1.1)
+      sass (~> 3.2)
+    bootstrap-tagsinput-rails (0.4.2.1)
+      railties (>= 3.1)
+    builder (3.2.2)
+    coffee-rails (4.0.1)
+      coffee-script (>= 2.2.0)
+      railties (>= 4.0.0, < 5.0)
+    coffee-script (2.3.0)
+      coffee-script-source
+      execjs
+    coffee-script-source (1.8.0)
+    daemons (1.1.9)
+    devise (3.4.1)
+      bcrypt (~> 3.0)
+      orm_adapter (~> 0.1)
+      railties (>= 3.2.6, < 5)
+      responders
+      thread_safe (~> 0.1)
+      warden (~> 1.2.3)
+    devise_invitable (1.3.6)
+      actionmailer (>= 3.2.6, < 5)
+      devise (>= 3.2.0)
+    erubis (2.7.0)
+    eventmachine (1.0.4)
+    execjs (2.2.2)
+    font-awesome-sass (4.2.2)
+      sass (~> 3.2)
+    haml (4.0.6)
+      tilt
+    hike (1.2.3)
+    i18n (0.7.0)
+    jbuilder (1.0.2)
+      activesupport (>= 3.0.0)
+    jquery-ace-rails (1.0.1)
+    jquery-datatables-rails (3.1.1)
+      actionpack (>= 3.1)
+      jquery-rails
+      railties (>= 3.1)
+      sass-rails
+    jquery-rails (3.1.2)
+      railties (>= 3.0, < 5.0)
+      thor (>= 0.14, < 2.0)
+    jquery-turbolinks (2.1.0)
+      railties (>= 3.1.0)
+      turbolinks
+    json (1.8.2)
+    kgio (2.9.3)
+    libv8 (3.16.14.7)
+    mail (2.5.4)
+      mime-types (~> 1.16)
+      treetop (~> 1.4.8)
+    mime-types (1.25.1)
+    minitest (5.5.1)
+    multi_json (1.10.1)
+    mustache (0.99.4)
+    orm_adapter (0.5.0)
+    pg (0.18.1)
+    polyglot (0.3.5)
+    rack (1.5.2)
+    rack-test (0.6.3)
+      rack (>= 1.0)
+    rails (4.1.0)
+      actionmailer (= 4.1.0)
+      actionpack (= 4.1.0)
+      actionview (= 4.1.0)
+      activemodel (= 4.1.0)
+      activerecord (= 4.1.0)
+      activesupport (= 4.1.0)
+      bundler (>= 1.3.0, < 2.0)
+      railties (= 4.1.0)
+      sprockets-rails (~> 2.0)
+    rails-i18n (4.0.3)
+      i18n (~> 0.6)
+      railties (~> 4.0)
+    railties (4.1.0)
+      actionpack (= 4.1.0)
+      activesupport (= 4.1.0)
+      rake (>= 0.8.7)
+      thor (>= 0.18.1, < 2.0)
+    raindrops (0.13.0)
+    rake (10.4.2)
+    rdoc (4.2.0)
+      json (~> 1.4)
+    recaptcha (0.3.6)
+    ref (1.0.5)
+    responders (1.1.2)
+      railties (>= 3.2, < 4.2)
+    sass (3.2.19)
+    sass-rails (4.0.5)
+      railties (>= 4.0.0, < 5.0)
+      sass (~> 3.2.2)
+      sprockets (~> 2.8, < 3.0)
+      sprockets-rails (~> 2.0)
+    sdoc (0.4.1)
+      json (~> 1.7, >= 1.7.7)
+      rdoc (~> 4.0)
+    simple_form (3.0.3)
+      actionpack (~> 4.0)
+      activemodel (~> 4.0)
+    sprockets (2.12.3)
+      hike (~> 1.2)
+      multi_json (~> 1.0)
+      rack (~> 1.0)
+      tilt (~> 1.1, != 1.3.0)
+    sprockets-rails (2.2.4)
+      actionpack (>= 3.0)
+      activesupport (>= 3.0)
+      sprockets (>= 2.8, < 4.0)
+    the_role_bootstrap3_ui (1.1)
+      haml
+      rails (>= 3, < 5)
+    the_string_to_slug (1.2)
+      rails-i18n (~> 4.0.0.pre)
+    therubyracer (0.12.1)
+      libv8 (~> 3.16.14.0)
+      ref
+    thin (1.6.3)
+      daemons (~> 1.0, >= 1.0.9)
+      eventmachine (~> 1.0)
+      rack (~> 1.0)
+    thor (0.19.1)
+    thread_safe (0.3.4)
+    tilt (1.4.1)
+    treetop (1.4.15)
+      polyglot
+      polyglot (>= 0.3.1)
+    turbolinks (2.5.3)
+      coffee-rails
+    tzinfo (1.2.2)
+      thread_safe (~> 0.1)
+    uglifier (2.7.0)
+      execjs (>= 0.3.0)
+      json (>= 1.8.0)
+    underscore-rails (1.7.0)
+    unicorn (4.8.3)
+      kgio (~> 2.6)
+      rack
+      raindrops (~> 0.7)
+    warden (1.2.3)
+      rack (>= 1.0)
+    will_paginate (3.0.7)
+    will_paginate-bootstrap (1.0.1)
+      will_paginate (>= 3.0.3)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activerecord-session_store!
+  acts-as-taggable-on (~> 3.4.2)
+  acts_as_list
+  bootstrap-datepicker-rails!
+  bootstrap-generators (~> 3.1.1)
+  bootstrap-sass (~> 3.1.1)
+  bootstrap-tagsinput-rails
+  coffee-rails (~> 4.0.0.rc1)
+  devise
+  devise_invitable (~> 1.3.4)
+  font-awesome-sass
+  jbuilder (~> 1.0.1)
+  jquery-ace-rails
+  jquery-datatables-rails (~> 3.1.1)
+  jquery-rails
+  jquery-turbolinks
+  mustache (= 0.99.4)
+  pg
+  rails (= 4.1.0)
+  recaptcha
+  sass-rails (~> 4.0.0)
+  sdoc
+  simple_form (~> 3.0.2)
+  the_role (= 2.5.4)!
+  the_role_bootstrap3_ui (= 1.1)
+  therubyracer
+  thin
+  turbolinks
+  uglifier (>= 1.3.0)
+  underscore-rails
+  unicorn
+  will_paginate-bootstrap

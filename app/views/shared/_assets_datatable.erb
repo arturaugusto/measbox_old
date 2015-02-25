@@ -1,0 +1,15 @@
+<%- model_class = Asset -%>
+<table id="assets_datatable" class="datatable table table-striped table-hover table-bordered asset_datatables_feature" data-source="<%= assets_url(format: "json") %>">
+  <thead>
+    <tr>
+      <th><%= model_class.human_attribute_name(:identification) %></th>
+      <th><%= model_class.human_attribute_name(:serial) %></th>
+      <th><%= model_class.human_attribute_name(:certificate) %></th>
+      <th><%= model_class.human_attribute_name(:calibration_date) %></th>
+      <th><%= model_class.human_attribute_name(:due_date) %></th>
+      <th>Model</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
