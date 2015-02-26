@@ -1,13 +1,4 @@
-TODO:
-
-Tipos de snippets:
-
-
-* model description (json, detalha as faixas e a reclassificação vem aqui!)
-* math model (planilha tb)
-
-
-
+Web-dev
 
 
 
