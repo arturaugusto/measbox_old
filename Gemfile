@@ -2,7 +2,8 @@ source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.1.0'
-gem 'ruby', '2.0.0'
+gem 'rails_12factor'
+#gem 'ruby', '2.0.0'
 gem 'pg'
 # Use sqlite3 as the database for Active Record
 #gem 'sqlite3'
@@ -44,7 +45,7 @@ end
 # gem 'bcrypt-ruby', '~> 3.0.0'
 
 # Use unicorn as the app server
-gem 'unicorn'
+gem 'puma'
 gem 'simple_form', '~> 3.0.2'
 gem 'will_paginate-bootstrap'
 #gem 'jquery-datatables-rails', git: 'git://github.com/rweng/jquery-datatables-rails.git'
