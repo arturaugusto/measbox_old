@@ -72,7 +72,8 @@ gem 'bootstrap-tagsinput-rails'
 
 gem "recaptcha", require: "recaptcha/rails"
 gem "activerecord-session_store", github: "rails/activerecord-session_store"
-gem "jquery-ace-rails"
+#gem "jquery-ace-rails"
+#gem 'ace-rails-ap'
 gem "mustache", "0.99.4"
 gem 'acts_as_list'
 gem 'font-awesome-sass'

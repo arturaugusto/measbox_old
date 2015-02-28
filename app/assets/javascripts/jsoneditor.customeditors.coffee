@@ -86,6 +86,7 @@ jQuery ->
 					@input.parentNode.insertBefore @ace_container, @input
 					@input.style.display = "none"
 					@ace_editor = window.ace.edit(@ace_container)
+					@ace_editor.$blockScrolling = Infinity
 					# CUSTOM BEGIN
 					@ace_editor.setValue @getValue(), -1
 					# CUSTOM END
@@ -112,3 +113,14 @@ jQuery ->
 			self.theme.afterInputReady self.input
 			return
 	)
+	# Add Fullscreen feature to code all editors
+	dom = ace.define.modules["ace/lib/dom"]
+	commands = ace.define.modules["ace/commands/default_commands"].commands
+	commands.push
+		name: "Toggle Fullscreen"
+		bindKey: "F11"
+		exec: (editor) ->
+			dom.toggleCssClass document.body, "fullScreen"
+			dom.toggleCssClass editor.container, "fullScreen-editor"
+			editor.resize()
+			return

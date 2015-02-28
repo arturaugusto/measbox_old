@@ -472,14 +472,3 @@ jQuery ->
 			$("#snippet_flavor").prop("selectedIndex", $("#snippet_flavor").data("prev") )
 			# Resize formula snippet
 			return
-		# Add Fullscreen feature to code all editors
-		dom = ace.define.modules["ace/lib/dom"]
-		commands = ace.define.modules["ace/commands/default_commands"].commands
-		commands.push
-			name: "Toggle Fullscreen"
-			bindKey: "F11"
-			exec: (editor) ->
-				dom.toggleCssClass document.body, "fullScreen"
-				dom.toggleCssClass editor.container, "fullScreen-editor"
-				editor.resize()
-				return
