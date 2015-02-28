@@ -26,7 +26,6 @@
 //= require bootstrap-tagsinput
 //= require the_role_editinplace
 //= require ace/ace
-//= require ace/theme-github
 //= require ace/mode-r
 //= require ace/mode-python
 //= require jquery-ace.min

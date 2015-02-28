@@ -27,7 +27,7 @@ jQuery ->
       clearTimeout(save_timeout_id)
       save_timeout_id = setTimeout ( ->
         autoSave()
-      ), 5000
+      ), 1000
     # Set ROUND_HALF_EVEN
     Big.RM = 2
     # Col that holds the UUT value
@@ -338,12 +338,12 @@ jQuery ->
         uut_name = uut_data.uut_name
         uut_units = uut_data.uut_units
         uut_prefixes = uut_data.uut_prefixes
-        
-        data.table_data.map (x,i) ->
-          if (x[point_value_key] isnt null) and (x[point_value_key] isnt undefined)
-            x.readout = get_prefix(uut_prefixes[i])*x[point_value_key]
-            x._prefix = uut_prefixes[i]
-            x._unit = uut_units[i]
+        if data.table_data isnt undefined
+          data.table_data.map (x,i) ->
+            if (x[point_value_key] isnt null) and (x[point_value_key] isnt undefined)
+              x.readout = get_prefix(uut_prefixes[i])*x[point_value_key]
+              x._prefix = uut_prefixes[i]
+              x._unit = uut_units[i]
 
         data.asset_snippets = chosenAssetsEditor.getValue()
         data.lookup = lookup
