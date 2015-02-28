@@ -171,7 +171,7 @@ jQuery ->
 					$.get "../../snippets/autocomplete",
 						tag: query
 						skip_model: true
-						flavor: ["1"] # asset snippets
+						flavor: ["2"] # asset snippets
 					, ((data) ->
 						return data
 					)
