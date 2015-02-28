@@ -470,8 +470,6 @@ jQuery ->
       req = ocpu.call("identity",
         x: mysnippet
       , (session) ->
-        console.log "***"
-        console.log session
         ocpu.seturl session.loc + "R"
         req = ocpu.call("main",
           object: json

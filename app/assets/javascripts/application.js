@@ -29,6 +29,7 @@
 //= require ace/mode-r
 //= require ace/mode-python
 //= require jquery-ace.min
+//= require theme-textmate.js
 //= require jsoneditor.min
 //= require jsoneditor.customeditors
 //= require bootstrap3-typeahead.min
