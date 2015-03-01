@@ -5,27 +5,30 @@ jQuery ->
 	$(".report_editor_feature").each ->
 		
 		swig.setFilter "wrap_table", (input) ->
-			tables = $.parseHTML("<span>" + input + "</span>")
-			# headers
-			h = $(tables).find("th").parent()
-			#window.h = h
-			# Remove duplicated in sequence
-			$(h).each (i, o) ->
-				if i > 0
-					curr = $(h)[i]
-					prev = $(h)[i-1]
-					# If html nodes are equal, remove current
-					if curr.isEqualNode(prev)
-						$(o).remove()
-			rows = _.reject(
-				$(tables).find("tr")
-			, (r) -> 
-				return $(r).text().trim() is ""
-			)
-			table_wrap = $(tables).find("table").first()
-			# wrap rows
-			$(table_wrap).find("tbody").append(rows)
-			$(table_wrap).get(0).outerHTML
+			console.log input
+			if input.trim().length
+				tables = $.parseHTML("<span>" + input + "</span>")
+				# headers
+				h = $(tables).find("th").parent()
+				#window.h = h
+				# Remove duplicated in sequence
+				$(h).each (i, o) ->
+					if i > 0
+						curr = $(h)[i]
+						prev = $(h)[i-1]
+						# If html nodes are equal, remove current
+						if curr.isEqualNode(prev)
+							$(o).remove()
+				rows = _.reject(
+					$(tables).find("tr")
+				, (r) -> 
+					return $(r).text().trim() is ""
+				)
+				table_wrap = $(tables).find("table").first()
+				# wrap rows
+				$(table_wrap).find("tbody").append(rows)
+				window.x = $(table_wrap).get(0)
+				$(table_wrap).get(0).outerHTML
 
 		$(".getdata").click (e) ->
 			e.preventDefault()
@@ -87,7 +90,7 @@ jQuery ->
 								return x.replace /&nbsp;/g, " "
 
 							template = template.replace(/&lt;br&gt;/, "<br/>")
-							console.log template
+							#console.log template
 							$.getJSON("../../services/" + $("#report_service_id_ref").val() + ".json").done (data) ->
 								# Get unic uut itens from data
 								merged = []

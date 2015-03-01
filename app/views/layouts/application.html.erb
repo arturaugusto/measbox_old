@@ -18,11 +18,21 @@
   <script>
     $.Editable.DEFAULTS.key = '4B4A2wE-11A-9nI-8pxC5ali==';
   </script>
-  
+  <script type='text/javascript'>
+      var jumboHeight = $('.hello_intro').outerHeight();
+      function parallax(){
+          var scrolled = $(window).scrollTop();
+          $('.bg').css('height', (jumboHeight-scrolled) + 'px');
+      }
+      $(window).scroll(function(e){
+          parallax();
+      });
+  </script>  
 </head>
 <body class='<%= if not ((controller_name == "reports") and (action_name == "show")) then "body_do_padding" else "body_dont_do_padding" end %>'>
   <% if not ((controller_name == "reports") and (action_name == "show")) then %>
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <!--<div class="navbar navbar-inverse navbar-fixed-top">-->
+    <div class="navbar navbar-default navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -31,7 +41,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <%= if current_laboratory != nil then (link_to(current_laboratory.name, edit_laboratory_path(current_laboratory), :class => "navbar-brand")) end %>
+          <%= if current_laboratory != nil then (link_to(current_laboratory.name, edit_laboratory_path(current_laboratory), :class => "navbar-brand")) else (link_to(raw("Measbox <sub>beta</sub>"), "#", :class => "navbar-brand")) end %>
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
@@ -54,7 +64,6 @@
               </li>
 
               <%= content_tag(:li, link_to("Snippets", snippets_path), class: "#{ controller_name=="snippets"? "active" : "" }" ) %>
-              
             <% end %>
             <% if user_signed_in? %>
               <%= content_tag(:li, link_to( content_tag(:i, "", class: "glyphicon glyphicon-user") + " " +current_user.email, edit_user_path(current_user) ), class: "#{ (controller_name=="users" and current_user.id == params[:id])? "active" : "" }" ) %>
@@ -72,13 +81,26 @@
               <% if current_laboratory != nil then %>
                 <%= content_tag(:li, link_to("Sign in", new_user_session_path), class: "#{ controller_name=="sessions"? "active" : "" }" ) %>
                 <%= content_tag(:li, link_to("Sign up", new_user_registration_path), class: "#{ controller_name=="registrations"? "active" : "" }" ) %>
+              <% else %>
+                <%#= content_tag(:li, link_to("None", "#"), class: "" ) %>
               <% end %>
             <% end %>
           </ul>
         </div>
-      </div>
+      </div>      
     </div>
+  
+    <% if current_laboratory == nil then %>
+      <div class="bg"></div>
+      <div class="jumbotron hello_intro">
+        <div class="container">
+          <h3>Empowering Laboratories.</h3>
+          <p>Automating your testing and reporting procedures with the use of Web technologies.</p>
+        </div>
+      </div>
+    <% end %>
   <% end %>
+
   <div class="container">
     <div id="flash_messages">
       <% flash.each do |name, msg|

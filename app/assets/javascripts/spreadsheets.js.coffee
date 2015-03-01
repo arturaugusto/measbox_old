@@ -30,8 +30,6 @@ jQuery ->
       ), 1000
     # Set ROUND_HALF_EVEN
     Big.RM = 2
-    # Col that holds the UUT value
-    point_value_key = "UUT"
     # Get precision of number. requires Big Decimal
     # Remove prefix and trim string with number
     remove_text = (str) ->
@@ -210,7 +208,7 @@ jQuery ->
               point_vals = ht.getDataAtCol(table_offset-replications)
 
       iterateOverAutocomplets()
-      # lookuap array to handsontable rows and assets snippets
+      # lookup array to handsontable rows and assets snippets
       lookup = []
       # Influence quantities
       influence_quantities = $('.table-json').data("temp-data").value.influence_quantities
@@ -281,6 +279,7 @@ jQuery ->
 
       # The next line show a bug on handsontable that I cant get the value changed imediatly before update it
       #ht = $('#handsontable').handsontable('getInstance');ht.setDataAtCell(0,0,"aaa");x=ht.getDataAtCol(0);console.log(x)
+
       setTimeout (->
 
         # return a array that contains the index of asset used by each autocomplete field,
@@ -324,15 +323,13 @@ jQuery ->
           error_msg = error_list[0]
           $("#error_messages").text(error_msg)
           $("#error_messages").show()
+          return
         else
           $("#error_messages").hide()
           
-        # Send changes to handsontable!
-        #if data_to_change.length
-        #  ht.setDataAtCell(data_to_change)
         # sync temp data on element
         data = $('.table-json').data("temp-data")
-
+        point_value_key = data.value.uut_col.output_column
         # Set some keys
         uut_data = do_uut_lookup(data)
         uut_name = uut_data.uut_name
@@ -608,6 +605,8 @@ jQuery ->
               uut_units = $('.table-json').data('temp-data').table_data.map((x) ->
                 x._unit
               )
+              # UUT targed col name
+              point_value_key = $('.table-json').data("temp-data").value.uut_col.output_column
               # Remove the last undefined row
               uut_units.splice(-1,1)
 

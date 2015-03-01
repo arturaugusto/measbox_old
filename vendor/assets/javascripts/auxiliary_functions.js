@@ -37,16 +37,28 @@ do_uut_lookup = function(temp_data) {
 		};
 	});
 	uut_ids = selector.map(function(s) {
-		return temp_data.asset_snippets.snippets[s.snippet_i].asset_id
+		ref = temp_data.asset_snippets.snippets[s.snippet_i];
+		if(ref !== undefined){
+			return temp_data.asset_snippets.snippets[s.snippet_i].asset_id
+		}
 	});
 	UUT_ranges = selector.map(function(s) {
-		return temp_data.asset_snippets.snippets[s.snippet_i].value.ranges[s.range_i];
+		ref = temp_data.asset_snippets.snippets[s.snippet_i];
+		if(ref !== undefined){
+			return ref.value.ranges[s.range_i];
+		}
 	});
+	// UUT_ranges is undefined when the value user input is out or range conditions,
+	// so we need to check and avois errors
 	uut_units = UUT_ranges.map(function(r) {
-		return r.unit;
+		if(r !== undefined){
+			return r.unit;
+		}
 	});
 	uut_prefixes = UUT_ranges.map(function(r) {
-		return r.prefix;
+		if(r !== undefined){
+			return r.prefix;
+		}
 	});
 	return {
 		uut_ids: uut_ids,

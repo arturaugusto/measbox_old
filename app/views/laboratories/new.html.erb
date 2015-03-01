@@ -1,5 +1,22 @@
 <%- model_class = Laboratory -%>
+<div class="row">
+      <div class="col-sm-4">
+        <h3>Wherever you are</h3>
+        <p>With a high end computer or a smartphone, you can access your tests and Laboratory data anywhere. All content will be adapted the be visualized on your device of choice.</p>
+      </div>
+      <div class="col-sm-4">
+        <h3>The whole process</h3>
+        <p>From the records of the instruments, through mathematical modeling to the final report, will be offered flexible tools that will help you achieve automation to procedures that used to be over complicated.</p>
+      </div>
+      <div class="col-sm-4">
+        <h3>Ready to use Procedures</h3>
+        <p>With Measbox you can access pre-built procedures and others created by the community. Perfect to exchange knowledge in a reproducible manner.</p>
+      </div>
+    </div>
+
 <div class="page-header">
-  <h1><%=t '.title', :default => [:'helpers.titles.create', 'Create %{model}'], :model => model_class.model_name.human.titleize %></h1>
+  <h1>And it's free!</h1>
+  <p class="lead">You can register and start using right now, our first public beta.</p>
+  <p class="lead"><%=t '.title', :default => [:'helpers.titles.create', 'Register your %{model}'], :model => model_class.model_name.human.titleize %></p >
 </div>
 <%= render :partial => 'form' %>

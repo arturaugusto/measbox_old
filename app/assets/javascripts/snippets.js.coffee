@@ -43,8 +43,6 @@ jQuery ->
 				# Mathematical Snippet como filtro dos snippets dos assets
 				if $(".table-json").data( "temp-data")
 					func_tag_list = $(".table-json").data( "temp-data").func_tag_list
-					console.log "---"
-					console.log func_tag_list
 					if func_tag_list isnt undefined
 						aoData.push
 							name: "func_tag_list"
@@ -336,6 +334,18 @@ jQuery ->
 											color: "#ffffff"
 										}
 									]
+							uut_col:
+								type: "object"
+								title: "UUT Col"
+								properties:
+									output_column:
+										type: "string"
+										format: "string"
+										title: "UUT Col"
+										watch:
+											out_cols: "root.output_columns"
+										enumSource: "out_cols"
+										enumValue: "{{item.name}}"
 							format_operations:
 								type: "array"
 								format: "table"
