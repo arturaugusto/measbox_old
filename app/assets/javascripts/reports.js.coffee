@@ -74,7 +74,7 @@ jQuery ->
 					callback: ->
 						filename = $("#report_name").val()
 						this_url = (document.URL).replace(/\/edit$/, '')
-						#window.open("http://www.html2pdf.it/?url=" + this_url + "&download=true&filename=" + filename, "_self")
+						window.open("http://www.html2pdf.it/?url=" + this_url + "&download=true&filename=" + filename, "_self")
 				generate:
 					title: "Generate"
 					icon:
