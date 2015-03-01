@@ -1,4 +1,1 @@
-<style type="text/css">
-	<%= Rails.application.assets.find_asset('application.css.scss').to_s.html_safe %>
-</style>
-<%= @report.value.html_safe %>
+<%= raw(@report.value) %>
