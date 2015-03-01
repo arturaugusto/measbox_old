@@ -17,16 +17,6 @@
 
   <script>
     $.Editable.DEFAULTS.key = '4B4A2wE-11A-9nI-8pxC5ali==';
-  </script>
-  <script type='text/javascript'>
-      var jumboHeight = $('.hello_intro').outerHeight();
-      function parallax(){
-          var scrolled = $(window).scrollTop();
-          $('.bg').css('height', (jumboHeight-scrolled) + 'px');
-      }
-      $(window).scroll(function(e){
-          parallax();
-      });
   </script>  
 </head>
 <body class='<%= if not ((controller_name == "reports") and (action_name == "show")) then "body_do_padding" else "body_dont_do_padding" end %>'>
