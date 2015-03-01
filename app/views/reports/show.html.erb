@@ -1,4 +1,1 @@
-<style type="text/css">
-  <%= raw Rails.application.assets['application.css'].to_s %>
-</style>
-<%= raw(@report.value) %>
+<%= raw(@report.value).html_safe %>

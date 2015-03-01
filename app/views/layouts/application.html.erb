@@ -17,10 +17,10 @@
 
   <script>
     $.Editable.DEFAULTS.key = '4B4A2wE-11A-9nI-8pxC5ali==';
-  </script>  
+  </script>
 </head>
 <body class='<%= if not ((controller_name == "reports") and (action_name == "show")) then "body_do_padding" else "body_dont_do_padding" end %>'>
-  <% if not ((controller_name == "reports") and (action_name == "show")) then %>
+  <%# if not ((controller_name == "reports") and (action_name == "show")) then %>
     <!--<div class="navbar navbar-inverse navbar-fixed-top">-->
     <div class="navbar navbar-default navbar-fixed-top">
       <div class="container">
@@ -89,7 +89,7 @@
         </div>
       </div>
     <% end %>
-  <% end %>
+  <%# end %>
 
   <div class="container">
     <div id="flash_messages">
