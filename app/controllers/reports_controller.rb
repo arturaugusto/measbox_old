@@ -12,6 +12,9 @@ class ReportsController < ApplicationController
   # GET /reports/1
   # GET /reports/1.json
   def show
+    respond_to do |format|
+      format.html { render :text =>  ("<style>"+Rails.application.assets['application.css'].to_s+"</style>").to_s+@report.value }
+    end
   end
 
   # GET /reports/new
