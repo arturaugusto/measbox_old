@@ -12,9 +12,9 @@ class ReportsController < ApplicationController
   # GET /reports/1
   # GET /reports/1.json
   def show
-    #respond_to do |format|
-    #  format.html { render :text => @report.value }
-    #end
+    respond_to do |format|
+      format.html { render :text =>  ("<style>"+Rails.application.assets['application.css'].to_s+"</style>").to_s+'<div class="froala-view">' + @report.value + '</div>' }
+    end
   end
 
   # GET /reports/new
