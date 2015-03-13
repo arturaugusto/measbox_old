@@ -79,6 +79,6 @@ class ReportTemplatesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def report_template_params
-      params.require(:report_template).permit(:laboratory_id, :name, :value)
+      params.require(:report_template).permit(:laboratory_id, :name, :value, :pdf_options)
     end
 end

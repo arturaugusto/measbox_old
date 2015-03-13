@@ -1,6 +1,6 @@
 class ReportsController < ApplicationController
   before_filter :authenticate_user!, except: [:show]
-  before_action :role_required, only: [:update, :destroy, :create, :edit, :index]
+  before_action :role_required, only: [:update, :destroy, :create, :edit, :index, :show]
   before_action :set_report, only: [:show, :edit, :update, :destroy]
 
   # GET /reports
@@ -12,8 +12,16 @@ class ReportsController < ApplicationController
   # GET /reports/1
   # GET /reports/1.json
   def show
+
     respond_to do |format|
-      format.html { render :text =>  ("<style>"+Rails.application.assets['application.css'].to_s+"</style>").to_s+'<div class="froala-view">' + @report.value + '</div>' }
+      format.html
+      pdf_options = @report.report_template.pdf_options
+      opts = {:pdf => "show"}.merge(pdf_options).deep_symbolize_keys
+      Rails.logger.info opts
+      format.pdf do
+          render(opts)
+          #render :pdf => "show"
+      end
     end
   end
 

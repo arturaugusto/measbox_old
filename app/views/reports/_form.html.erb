@@ -8,9 +8,15 @@
   
   
 	<%= render "shared/modal_choose_value", f: f, :association => :report_template, :cols => [:name, :created_at] , :value => (@report.report_template.nil? ? "Choose a report template..." : @report.report_template.name) %>
+  <br>
+  <a href="#" class="btn btn-primary generate">
+    <span class="fa fa-file-text-o" aria-hidden="true"></span>
+  Generate
+  </a>
 
+  <hr>
   <div class="form-inputs">
-    <%= f.input :value, input_html: { class: 'form-control report_editor_feature' } %>
+    <%= f.input :value, :label => false, input_html: { class: 'form-control report_editor_feature' } %>
   </div>  
   <br>
   <a href="#" class="btn btn-primary getdata">Update Report</a>

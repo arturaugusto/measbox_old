@@ -94,7 +94,10 @@ jQuery ->
         x = parse_readout(a[key])
         y = parse_readout(b[key])
         (if (x < y) then -1 else ((if (x > y) then 1 else 0)))
-
+    
+    # Name of uut var
+    uut_name = ""
+    
     window.chosenAssetsEditor = new JSONEditor document.getElementById('chosenAssetsHolder'),
         theme: "bootstrap3"
         iconlib: "bootstrap3"
@@ -234,6 +237,7 @@ jQuery ->
         range_index = null
         reklass_index = null
         error = null
+        used_range = null
         asset = asset_snippets_editor[asset_map.snippet_index]
         if asset isnt undefined
           # Params that will be exported to user defined expresion evaluation on browser
@@ -269,19 +273,28 @@ jQuery ->
             result = try expr.parse(conditions_expr, expr_params)
             catch e then error_list.push('Autorange expression: "' + conditions_expr + '"\nRange name: "' + range.name + '"\nSnippet label: "' + asset.label + '"\n' + e.message ) #; finally 
             if result
+              used_range = range
               range_index = range_i
               reklass_index = determineRangeReclass(range, expr_params, asset.label)
               break
           # No suitable range found, show error
           if range_index is null
             error = "No suitable range found: line " + (row_i+1).toString() + ", variable " + var_name
-        return {"range_index": range_index, "reklass_index": reklass_index, "error": error}
+        return {"range_index": range_index, "reklass_index": reklass_index, "range": used_range, "error": error}
 
       # The next line show a bug on handsontable that I cant get the value changed imediatly before update it
       #ht = $('#handsontable').handsontable('getInstance');ht.setDataAtCell(0,0,"aaa");x=ht.getDataAtCol(0);console.log(x)
 
       setTimeout (->
+        # sync temp data on element
+        data = $('.table-json').data("temp-data")
+        point_value_key = data.value.uut_col.output_column
+        # Set some keys
+        uut_data = do_uut_lookup(data)
+        uut_name = uut_data.uut_name
 
+        # Array will hold uut ranges for each row
+        uut_ranges = []
         # return a array that contains the index of asset used by each autocomplete field,
         # the var name and row index
         compareAutocompletesToAssetsSnippets = () ->
@@ -312,9 +325,18 @@ jQuery ->
                 asset_map["range_index"] = range_and_reklass_indexes.range_index
                 asset_map["reklass_index"] = range_and_reklass_indexes.reklass_index
                 asset_map["error"] = range_and_reklass_indexes.error
+                # collect uut ranges
+                if var_name is uut_name
+                  uut_ranges.push range_and_reklass_indexes.range
                 lookup.push asset_map
           return lookup
         lookup = compareAutocompletesToAssetsSnippets()
+
+        # filter to get only uut ranges
+        #uut_ranges = lookup.spreadsheets.map (x) ->
+        #  _.where(x.table_json.lookup, var: 'uut_meas').map (x) ->
+        #    x.range
+
         # Check for autorange and parse errors
         $(lookup).each ->
           if this.error isnt null
@@ -326,13 +348,7 @@ jQuery ->
           return
         else
           $("#error_messages").hide()
-          
-        # sync temp data on element
-        data = $('.table-json').data("temp-data")
-        point_value_key = data.value.uut_col.output_column
-        # Set some keys
-        uut_data = do_uut_lookup(data)
-        uut_name = uut_data.uut_name
+
         uut_units = uut_data.uut_units
         uut_prefixes = uut_data.uut_prefixes
         if data.table_data isnt undefined
@@ -342,8 +358,10 @@ jQuery ->
               x._prefix = uut_prefixes[i]
               x._unit = uut_units[i]
 
+        #data.uut_ranges = uut_ranges
         data.asset_snippets = chosenAssetsEditor.getValue()
         data.lookup = lookup
+        data.uut_ranges = uut_ranges
         data.uut_ids = uut_data.uut_ids
         data.table_offset = table_offset
         data.assets = assets_json

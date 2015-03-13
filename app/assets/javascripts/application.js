@@ -27,6 +27,7 @@
 //= require the_role_editinplace
 //= require ace/ace
 //= require ace/mode-r
+//= require ace/mode-html
 //= require ace/mode-python
 //= require ace/theme-textmate
 //= require jsoneditor.min

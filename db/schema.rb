@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150221130128) do
+ActiveRecord::Schema.define(version: 20150308012257) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -87,6 +87,7 @@ ActiveRecord::Schema.define(version: 20150221130128) do
     t.uuid     "laboratory_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.json     "pdf_options"
   end
 
   add_index "report_templates", ["laboratory_id"], name: "index_report_templates_on_laboratory_id", using: :btree

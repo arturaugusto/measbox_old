@@ -4,23 +4,83 @@
 jQuery ->
 	$(".report_template_editor_feature").each ->
 
-		###input = '<p class=""><span>blabla</span><span style="color: rgb(51, 51, 51); font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.600000381469727px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); display: inline !important; float: none;">{% filter wrap_table %}{% for a in assets %}</span></p><p class=""><span style="color: rgb(51, 51, 51); font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.600000381469727px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); display: inline !important; float: none;">{% blablabla %}</span></p>'
-		window.html = $.parseHTML(input)
-		window.s = $(html).find("span")
-		replaceWith = ""
-		_x = $(s).each ((i,x) ->
-			t = $(s[i]).contents().text()
-			if i > 0
-				replaceWith = replaceWith + t
-			else
-				replaceWith 
+		header_footer = 
+			type: "object"
+			options:
+				collapsed: true
+				disable_edit_json: true
+			properties:
+				content:
+					type: "code"
+					format: "html"
 
-		)
-		console.log replaceWith
-		###
+		$(".pdf_options_holder").each ->
+			element = this
+			schema =
+				title: "PDF Options"
+				type: "object"
+				required: false
+				options:
+					collapsed: true
+					disable_edit_json: true
+				properties:
+					orientation:
+						type: "string"
+						enum: [
+							"Portrait"
+							"Landscape"
+						]
+					page_size:
+						type: "string"
+						enum: [
+							"A4"
+							"Letter"
+						]						
+					margin:
+						type: "object"
+						options:
+							collapsed: true
+							disable_edit_json: true
+						properties:
+							top:
+								type: "number"
+							bottom:
+								type: "number"
+							left:
+								type: "number"
+							right:
+								type: "number"
+					header: header_footer
+					footer: header_footer
+
+			editor = new JSONEditor(element,
+				theme: "bootstrap3"
+				iconlib: "bootstrap3"
+				disable_collapse: false
+				schema: schema
+				)
+			data_string = $('#report_template_pdf_options').val()
+			if data_string isnt ""
+				editor.setValue JSON.parse(data_string)
+			editor.on "change", ->
+				data = editor.getValue()
+				data_string_2 = JSON.stringify(data)
+				$('#report_template_pdf_options').val(data_string_2)
 		# froala editor
+		$(".code_wrap_done").click (event) ->
+			event.preventDefault()
+			table = $('#myModal').data("target")
+			wrap_code_open = $(table_wrap_code_open).val()
+			wrap_code_close = $(table_wrap_code_close).val()
+			wrap_caption = $(table_wrap_caption).val()
+
+			$(table[0]).attr("wrap_code_open", wrap_code_open)
+			$(table[0]).attr("wrap_code_close", wrap_code_close)
+			$(table[0]).attr("wrap_caption", wrap_caption)
+
+
 		$("#report_template_value").editable 
-			inlineMode: false
+			inlineMode: true
 			paragraphy: false
 			blockStyles: false
 			buttons: [
@@ -50,9 +110,31 @@ jQuery ->
 				#"removeMarkers"
 				"editTags"
 				"html"
+				"get_selection"
 			]
 			#blockTags: ["p"]
-			#customButtons:
+			customButtons:
+				get_selection:
+					title: "Get Selection"
+					icon:
+						type: "font"
+						value: "fa fa-edit"
+					callback: ->
+						#this.removeFormat()
+						#this.removeMarkers()
+						table = $(this.getSelectionParent()).closest("table")
+						if (table[0] isnt undefined) and (table[0].tagName is "TABLE")
+							
+							wrap_code_open = $(table[0]).attr("wrap_code_open")
+							wrap_code_close = $(table[0]).attr("wrap_code_close")
+							wrap_caption = $(table[0]).attr("wrap_caption")
+							
+							$(table_wrap_code_open).val(wrap_code_open)
+							$(table_wrap_code_close).val(wrap_code_close)
+							$(table_wrap_caption).val(wrap_caption)
+
+							$('#myModal').data("target", table)
+							$('#myModal').modal('show')
 			#	removeMarkers:
 			#		title: "Remove Markers"
 			#		icon:

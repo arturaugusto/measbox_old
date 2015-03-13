@@ -78,3 +78,5 @@ gem "mustache", "0.99.4"
 gem 'acts_as_list'
 gem 'font-awesome-sass'
 #gem 'twitter-typeahead-rails', :git => "git://github.com/yourabi/twitter-typeahead-rails.git"
+gem 'wicked_pdf'
+gem 'wkhtmltopdf-binary'
