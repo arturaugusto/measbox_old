@@ -73,10 +73,12 @@ jQuery ->
 			wrap_code_open = $(table_wrap_code_open).val()
 			wrap_code_close = $(table_wrap_code_close).val()
 			wrap_caption = $(table_wrap_caption).val()
+			wrap_class = $(table_wrap_class).val()
 
 			$(table[0]).attr("wrap_code_open", wrap_code_open)
 			$(table[0]).attr("wrap_code_close", wrap_code_close)
 			$(table[0]).attr("wrap_caption", wrap_caption)
+			$(table[0]).attr("wrap_class", wrap_class)
 
 
 		$("#report_template_value").editable 
@@ -128,10 +130,12 @@ jQuery ->
 							wrap_code_open = $(table[0]).attr("wrap_code_open")
 							wrap_code_close = $(table[0]).attr("wrap_code_close")
 							wrap_caption = $(table[0]).attr("wrap_caption")
+							wrap_class = $(table[0]).attr("wrap_class")
 							
 							$(table_wrap_code_open).val(wrap_code_open)
 							$(table_wrap_code_close).val(wrap_code_close)
 							$(table_wrap_caption).val(wrap_caption)
+							$(table_wrap_class).val(wrap_class)
 
 							$('#myModal').data("target", table)
 							$('#myModal').modal('show')

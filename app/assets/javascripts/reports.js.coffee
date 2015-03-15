@@ -3,22 +3,53 @@
 # You can use CoffeeScript in this file: http://coffeescript.org/
 jQuery ->
 	$(".report_editor_feature").each ->
+
+		movingRemoveDuplicateHeader = (tables) ->
+			h = $(tables).find("th").parent()
+			movingRemoveDuplicateTableElem(h)
+		movingRemoveDuplicateRow = (tables, n) ->
+			h = $(tables).find('tr:nth-child(' + n.toString() + ')')
+			movingRemoveDuplicateTableElem(h)
+		movingRemoveDuplicateTableElem = (h) ->
+			# Remove duplicated in sequence
+			$(h).each (i, o) ->
+				if i > 0
+					curr = $(h)[i]
+					prev = $(h)[i-1]
+					# If html nodes are equal, remove current
+					if curr.isEqualNode(prev)
+						$(o).remove()
+
 		
-		swig.setFilter "wrap_table", (input) ->
-			#console.log input
+		swig.setFilter "join_tables", (input) ->
 			if input.trim().length
 				tables = $.parseHTML("<span>" + input + "</span>")
-				#console.log tables
+				#uut_ids = _.uniq($(t).find('[wrap_class]').map(function(i,x){return($(x).attr("wrap_class"))}))
+				uut_range_ids = _.uniq($(tables).find('[wrap_class]').map((i, x) ->
+					$(x).attr 'wrap_class'
+				))
+				out_tables = $.parseHTML("<span></span>")
+				if uut_range_ids.length
+					for uut_range_id in uut_range_ids
+						table_span = $.parseHTML("<span></span>")
+						wt = $(tables).find("[wrap_class='" + uut_range_id + "']")
+						movingRemoveDuplicateRow(wt, 2)
+						#first_table = $(wt).first()
+						#last_tr_first_table = $(first_table).find('tr:last')
+						for i in [1..wt.length] by 1
+							$(wt).first().find('tr:last').after($(wt[i]).find("tr"))
+						$(table_span).append($(wt).first())
+						movingRemoveDuplicateHeader(table_span)
+						$(out_tables).append(table_span)
+				return $(out_tables).get(0).outerHTML
+
+		swig.setFilter "wrap_table", (input) ->
+			if input.trim().length
+				tables = $.parseHTML("<span>" + input + "</span>")
 				# headers
-				h = $(tables).find("th").parent()
-				# Remove duplicated in sequence
-				$(h).each (i, o) ->
-					if i > 0
-						curr = $(h)[i]
-						prev = $(h)[i-1]
-						# If html nodes are equal, remove current
-						if curr.isEqualNode(prev)
-							$(o).remove()
+				movingRemoveDuplicateRow(tables, 2)
+				movingRemoveDuplicateHeader(tables)
+				# Remove all white rows
 				rows = _.reject(
 					$(tables).find("tr")
 				, (r) -> 
@@ -49,11 +80,12 @@ jQuery ->
 					wrap_code_open = $(this).attr("wrap_code_open")
 					wrap_code_close = $(this).attr("wrap_code_close")
 					wrap_caption = $(this).attr("wrap_caption")
-
+					wrap_class = $(this).attr("wrap_class")
 
 					$(this).removeAttr("wrap_code_open")
 					$(this).removeAttr("wrap_code_close")
 					$(this).removeAttr("wrap_caption")
+					#$(this).removeAttr("wrap_class")
 
 
 					if wrap_caption isnt undefined
@@ -91,6 +123,9 @@ jQuery ->
 					data.spreadsheets.map (x) ->
 						x.table_json.table_data.splice -1, 1
 						return
+
+
+
 					console.log data
 					html = swig.render(template,"locals": data)
 					el.setHTML html
