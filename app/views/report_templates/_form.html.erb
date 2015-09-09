@@ -1,4 +1,4 @@
-<%= simple_form_for(@report_template) do |f| %>
+<%= simple_form_for @report_template, :remote => true, :html => { :class => 'report_template_feature' } do |f| %>
   <%= f.error_notification %>
 
   <!-- Modal -->
@@ -56,15 +56,13 @@
     <%= f.input :name, input_html: { class: 'form-control' } %>
   </div>
   <br>
-  <%= f.input :pdf_options, as: :hidden %>
-  <div class="pdf_options_holder"></div>
+  <%= f.input :pdf_options, as: :text, :label => false, input_html: { value: @report_template.pdf_options.to_json } %>
   <br>
   <hr>
+  <div id="editor"></div> 
   <div class="form-inputs">
-    <%= f.input :value, :label => false, input_html: { class: 'form-control report_template_editor_feature' } %>
+    <%= f.input :value, :label => false, input_html: { class: 'form-control report_template_editor_feature autogrow', :rows => 30 } %>
   </div>  
   <br>
-  <div class="form-actions">
-    <%= f.button :submit, :class => 'btn btn-primary' %>
-  </div>
+  <a href="#" class="btn btn-primary getdata">Update Report Template</a>
 <% end %>

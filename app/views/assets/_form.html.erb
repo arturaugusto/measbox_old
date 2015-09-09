@@ -1,7 +1,11 @@
 <%= simple_form_for(@asset) do |f| %>
   <%= f.error_notification %>
+  <div class="form-inputs">
 
-  <div class="form-inputs">    
+    <%= f.input :avaliable, as: :boolean, boolean_style: :inline, label: false, input_html: { :data => {toggle: 'toggle', on: 'Avaliable', off: 'Unavailable', onstyle: 'success', offstyle: 'danger'}, class: 'form-control' } %>    
+
+    <br>
+    
     <%= render "shared/modal_choose_value", f: f, :association => :company, :cols => [:name, :created_at] , :value => (@asset.company.nil? ? "Choose the owner..." : @asset.company.name) %>
 
     <%= render "shared/modal_choose_value", f: f, :association => :model, :cols => [:name, :created_at] , :value => (@asset.model.nil? ? "Choose the model..." : @asset.model.name) %>
@@ -15,6 +19,13 @@
     <%= render "shared/datepicker", f: f, :field => :due_date %>      
 
     <%= f.input :visa_address, input_html: { class: 'form-control' } %>
+
+    <br>
+    
+    <%= f.input :use_reclassification, as: :boolean, boolean_style: :inline, label: false, input_html: { :data => {toggle: 'toggle', on: 'Use reclassification', off: 'Don\'t use reclassification', onstyle: 'success'}, class: 'form-control' } unless @asset.new_record? or @avaliable_ranges.nil? %>
+
+    <%= f.input :reclassification, as: :text, :label => false, input_html: { class: 'form-control reclassification_feature', data: { avaliable_ranges: @avaliable_ranges }, value: @asset.reclassification.to_json } unless @asset.new_record? or @avaliable_ranges.nil? %>
+
   </div>
   <br>
   <div class="form-actions">

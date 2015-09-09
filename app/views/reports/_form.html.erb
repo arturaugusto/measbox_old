@@ -1,6 +1,8 @@
+<style type="text/css">
+  <%= raw @laboratory.custom_forms['styles'].html_safe %>
+</style>
 <%= simple_form_for @report, :remote => true, :html => { :class => 'report_feature' } do |f| %>
   <%= f.error_notification %>
-
   <div class="form-inputs">
     <%= f.input :name, input_html: { class: 'form-control' } %>
   </div>
@@ -14,11 +16,30 @@
   Generate
   </a>
 
+  <a href="#" class="btn btn-success getdata">
+    <span class="fa fa-floppy-o" aria-hidden="true"></span>
+  Save
+  </a>
+
+  <a href="#" class="btn btn-default getpdf">
+    <span class="fa fa-file-pdf-o" aria-hidden="true"></span>
+  PDF
+  </a>
+ 
+  <a href="#" class="btn btn-default printview">
+    <span class="fa fa-print" aria-hidden="true"></span>
+  Print view
+  </a> 
+
+ <a href="#" class="btn btn-default markdownedit">
+    <span class="fa fa-code" aria-hidden="true"></span>
+  Markdown
+  </a> 
+
+
   <hr>
-  <div class="form-inputs">
-    <%= f.input :value, :label => false, input_html: { class: 'form-control report_editor_feature' } %>
-  </div>  
+  <%= f.input :pdf_options, as: :hidden %>  
+  <%= f.input :value, :label => false, input_html: { class: ' markdown_textarea', :rows => 20 } %>
+  <%= f.input :value_html, :label => false, input_html: { class: 'report_editor_feature report_view' } %>
   <br>
-  <a href="#" class="btn btn-primary getdata">Update Report</a>
-  <%= link_to t('.cancel', :default => t("helpers.links.cancel")), service_path(@report.service, :tab => 'reports'), :class => 'btn btn-default' %>
 <% end %>

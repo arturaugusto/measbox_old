@@ -1,8 +1,8 @@
-<fieldset>
+<fieldset obj-id="<%= params[:id] %>">
 
 	<!-- Share template for new asset input using mustache -->
 	<% template = '
-	<span class="label label-primary {{changeable}}" style="font-size: small" data-model="{{model.manufacturer.name}} {{model.name}}">{{model.manufacturer.name}}, {{model.name}} {{model.kind.name}}</span>
+	<span class="label label-primary {{changeable}}" style="font-size: small; cursor: default" data-model="{{model.manufacturer.name}} {{model.name}}">{{model.manufacturer.name}}, {{model.name}} {{model.kind.name}}</span>
 	<span class="label label-default" style="font-size: small">{{identification}}</span>
 	<span class="{{button_role}}_fields glyphicon glyphicon-{{button_role}}" style="cursor: pointer;"></span>
 	<input class="form-control" id="service_asset_ids_{{id}}" name="service[asset_ids][]" type="hidden" value="{{id}}">
@@ -19,7 +19,7 @@
 		<% wb_position = ( (wb == 'null') or wb.nil? ?  "" : wb.position) %>
 		<% f.object.position = wb_position %>
 		<%= raw ( Mustache.render(template, f.object) ) %>
-		<%= hidden_field_tag(:address, nil, data:{json: f.object.to_json}, class: 'asset_json_data', asset_id: f.object.id )%>
+		<%= hidden_field_tag(f.object.id, nil, data:{json: f.object.to_json}, class: 'asset_json_data', asset_id: f.object.id )%>
 	<!-- Else, render the template. It will be used when the raw_template method is called, and the template will became avaliabpe to javascript 
 	render json objects to new added items -->
 	<% else %>

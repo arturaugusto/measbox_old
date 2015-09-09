@@ -2,391 +2,1203 @@
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
 jQuery ->
+
+  ################################################################################
+  # Get prefix aux func
+  ################################################################################
+
+  window.prefix_val = (k) ->
+    prefixes =
+      'Y': 1000000000000000000000000
+      'Z': 1000000000000000000000
+      'E': 1000000000000000000
+      'P': 1000000000000000
+      'T': 1000000000000
+      'G': 1000000000
+      'M': 1000000
+      'k': 1000
+      'h': 100
+      'da': 10
+      'd': 0.1
+      'c': 0.01
+      'm': 0.001
+      'u': 0.000001
+      'n': 0.000000001
+      'p': 0.000000000001
+      'f': 0.000000000000001
+      'a': 0.000000000000000001
+      'z': 0.000000000000000000001
+      'y': 0.000000000000000000000001
+    k_val = if prefixes[k] == undefined then 1 else prefixes[k]
+
+  window.reject_non_numbers = (list) ->
+    _.reject(list, (n) ->
+      return (n is undefined) or (n is null) or (n is NaN) or (n is "")
+    ) 
+
+
+  # Custom colors to Highcharts
+  Highcharts.setOptions(
+    colors: ['#058DC7', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572', '#FF9655', '#FFF263', '#6AF9C4']
+  )
+
+  # Custom symbol to Highcharts
+  Highcharts.SVGRenderer.prototype.symbols.cross = (x, y, w, h) ->
+    return ['M', x, y, 'L', x + w, y + h, 'M', x + w, y, 'L', x, y + h, 'z']
+
+
+  ################################################################################
+  # Extend mathjs to post-processing functions
+  ################################################################################
+
+  
+  window._convert_if_not_big_num = (x) ->
+    if typeof x isnt "object"
+      return new Decimal(parseFloat(x).toPrecision(15))
+    else
+      return x
+  math.import(
+
+    fmt_to_precision: (x, sd) ->
+      x = window._convert_if_not_big_num(x)
+      return x.toPrecision(sd)
+
+    precision: (x, include_zeros) ->
+      x = window._convert_if_not_big_num(x)
+      return x.precision(include_zeros).toString()
+
+    decimal_places: (x) ->
+      if typeof x is "string"
+        # This solve the problem with Decimal type to get its decimal places when ocours
+        # number like 0.010 . In this case, it returns the decimal places of 2 instead of 3 that is desired.
+        # Replacing all numbers to 1, we can get 1.111, and return the decimal places of 3
+        x = x.replace(/[0-9]/g, "1")
+      x = window._convert_if_not_big_num(x)
+      return x.decimalPlaces()
+
+    fmt_to_decimal_places: (x, dp) ->
+      x = window._convert_if_not_big_num(x)
+      return x.toDecimalPlaces(dp).toString()
+
+    fmt_to_fixed: (x, n) ->
+      x = window._convert_if_not_big_num(x)
+      return x.toFixed(n).toString()
+
+
+    prefix_val: prefix_val
+  )
+
+  # Fix unformated hot when math model change
+  $("#spreadsheet").click (e) ->
+    e.preventDefault()
+    setTimeout (->
+      window.hot.render()
+    ), 200
+
+
+  # Spreadsheet specific
   $(".spreadsheet_feature").each ->
-    $(this).bind('ajax:success', (data, status, xhr) ->
-      $.notify 'Changes saved!',
-        className: 'success'
-        globalPosition: 'top left'
-        style: 'bootstrap'
-        showAnimation: 'fadeIn'
-        hideAnimation: 'fadeOut'
-      return
-    ).bind 'ajax:error', (xhr, status, error) ->
-      alert("Error on saving form. Try again later. If error presists, contact the support.")
-      return
 
-    ht = $('#handsontable').handsontable('getInstance')
-    sync_timeout_id = 0
-    timeout_sync = () ->
-      clearTimeout(sync_timeout_id)
-      sync_timeout_id = setTimeout ( ->
-        syncHTSnippets(ht)
-      ), 1000
-    save_timeout_id = 0
-    timeout_save = () ->
-      clearTimeout(save_timeout_id)
-      save_timeout_id = setTimeout ( ->
-        autoSave()
-      ), 1000
-    # Set ROUND_HALF_EVEN
-    Big.RM = 2
-    # Get precision of number. requires Big Decimal
-    # Remove prefix and trim string with number
-    remove_text = (str) ->
-      n_str = str.trim().replace(/([a-zA-Z]){1,2}$/g, (x) ->
-          k = x
-          ""
-        ).trim()
+    $("#spreadsheet_tag_list").tagsinput
 
-    window.auxFormatingFunctions =
-      precision: (x) ->
-        x = remove_text(x.toString())
-        return x.split(/^[0\s\D]*|[\.]/).join("").length
-      resolution: (x) ->
-        x = remove_text(x.toString())
-        x_split = x.split(".")
-        if x_split.length is 1
-          return 0
-        else
-          return x_split[1].length
 
-    window.get_prefix = (k) ->
-      prefixes =
-        Y: 1000000000000000000000000
-        Z: 1000000000000000000000
-        E: 1000000000000000000
-        P: 1000000000000000
-        T: 1000000000000
-        G: 1000000000
-        M: 1000000
-        k: 1000
-        h: 100
-        da: 10
-        d: 0.1
-        c: 0.01
-        m: 0.001
-        u: 0.000001
-        n: 0.000000001
-        p: 0.000000000001
-        f: 0.000000000000001
-        a: 0.000000000000000001
-        z: 0.000000000000000000001
-        y: 0.000000000000000000000001
-      k_val = (if prefixes[k] is undefined then 1 else prefixes[k])
+    ################################################################################
+    # Init uncertanties datatables
+    ################################################################################
 
-    parse_readout = (str) ->
-      k = undefined
-      n_str = undefined
-      if typeof str is "number"
-        n_str = str
-      else if (str is null) or (str is undefined)
-        n_str = 0
+    window.unc_table = $("#uncertanties_table").dataTable
+      #sDom: 'TRr<"inline"l> <"inline"f>t<"inline"p><"inline"i>'
+      sDom: 'TRr t<"inline"p><"inline"i>'
+      data: []
+      columns: [
+        { "title": "Var", "class": "var_col" }
+        { "title": "Unit" }
+        { "title": "Source" }
+        { "title": "Type" }
+        { "title": "Input", "class": "center" }
+        { "title": "Dist.", "class": "center" }
+        { "title": "Std. Unc.", "class": "center" }
+        { "title": "Coef.", "class": "center" }
+        { "title": "Contribution", "class": "center" }
+        { "title": "Graph.", "class": "center" }
+      ]
+      aoColumnDefs: [
+        {
+          aTargets:[0]
+          fnCreatedCell: (nTd, sData, oData, iRow, iCol) ->
+            color = _.findWhere(
+              spreadsheetEditor.getEditor("root.model.variables").getValue(), 
+              {"name": sData}).color
+            if color isnt undefined
+              $(nTd).closest('.var_col').css('background-color', color)
+              #$(nTd).closest('.var_col').css({'color': color, 'text-shadow': '0 1px 0 rgba(255, 255, 255, 0.4);'})
+              #$(nTd).closest('.var_col').css({"text-align": "center;", "padding": "40px 0;", "text-shadow": "0 1px 0 rgba(255, 255, 255, 0.4);"})
+        }                    
+      ]
+
+      #sPaginationType: "bootstrap"
+      #responsive: true # this true makes thinks a bit slower...
+      #pagingType: 'full_numbers'
+      bAutoWidth: false
+
+    ################################################################################
+    # Percent to RGP, borrowed from http://stackoverflow.com/questions/340209/generate-colors-between-red-and-green-for-a-power-meter/340214#340214
+    ################################################################################
+
+    percentToRGB = (percent) ->
+      if percent == 100
+        percent = 99
+      r = undefined
+      g = undefined
+      b = undefined
+      if percent < 50
+        # green to yellow
+        r = Math.floor(255 * percent / 50)
+        g = 255
       else
-        n_str = str.trim().replace(/([a-zA-Z]){1,2}$/g, (x) ->
-          k = x
-          ""
+        # yellow to red
+        r = 255
+        g = Math.floor(255 * (50 - (percent % 50)) / 50)
+      b = 0
+      'rgb(' + r + ',' + g + ',' + b + ')'
+
+
+    get_chart_unit = (data) ->
+      # Get used unit list
+      units = _.uniq data.map (x) ->
+        return x.uut_unit
+      
+      # reject undefined      
+      units = _.reject( units,  (x) ->
+        return x is undefined
+      )
+      
+      # If multiple units exixts, use blank
+      if units.length > 0
+        _chart_unit = " " + units[0]
+      else
+        _chart_unit ""
+      return _chart_unit
+
+    ################################################################################
+    # Set series and tooltip handlers for charts
+    ################################################################################
+
+    set_chart_series = (data, x_key, x_key_parser) ->
+      _chart_unit = get_chart_unit(data)
+
+      # Group by serie name
+      series_groups = _.groupBy(data, (x) -> 
+        x.serie_name
+      ) 
+
+      series = []
+      _.keys(series_groups).map((serie_name) ->
+        point = series_groups[serie_name].map((p) ->
+          return [x_key_parser(p[x_key]), p.y]
         )
-      k_val = get_prefix(k)
-      parseFloat(n_str) * k_val
+        series.push
+          name: serie_name
+          type: 'spline'
+          data: point
+          tooltip:
+            #headerFormat: '<b>{series.name}</b><br>'
+            headerFormat: ''
+            pointFormatter: () ->
+              point = ''
+              # Solve bug when showing trend chart
+              if this.x < 1e10
+                point = '<b>Point:</b> '  + this.x.toExponential(2) + _chart_unit
+              else
+                d = new Date(this.x)
+                point = '<b>Date:</b> ' + d.toDateString()
+              return point + ' <b>Error:</b> ' + this.y.toExponential(2) + _chart_unit + '<br/>'
 
-    sortByKey = (array, key) ->
-      array.sort (a, b) ->
-        x = parse_readout(a[key])
-        y = parse_readout(b[key])
-        (if (x < y) then -1 else ((if (x > y) then 1 else 0)))
-    
-    # Name of uut var
-    uut_name = ""
-    
-    window.chosenAssetsEditor = new JSONEditor document.getElementById('chosenAssetsHolder'),
-        theme: "bootstrap3"
-        iconlib: "bootstrap3"
-        disable_collapse: false
-        disable_array_add: true
-        schema:
-          type: "object"
-          title: "Chosen snippets"
-          properties:
-            snippets:
-              type: "array"
-              format: "tabs"
-              title: "snippets"
-              items:
-                type: "object"
-                title: "snippet"
-                headerTemplate: "{{ self.label }}"
-                options:
-                  collapsed: true
-                properties:
-                  label:
-                    type: "string"
-                    title: "Label"
-                    format: "text"
-                    propertyOrder: 1
-                  asset_id:
-                    type: "string"
-                    options: {"hidden": true}
-                    propertyOrder: 2
-                  snippet_id:
-                    type: "string"
-                    options: {"hidden": true}
-                    propertyOrder: 3
-                  position:
-                    type: "string"
-                    options: {"hidden": true}
-                    propertyOrder: 4
-                  value:
-                    type: "object"
-                    title: "Value"
-                    options:
-                      collapsed: true
-                    propertyOrder: 5
-                    properties:
-                      ranges: window.rangesSchema.ranges    
-
-    # Update handsontable text when the label is changed on snippets data
-    syncWithAssetsEditor = (ht) ->
-      ht_changes = []
-      asset_snippets_editor = chosenAssetsEditor.getValue("root.snippets").snippets
-      if $('.table-json').data("temp-data").lookup isnt undefined
-        prev_lookup = $('.table-json').data("temp-data").lookup
-        for l, l_index in prev_lookup
-          row = prev_lookup[l_index].row_index
-          col = prev_lookup[l_index].col_index
-          ht_label = ht.getDataAtCell(row, col)
-          changed_asset_snippet = asset_snippets_editor[prev_lookup[l_index].snippet_index]
-          # Compare items, if differents, update ht
-          if (changed_asset_snippet isnt undefined) and (ht_label isnt changed_asset_snippet.label)
-            ht_changes.push [row, col, changed_asset_snippet.label]
-        if ht_changes.length
-          ht.setDataAtCell(ht_changes)
-
-    # Wait editor to full load
-    chosenAssetsEditor.on "ready", ->
-      #chosenAssetsEditor.watch "root.snippets", ->
-      chosenAssetsEditor.on "change", ->
-        ht = $('#handsontable').handsontable('getInstance')
-        if ht isnt undefined
-          syncWithAssetsEditor(ht)
-          #syncHTSnippets(ht)
-
-    ######################
-    syncHTSnippets = (ht) ->
-      # Check if temp snippets data already exists
-      if typeof $('.table-json').data("temp-data").asset_snippets is undefined
-        # Call autosave to ensure all data and temp data is avaliable
-        autoSave()
-      # Take a look inside handsontable settings, 
-      # and see witch fields are autocomplete
-      mapAutocompletFields = (ht) ->
-        col_to_verify = []
-        ht.getSettings().columns.map (c, i) ->
-          col_to_verify.push i  if c.type is "autocomplete"
-        return col_to_verify
-      col_to_verify = mapAutocompletFields(ht)
-      # Procedure variables
-      variables = $('.table-json').data("temp-data").value.variables
-      # Where calculated data col starts?
-      # table_offset holds this value
-      table_offset = 0
-      # row point val
-      point_vals = []
-      # Update table offset value, based on where UUT defined var is found
-      # on handsontable. Also set the point val, that is the first value right the UUT autocomplete field
-      iterateOverAutocomplets = () ->
-        # First, set a array with the point value.
-        # The point value is the readout of the UUT col
-        replications = $('.table-json').data("temp-data").value.replications
-        for v, i in variables
-          # invisible cols count only one
-          if v.kind.indexOf('Invisible') >= 0
-            if (v.kind.indexOf('UUT') >= 0)
-              # Reach the col with values
-              point_vals = ht.getDataAtCol(table_offset)
-            table_offset = table_offset + 1
-          else
-            table_offset = table_offset + replications + 1
-            if (v.kind.indexOf('UUT') >= 0)
-              # Reach the col with values
-              point_vals = ht.getDataAtCol(table_offset-replications)
-
-      iterateOverAutocomplets()
-      # lookup array to handsontable rows and assets snippets
-      lookup = []
-      # Influence quantities
-      influence_quantities = $('.table-json').data("temp-data").value.influence_quantities
-      # Errors list for evaluation
-      error_list = []
-
-      determineRangeReclass = (range, expr_params, asset_label) ->
-        reklass_index = null
-        for reklass, k in range.reclassifications
-          conditions_expr = reklass.condition
-          result = try expr.parse(conditions_expr, expr_params)
-          catch e then error_list.push('Reclassification condition: "' + conditions_expr + '"\nRange name: "' + range.name + '"\nSnippet label: "' + asset_label + '"\n' + e.message ) #; finally 
-          # Valid reclassification found
-          if result
-            reklass_index = k
-            break
-        return reklass_index
-      # Get snippets data from json-editor
-      asset_snippets_editor = chosenAssetsEditor.getValue("root.snippets").snippets
-
-      # Iterate to determine the correct range
-      determineSnippetRange = (asset_map, var_name, row_i) ->
-        range_index = null
-        reklass_index = null
-        error = null
-        used_range = null
-        asset = asset_snippets_editor[asset_map.snippet_index]
-        if asset isnt undefined
-          # Params that will be exported to user defined expresion evaluation on browser
-          expr_params = {}
-          # Get readout
-          expr_params.readout = parse_readout(asset_map.first_readout)
-          # Get point value
-          if (typeof(point_vals[asset_map.row_index]) isnt "undefined") and (point_vals[asset_map.row_index] isnt null)
-            expr_params.point = parse_readout(point_vals[asset_map.row_index].toString())
-          else 
-            expr_params.point = 0
-          # set influence quantities for current row
-          for iq, iq_index in influence_quantities
-            iq_val = ht.getDataAtCell(asset_map.row_index, table_offset+iq_index)
-            expr_params[iq.name] = iq_val
-          # Get deeper asset information from DOM
-          asset_json_el = $(".asset_json_data[asset_id='" + asset.asset_id + "']")
-          if typeof(asset_json_el[0]) isnt undefined
-            asset_data = JSON.parse(asset_json_el.attr("data-json"))
-            expr_params.asset = asset_data
-          # Iterate over ranges inside asset
-          for range, range_i in asset.value.ranges
-            # Define the params, adding some aliases
-            expr_params.range = range
-            expr_params.range_start = range.limits.start
-            expr_params.range_end = range.limits.end
-            expr_params.full_scale = range.limits.fullscale
-            expr_params.is_meas = if range.kind is "Measurement" then 1 else 0
-            expr_params.is_source = if range.kind is "Source" then 1 else 0
-            expr_params.is_fixed = if range.kind is "Fixed" then 1 else 0
-            # Get the conditions of the range and parse to check if this range is for this point
-            conditions_expr = range.limits.autorange_conditions
-            result = try expr.parse(conditions_expr, expr_params)
-            catch e then error_list.push('Autorange expression: "' + conditions_expr + '"\nRange name: "' + range.name + '"\nSnippet label: "' + asset.label + '"\n' + e.message ) #; finally 
-            if result
-              used_range = range
-              range_index = range_i
-              reklass_index = determineRangeReclass(range, expr_params, asset.label)
-              break
-          # No suitable range found, show error
-          if range_index is null
-            error = "No suitable range found: line " + (row_i+1).toString() + ", variable " + var_name
-        return {"range_index": range_index, "reklass_index": reklass_index, "range": used_range, "error": error}
-
-      # The next line show a bug on handsontable that I cant get the value changed imediatly before update it
-      #ht = $('#handsontable').handsontable('getInstance');ht.setDataAtCell(0,0,"aaa");x=ht.getDataAtCol(0);console.log(x)
-
-      setTimeout (->
-        # sync temp data on element
-        data = $('.table-json').data("temp-data")
-        point_value_key = data.value.uut_col.output_column
-        # Set some keys
-        uut_data = do_uut_lookup(data)
-        uut_name = uut_data.uut_name
-
-        # Array will hold uut ranges for each row
-        uut_ranges = []
-        # return a array that contains the index of asset used by each autocomplete field,
-        # the var name and row index
-        compareAutocompletesToAssetsSnippets = () ->
-          for col_i, col_i_index in col_to_verify
-            col_readout = ht.getDataAtCol(col_i+1)
-            row_data = ht.getDataAtCol(col_i)
-            # Ger var name. The vartiables array is index the same order handsontable
-            # so we can use col_i_index to access it
-            if variables[col_i_index] isnt undefined
-              var_name = variables[col_i_index].name
-            else
-              var_name = null
-            for autocomplete_label, row_i in row_data
-              if autocomplete_label isnt null
-                asset_map = {}
-                match = _.findWhere(asset_snippets_editor, {label:autocomplete_label.trim()})
-                if match is undefined
-                  asset_map["snippet_index"] = null
-                else
-                  match_i = _.indexOf(asset_snippets_editor, match)
-                  asset_map["snippet_index"] = match_i
-                asset_map["var"] = var_name
-                asset_map["row_index"] = row_i
-                asset_map["col_index"] = col_i
-                asset_map["first_readout"] = ht.getDataAtCell(row_i, col_i+1)
-                # Determine range and reclass indexes
-                range_and_reklass_indexes = determineSnippetRange(asset_map, var_name, row_i)
-                asset_map["range_index"] = range_and_reklass_indexes.range_index
-                asset_map["reklass_index"] = range_and_reklass_indexes.reklass_index
-                asset_map["error"] = range_and_reklass_indexes.error
-                # collect uut ranges
-                if var_name is uut_name
-                  uut_ranges.push range_and_reklass_indexes.range
-                lookup.push asset_map
-          return lookup
-        lookup = compareAutocompletesToAssetsSnippets()
-
-        # filter to get only uut ranges
-        #uut_ranges = lookup.spreadsheets.map (x) ->
-        #  _.where(x.table_json.lookup, var: 'uut_meas').map (x) ->
-        #    x.range
-
-        # Check for autorange and parse errors
-        $(lookup).each ->
-          if this.error isnt null
-            error_list.push(this.error)
-        if error_list.length
-          error_msg = error_list[0]
-          $("#error_messages").text(error_msg)
-          $("#error_messages").show()
-          return
-        else
-          $("#error_messages").hide()
-
-        uut_units = uut_data.uut_units
-        uut_prefixes = uut_data.uut_prefixes
-        if data.table_data isnt undefined
-          data.table_data.map (x,i) ->
-            if (x[point_value_key] isnt null) and (x[point_value_key] isnt undefined)
-              x.readout = get_prefix(uut_prefixes[i])*x[point_value_key]
-              x._prefix = uut_prefixes[i]
-              x._unit = uut_units[i]
-
-        #data.uut_ranges = uut_ranges
-        data.asset_snippets = chosenAssetsEditor.getValue()
-        data.lookup = lookup
-        data.uut_ranges = uut_ranges
-        data.uut_ids = uut_data.uut_ids
-        data.table_offset = table_offset
-        data.assets = assets_json
-        $(".table-json").data( "temp-data", data )
-        ht.render()
-      ), 100
+        point_error = series_groups[serie_name].map((p) ->
+          return [x_key_parser(p[x_key]), p.y - (p.U), p.y + (p.U)]
+        )
 
 
+        series.push
+          name: serie_name + ' error'
+          type: 'errorbar'
+          data: point_error
+          tooltip:
+            #headerFormat: '<b>{series.name}</b><br>'
+            headerFormat: ''
+            pointFormatter: () ->
+              return '<b>U:</b> ' + this.low.toExponential(2) +  '<b> .. </b>' +  this.high.toExponential(2) + _chart_unit + '<br>'
 
-    ###################
-    # Load assets data on assets_json GLOBAL var
-    assets_json = {}
-    $(".asset_json_data").each ->
-      asset_json = JSON.parse $(this).attr("data-json")
-      assets_json[asset_json.id] = asset_json
-      assets_json[asset_json.id]["position"] = $(this).attr("position")
+        upper_point_mpe = series_groups[serie_name].map((p) ->
+          return [x_key_parser(p[x_key]),  + p.mpe]
+        )
 
-    # This helps to draw correctly the handsontable when we come back to spreadsheet tab
-    $('a[data-toggle="tab"]').on 'shown.bs.tab', (e) ->
-      if $(e.target).text() is "Spreadsheet"
-        ht = $('#handsontable').handsontable('getInstance')
-        ht.render()
+        lower_point_mpe = series_groups[serie_name].map((p) ->
+          return [x_key_parser(p[x_key]), - p.mpe]
+        )
+
+        series.push
+          name: serie_name + ' MPE'
+          type: 'line'
+          color: "#000000"
+          dashStyle: "ShortDash"
+          marker: symbol: "diamond"
+          data: upper_point_mpe
+          tooltip:
+            headerFormat: ''
+            pointFormatter: () ->
+              return ''
+
+        series.push
+          linkedTo:':previous'
+          type: 'line'
+          color: "#000000"
+          dashStyle: "ShortDash"
+          marker: symbol: "diamond"
+          data: lower_point_mpe
+          tooltip:
+            headerFormat: ''
+            pointFormatter: () ->
+              return ''
+      )
+      return series
+
+    # Get model influence vars names
+    model_influence_vars = () ->
+      influence_vars = _.filter(spreadsheetEditor.getEditor('root.model.variables').getValue(), (x) ->
+        x.influence
+      ).map (v) ->
+        v.name
+      return influence_vars
+
+
+    # function to get array item closest to specified key
+    #http://stackoverflow.com/questions/4811536/find-the-number-in-an-array-that-is-closest-to-a-given-number
+    getClosest = (array, key, target) ->
+      tuples = _.map(array, (val) ->
+        [
+          val
+          Math.abs(val[key] - target)
+        ]
+      )
+      _.reduce(tuples, ((memo, val) ->
+        if memo[1][key] < val[1][key] then memo else val
+      ), [
+        -1
+        999
+      ])[0]
+
+    ################################################################################
+    # Function to populate unc table
+    ################################################################################
+
+    build_unc_table = (_results, _range_id, _uut_id) ->
+      if _results.U isnt undefined
+        unc_table.fnClearTable()
+
+        data = []
+
+        max_contribution = Math.max.apply(0,_results.ci_ui)
+
+        for u, i in _results.uncertainties
+          # Skip null contributions
+          if (_results.ci_ui[i] isnt null) and (parseFloat(u.value) isnt 0)
+            bar_size = (+_results.ci_ui[i]/max_contribution) * 100
+            color = percentToRGB(bar_size*0.9)
+            var_name = _results.uncertainties_var_names[i]
+            data.push([
+              var_name
+              _results.units[var_name]
+              u.name
+              u.type
+              (+u.value).toExponential(3)
+              u.distribution
+              (+_results.ui[i]).toExponential(3)
+              Math.round(_results.ci[i])
+              (+_results.ci_ui[i]).toExponential(3)
+              "<svg width='100px' height='7px'><rect width='" + bar_size.toString() + "px' height='7px' style='fill:" + color + ";stroke-width:0;stroke:rgb(0,0,0)' /></svg>"
+            ])
+        # Populate editor with contribution sorted data
+        unc_table.fnAddData(_.sortBy(data, (a) -> return -parseFloat(a[7]) ))
+
+        # Trend chart
+        if (_range_id isnt undefined) and (_uut_id isnt undefined)
+          $.get "http://lab1.lvh.me:3000/spreadsheets/get_tendency?_range_id=" + _range_id + "&_uut_id=" + _uut_id, (data) ->
+           
+            # flat and grouped by calibration date
+            grouped_data = _.groupBy data.map((x) ->
+              obj = x._results
+              obj.calibration_date = x.calibration_date
+              obj.serie_name = "Serie"
+              return obj
+            ), "calibration_date"
+
+            # Find closest point for comparision
+            choosen_data = []
+            _.keys(grouped_data).map((k) ->
+              group = grouped_data[k]
+              # First, find by influence quantities
+              influence_vars = model_influence_vars()
+              if influence_vars.length
+                influence_match_obj = (_.pick(_results.scope, influence_vars))
+                group_where_equals_influence = _.where(grouped_data[k], influence_match_obj)
+                if group_where_equals_influence.length
+                  group = group_where_equals_influence
+                  # find closest item
+                  closest = _.sortBy(group, (x) ->
+                    Math.abs(_results.uut_readout - x.uut_readout)
+                  )[0]
+                  choosen_data.push(closest)
+            )
+            # Sort
+            choosen_data = _.sortBy(choosen_data, (x) ->
+              return Date.parse(x.calibration_date)
+            )
+
+            x_key_parser = (x) ->
+              return Date.parse(x)
+            
+            series = set_chart_series(choosen_data, "calibration_date", x_key_parser)
+            chart_unit = choosen_data[0].uut_unit
+            
+            $('#trend_container').highcharts
+              credits: enabled: false
+              exporting: enabled: true
+              chart:
+                zoomType: 'xy'
+              title: text: "Point trend"
+              xAxis:
+                type: 'datetime'  
+                #dateTimeLabelFormats:
+                #  day: '%e of %b'
+                title: text: 'Date'
+                minRange: 1e-12
+              yAxis:
+                title: text: if chart_unit is "" then "" else "error (" + chart_unit + ")"            
+              plotOptions: spline: marker: enabled: true
+              tooltip: shared: true
+              series: series
       return
 
-    # actiion to search icon for the assets    
+    ################################################################################
+    # Save data
+    ################################################################################
+
+    window.auto_save = () ->
+      # build tags based on wat was used on spreadsheet
+      try
+        uut_name = spreadsheetEditor.getEditor("root.model.variables.0.name").getValue()
+
+        uut_name_list = window.hot.getData().map( (r) ->
+          return r[uut_name].snippet
+        )
+
+        uut_name_list_uniq = _.uniq(uut_name_list.filter( (x) -> return x isnt null) )
+        
+        # get tags from all uut detected on worksheet
+        tags = _.select( spreadsheetEditor.getEditor("root.choosen_snippets").getValue(), (x) -> 
+          uut_name_list_uniq.indexOf(x.label) isnt -1
+        )
+        .map (x) ->
+          return x._tag_list
+        
+        assets_tags = _.uniq(tags.join().split(/[\s,]+/))
+
+        math_tags = spreadsheetEditor.getEditor("root.model._tag_list").getValue().split(/[\s,]+/)
+
+        intersection = (_.intersection(assets_tags, math_tags))
+
+        $("#spreadsheet_tag_list").tagsinput('removeAll')
+        $("#spreadsheet_tag_list").tagsinput('add', intersection.toString())
+
+        $("#spreadsheet_spreadsheet_json").val(JSON.stringify(hot.getData()))
+
+        $(".spreadsheet_feature").submit()
+      catch e
+        console.log "Cant save"
+        console.log e
+
+
+    ################################################################################
+    # Callbacks for handsontable context menu items
+    ################################################################################
+
+    handsontableContextMenuCallbacks = (key, options) ->
+      if key is "readouts"
+        # Clean editor
+        if window.readoutsEditor
+          window.readoutsEditor.destroy()
+          delete window.readoutsEditor
+        schema_items = _.filter( window.spreadsheetEditor.getEditor("root.model.variables").getValue(), {influence: false} )
+        schema = {}
+        for v in schema_items
+          schema[v.name] = null
+
+        columns = schema_items.map (v) ->
+          obj =
+            data: v.name
+            color: v.color
+            renderer: colorRenderer
+          return obj
+      if key is "plot"
+        plot_chart()
+        $('#chart').modal('toggle')
+      if key is "permalink"
+        url = 'http://lab1.lvh.me:3000/spreadsheets/'
+        content = {}
+        content.input = JSON.parse($("#spreadsheet_spreadsheet_json").val()).map((x) ->
+          x._results = {}
+          return x
+        )
+        content.data = JSON.parse $("#spreadsheet_table_json").val()
+        encoded = LZString.compressToEncodedURIComponent( JSON.stringify content )
+        
+        url += '?data=' + encoded
+        console.log url
+      if key is "run_automation"
+        console.log "Automation task data:"
+        task = {}
+        task.selection = hot.getSelected()
+        if task.selection is undefined then return
+        task.input = hot.getData()
+        task.data = window.spreadsheetEditor.getValue()
+        console.log task
+        task_handler = new MBAuto("ws://127.0.0.1:9000", hot)
+        task_handler.sendTask(task)
+        
+      if key is "save"
+        # Save spreadsheet
+        auto_save()
+      if key is "calc"
+        # Save spreadsheet
+        auto_save()
+      if key is "details"
+        # Ret selected row
+        curr_data = hot.getData()[options.end.row]
+        build_unc_table(curr_data._results, curr_data._range_id, curr_data._uut_id)
+        $('#rowDetails').modal('toggle')
+      return
+
+    snippets_autocomplet_source = (query, process) ->
+      data = window.spreadsheetEditor.getEditor("root.choosen_snippets").getValue().map (s) ->
+        s.label.trim()
+      return if process isnt undefined then process data else data
+      
+    prefixes_autocomplet_source = (query, process) ->
+      # The comented code seatch all assets and take the prefix string uniq itens
+      ###
+      editor_data = window.spreadsheetEditor.getValue()
+
+      nested_prefix_list = editor_data.choosen_snippets.map (s) ->
+        s.value.ranges.map (r) ->
+          r.prefix.trim()
+      data = _.uniq(_.flatten(nested_prefix_list))
+      ###
+      data = ["", "Y","Z","E","P","T","G","M","k","h","da","d","c","m","u","n","p","f","a","z","y"]
+      return if process isnt undefined then process data else data
+      
+    all_autocomplete_source = (query, process) ->
+      return process snippets_autocomplet_source().concat(prefixes_autocomplet_source())
+
+
+    ################################################################################
+    # Functions to update hot editors.
+    # Colors, headers and schemas
+    ################################################################################
+
+    colorRenderer = (instance, td, row, col, prop, value, cellProperties) ->
+      Handsontable.renderers.TextRenderer.apply this, arguments
+      $(td).css background: columns[col]['color']
+      $(td).css "font-style": columns[col]['font_style']
+
+    prefixCellRenderer = (instance, td, row, col, prop, value, cellProperties) ->
+      Handsontable.renderers.TextRenderer.apply this, arguments
+      $(td).css background: columns[col]['color']
+      $(td).css "font-weight": "bolder"
+
+
+    # original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    strip_tags = (input, allowed) ->
+      tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi
+      commentsAndPhpTags = /<!--[\s\S]*?-->|<\?(?:php)?[\s\S]*?\?>/gi
+      # making sure the allowed arg is a string containing only tags in lowercase (<a><b><c>)
+      allowed = (((allowed or '') + '').toLowerCase().match(/<[a-z][a-z0-9]*>/g) or []).join('')
+      input.replace(commentsAndPhpTags, '').replace tags, ($0, $1) ->
+        if allowed.indexOf('<' + $1.toLowerCase() + '>') > -1 then $0 else ''
+
+
+    chartRenderer = (instance, td, row, col, prop, value, cellProperties) ->
+      Handsontable.renderers.TextRenderer.apply this, arguments
+      cellProperties.readOnly = true
+      if window.hot isnt undefined
+        try
+          td.innerHTML = window.hot.getDataAtRowProp(row, "_results")._error_chart
+          $(td).popover
+            trigger: 'hover'
+            placement: 'left'
+            container: 'body'
+            html: true
+            content: () -> 
+              return $(this).find(".data_info").html()
+        catch e
+          console.log e
+        
+
+    disabledRenderer = (instance, td, row, col, prop, value, cellProperties) ->
+      Handsontable.renderers.TextRenderer.apply this, arguments
+      cellProperties.readOnly = true
+      $(td).css "font-weight": "bolder"
+      $(td).css "background": "#EEE"
+
+    mathjs_eval_res = (formula, scope, res_var) ->
+      if formula is undefined then return 0
+      if typeof formula is "number" then return formula
+      eval_res = mathjs.eval(formula, scope)
+      if typeof scope[res_var] is "number" then return scope[res_var]
+      # check if formula has multiple lines,
+      # if true get the last entry as the uncertanti
+      if typeof eval_res is "object"
+        len = eval_res.entries.length
+        res = eval_res.entries[len-1]
+      else
+        res = eval_res
+      return res
+
+    process_entries = (changes) ->
+      that = this
+      ################################################################################
+      # When changes exists and its not seting results
+      ################################################################################
+      for change in changes
+        row_num = change[0]
+        # variables editor
+        variables_editor = spreadsheetEditor.getEditor("root.model.variables")
+        # uut is the first variable
+        this._uut_name = variables_editor.getValue()[0].name              
+        # UUT value without prefix
+        this._uut_val_wo_prefix = NaN
+        # object to build and send to uncertanty calc framework
+        # set it initialy with variables and influence_quantities
+        unc_source_obj = 
+          variables: []
+          influence_quantities: []
+
+        ################################################################################
+        # filter model variables object
+        ################################################################################
+
+        variables_editor.getValue().map (v, i) ->
+          variable = Object.create(v)
+          variable.name = v.name
+          delete variable.color
+          is_influence = variable.influence
+          if is_influence
+            if window.hot.getDataAtRowProp(row_num, variable.name) isnt undefined
+              variable.value = window.hot.getDataAtRowProp(row_num, variable.name).readout
+              variable.prefix = window.hot.getDataAtRowProp(row_num, variable.name).prefix
+            unc_source_obj.influence_quantities.push variable
+          else
+            value = window.reject_non_numbers(window.hot.getDataAtRowProp(row_num, variable.name).readouts)
+            # if first, is uut. Set variable
+            if i is 0
+              that._uut_val_wo_prefix = jStat.mean( value.map (r) -> return parseFloat(r) )
+            variable.value = value
+            variable.prefix = window.hot.getDataAtRowProp(row_num, variable.name).prefix
+            unc_source_obj.variables.push variable
+        
+
+        # snippet editor
+        snippets_editor = spreadsheetEditor.getEditor("root.choosen_snippets")
+        
+        ################################################################################
+        # Create scope to use when parsing expression with math.js
+        ################################################################################
+
+        this.base_scope = {}
+        this.base_scope.uut_readout = this._uut_val_wo_prefix * prefix_val(window.hot.getDataAtRowProp(row_num, this._uut_name).prefix)
+
+        unc_source_obj.influence_quantities.map (iq) ->
+          that.base_scope[iq.name] = parseFloat(iq.value)*prefix_val(iq.prefix)
+        
+        unc_source_obj.variables.map (v) ->
+          # determine mean
+          # default is 0
+          that.base_scope[v.name] = 0
+          # If on snippet, the var is set as readout, overwrite with the mean
+          if v.readout
+            mean_value = jStat.mean( v.value.map (r) -> return parseFloat(r) )
+            that.base_scope[v.name] = mean_value * prefix_val(window.hot.getDataAtRowProp(row_num, v.name).prefix)
+
+        # init max permissive error
+        this._mpe = 0
+
+        # Hold extra information to the label
+        #this._uut_range_label = ""
+        # Hold resolution for each variable
+        this._resolutions = {}
+        this._units = {}
+        unc_source_obj.variables.map (v, var_index) ->
+          # get snippet by label
+          snippet = _.findWhere(snippets_editor.getValue(), {label: window.hot.getDataAtRowProp(row_num, v.name).snippet} )
+          # didnt found any snippet, stop here
+          if snippet is undefined then return
+          # save the uuid of the snippet,
+          # the first index is the UUT
+          if var_index is 0 then that._uut_id = snippet.asset_id
+          # Copy scope by val
+          scope = Object.create(that.base_scope)
+          scope.readout = that.base_scope[v.name]
+          scope.is_fixed = if snippet.value.kind is "Fixed" then true else false
+          scope.is_uut = (v.name is that._uut_name)
+          for r in snippet.value.ranges
+            that._units[v.name] = snippet.value.unit
+            # Add some keys to scope
+            scope.range_start = r.limits.start
+            scope.range_end = r.limits.end
+            scope.fullscale = r.limits.fullscale
+            # Set nominal value, based only on the asset, not reclassification
+            mathjs.eval(r.nominal_value, scope)
+            # Define resolution
+            resolution = mathjs.eval(r.limits.resolution, scope)
+            scope.resolution = resolution
+            that._resolutions[v.name+"_resolution"] = resolution
+            # is is uut, create alias
+            if scope.is_uut
+              that._resolutions["uut_resolution"] = resolution
+              # add unique range identifier
+              that._range_id = r._identifier
+
+            ################################################################################
+            # Test if this is a suitable range
+            ################################################################################
+
+            truth_test = mathjs.eval(r.limits.autorange_conditions, scope)
+            if truth_test
+              # Set extra info to the label when uut range is found
+              #if scope.is_uut
+              #  #that._uut_range_label = " (" + r.name + ")"
+              #  that._uut_range_label = " (teste)"
+
+              # Check for reclassifications
+              if r.reclassification isnt undefined
+                uncertainties = r.reclassification
+              else
+                uncertainties = r.uncertainties
+
+              u_list = uncertainties.map (range_u) ->
+                u_res = mathjs_eval_res(range_u.formula, scope, "u")
+                c_res = mathjs_eval_res(range_u.correction, scope, "c")
+                # Get possible max permissive error increment
+                if range_u.name is "MPE"
+                  that._mpe += u_res
+                  # When unc is MPE and variable is UUT, dont add uncertanty to budget
+                  if scope.is_uut
+                    u_res = 0
+
+                u_obj = 
+                  name: range_u.name
+                  value: u_res
+                  distribution: range_u.distribution
+                  correction: parseFloat(c_res)
+
+                if range_u.k isnt undefined then u_obj.k = range_u.k
+                if range_u.df isnt undefined then u_obj.df = range_u.df
+                if range_u.ci isnt undefined then u_obj.ci = range_u.ci
+                return u_obj
+              # add uncertainties
+              unc_source_obj.variables[var_index].uncertainties = u_list
+              # If is fixed, need to set the readout value to GUM variable entry
+              if scope.is_fixed
+                unc_source_obj.variables[var_index].value = scope.readout
+              # Range found, break loop
+              break
+        # Get snippet object
+        worksheet_snippet = _.findWhere(snippets_editor.getValue(), {label: window.hot.getDataAtRowProp(row_num, this._uut_name).snippet})
+        # Set label text
+        #uut_val_label = this._uut_val_wo_prefix.toString() + " " + window.hot.getDataAtRowProp(row_num, this._uut_name).prefix + worksheet_snippet.value.unit + this._uut_range_label
+
+        ################################################################################
+        # Call GUM
+        ################################################################################
+
+        model_data = spreadsheetEditor.getEditor("root.model").getValue()
+        unc_source_obj.func = model_data.func
+        unc_source_obj.cl = model_data.additional_options.cl
+
+        # Entry data
+        console.log "Entry data"
+        console.log unc_source_obj
+
+        try
+          calc = new GUM(unc_source_obj)
+        catch e
+          console.log e
+          spreadsheetEditor.onChange()
+
+        _results = 
+          "U": calc.U
+          "ci": calc.ci
+          "df": calc.df
+          "k": calc.k
+          "uc": calc.uc
+          "ui": calc.ui
+          "ci_ui": calc.ci_ui
+          "uncertainties": calc.uncertainties
+          "uncertainties_var_names": calc.uncertainties_var_names
+          "veff": calc.veff
+          "y": calc.y
+          "uut_name": this._uut_name
+          "uut_readout": this.base_scope.uut_readout
+          "correct_value": this.base_scope.uut_readout - calc.y
+          "scope": that.base_scope
+          "uut_unit": worksheet_snippet.value.unit
+          "uut_prefix": window.hot.getDataAtRowProp(row_num, this._uut_name).prefix
+          "mpe": this._mpe
+          "units": this._units
+          #"_uut_id": this._uut_id
+          #"_range_id": this._range_id
+
+        # Copy var values to results
+        _.extend(_results, calc._scope, that.base_scope)
+
+        # Register resolutions on _results
+        _resolution_keys = _.allKeys(this._resolutions)
+        for key in _resolution_keys
+          _results[key] = this._resolutions[key]
+
+        # If only two varibles exists, its a direct comparison measurement
+        # so in this case we use the secont variable as the reference and register to _results
+        # the resolution of it
+        measurand_variables = _.filter( variables_editor.getValue(), {influence: false} )
+        if measurand_variables.length is 2
+          _results["reference_resolution"] = this._resolutions[_resolution_keys[1]]
+        else
+          _results["reference_resolution"] = 0
+        
+        ################################################################################
+        # Eval post porocessing
+        ################################################################################
+
+        mathjs.eval(model_data.additional_options.post_processing, _results)
+        # Output
+        console.log "Output"
+        console.log _results
+        
+        # parse results prevew 
+        _results._preview_content = swig.render(model_data.additional_options.results_preview, locals: _results)
+        _results._preview_content = kramed.parse(_results._preview_content)
+
+        # Refresh chart content
+
+        point_val = _results.scope[_results.uut_name]
+      
+        correct_value = point_val - _results.y
+        bottom_u = correct_value - _results.U 
+        upper_u = correct_value + _results.U 
+        
+        bottom_mpe = point_val - _results.mpe
+        upper_mpe = point_val + _results.mpe
+
+        max_value = Math.max(upper_u, upper_mpe)
+        offset = Math.min(bottom_u, bottom_mpe)
+        u_y = 8
+        mpe_y = 18
+
+        ################################################################################
+        # Chart elements
+        # TODO sanatize this
+        ################################################################################
+
+        _results._error_chart = '<svg height="22px" width="300px">
+
+        <circle cx="' + ((correct_value - offset) / (max_value - offset))*100 + '%" cy="' + u_y + '" r="3" fill="#00628C" stroke="none"></circle>
+        <line x1="' + ((bottom_u - offset) / (max_value - offset))*100 + '%" y1="' + u_y + '" x2="' + ((upper_u - offset) / (max_value - offset))*100 + '%" y2="' + u_y + '" style="stroke:#00628C;stroke-width:1.5" />
+
+        
+        <circle cx="' + ((point_val - offset) / (max_value - offset))*100 + '%" cy="' + mpe_y + '" r="3" fill=rgb(170,0,0) stroke="none"></circle>
+        <line x1="' + ((bottom_mpe - offset) / (max_value - offset))*100 + '%" y1="' + mpe_y + '" x2="' + ((upper_mpe - offset) / (max_value - offset))*100 + '%" y2="' + mpe_y + '" style="stroke:rgb(170,0,0);stroke-width:1.5;" />
+
+        <div class="data_info" style="display: none;">
+            ' + _results._preview_content + '
+        </div>
+        </svg>'                  
+        
+        window.hot.setDataAtRowProp(row_num, "_results", _results, "set_results")
+
+        # Parameter used to query results history
+        window.hot.setDataAtRowProp(row_num, "_uut_id", this._uut_id, "set_results")
+        window.hot.setDataAtRowProp(row_num, "_range_id", this._range_id, "set_results")
+
+        # Trigger on change on json-editor
+        spreadsheetEditor.onChange()
+      return # THIS RETURN HERE IS IMPORTANT! (probems with undo)
+
+    ################################################################################
+    # Generate deffinition hot settings
+    ################################################################################
+
+    window.entries_hot_settings = (data) ->
+      that = this
+      this.data = data
+      @dataSchema = {}
+      @columns = []
+      #@colWidths = []
+      @col_headers = []
+      data.variables.map((v) ->
+        that.dataSchema[v.name] = {}
+        # Readouts
+        if v.influence
+          col_name = v.name
+          # Feed schema columns color and type
+          that.col_headers.push col_name
+          that.dataSchema[v.name]["readout"] = null
+          that.columns.push
+            data: v.name+".readout"
+            color: v.color
+            renderer: colorRenderer
+        else
+          # Snippet col
+          that.dataSchema[v.name]["snippet"] = null
+          that.col_headers.push v.name+" snippet"
+          that.columns.push
+            data: v.name+".snippet"
+            color: v.color
+            renderer: colorRenderer
+            type: 'autocomplete'
+            strict: true
+            allowInvalid: false
+            source: snippets_autocomplet_source
+          if v.readout
+            that.dataSchema[v.name]["readouts"] = []
+            for i in [1..that.data.n_read] by 1
+              col_name = v.name + " " + i
+              # Feed schema columns color and type
+              that.col_headers.push col_name
+              that.dataSchema[v.name]["readouts"].push null
+              that.columns.push
+                data: v.name+".readouts."+(i-1).toString()
+                color: v.color
+                renderer: colorRenderer
+        if v.readout
+          # Prefix
+          # Feed schema columns color and type
+          that.col_headers.push "×"
+          that.dataSchema[v.name]["prefix"] = null
+          that.columns.push
+            data: v.name+".prefix"
+            color: v.color
+            renderer: prefixCellRenderer
+            type: 'autocomplete'
+            strict: false
+            allowInvalid: false
+            source: prefixes_autocomplet_source
+            className: "htCenter"
+      )
+      that.dataSchema["_results"] = {}
+      # Error bar chart
+      that.col_headers.push "Chart"
+      that.dataSchema["_chart"] = null
+      that.columns.push
+        data: "_chart"
+        renderer: chartRenderer
+
+      settings = 
+        data: []
+        colHeaders: col_headers
+        startCols: col_headers.length
+        dataSchema: dataSchema
+        columns: columns
+        minSpareRows: 1
+
+        ################################################################################
+        # After change hot function callback
+        ################################################################################
+
+        afterChange: (changes, source) ->
+          if (changes is null) or (source is "set_results") or (source is "snippet_change")
+            return
+          try
+            console.log "Changes:"
+            process_entries(changes)
+          catch e
+            console.log e
+
+
+        ################################################################################
+        # Continue to other hot configs
+        ################################################################################
+
+        #manualColumnResize: true
+        contextMenu: true
+        contextMenu:
+          callback: handsontableContextMenuCallbacks
+          items:
+            row_above:
+              disabled: ->
+                #if first row, disable this option
+                this.getSelected()[0] is 0
+            row_below: {}
+            hsep1: "---------"
+            remove_row: {}
+            hsep2: "---------"
+            plot:
+              name: "Chart"
+            details:
+              name: "Details"
+            permalink:
+              name: "Permalink"
+            run_automation:
+              name: "Automation task"
+            save:
+              name: "Save"
+      return settings
+
+    ################################################################################
+    # Update handsontable range select text when the label is changed on choosen snippets data
+    ################################################################################
+    
+    replace_autocomplete_text = (changes, row) ->
+      that = this
+      this.props_to_verify = _.filter( window.spreadsheetEditor.getEditor("root.model.variables").getValue(), {influence: false} )
+      changes.map (c) ->
+        # Get current labels on handsontable
+        that.props_to_verify.map (p) ->
+          if window.hot.getDataAtRowProp(row, p.name+".snippet") is c.old
+            window.hot.setDataAtRowProp(row, p.name+".snippet", c.new, "snippet_change")
+            window.hot.render()
+
+    ################################################################################
+    # Filter change ocorrences on choosen_snippets editor and call functions to change
+    ################################################################################
+
+    treat_snippet_changes = (changes) ->
+      that = this
+      # Iterate over hot objects
+      hot.getData().map (_, row) ->
+        replace_autocomplete_text(changes, row)
+
+    ################################################################################
+    # Observe snippets and model for changes
+    ################################################################################
+
+    window.SnippetsObserver = () ->
+      that = this
+      this.editor = window.spreadsheetEditor.getEditor('root.choosen_snippets')
+      this.prev_labels = []
+      this.curr_labels = []
+      this.get_labels = () ->
+        that.editor.getValue().map (s) ->
+          s.label
+      this.init = () ->
+        that.curr_labels = that.prev_labels = that.get_labels()
+        # Snippets
+        window.spreadsheetEditor.watch 'root.choosen_snippets', () ->
+          that.prev_labels = that.curr_labels
+          that.curr_labels = that.get_labels()
+          # check difference to detect sort,
+          # when data was sorted, no action is triggered
+          diff = _.difference(that.prev_labels, that.curr_labels)
+          changes = []
+          if diff.length isnt 0
+            changes = diff.map (old_val) ->
+              index_value_changed = _.indexOf(that.prev_labels, old_val)
+              new_val = that.curr_labels[index_value_changed]
+              return {"old": old_val, "new": new_val}
+          treat_snippet_changes(changes)
+
+        # Model
+        window.spreadsheetEditor.watch 'root.model', () ->
+          update_hot_settings()
+
+      this.init()
+
+    ################################################################################
+    # Build editor
+    ################################################################################
+    window.auto_save_handler = undefined
+    window.spreadsheetEditorBuilder = (data) ->
+      # Dont polute db with the text procedure
+      delete data.procedure
+      delete window.mathFormSchema.properties.procedure
+
+      if window.spreadsheetEditor is undefined
+        window.spreadsheetEditor = create_json_editor("#spreadsheet_table_json", window.spreadsheetEntriesSchema)
+        window.spreadsheetEditor.on "ready", () ->
+
+          if not standaloneMode()
+            ################################################################################
+            # Refresh choosen snippets TODO: Clean this, maybe using other aproach, like other json-editor
+            ################################################################################
+
+            # add refresh button
+            #$(".container-choosen_snippets").find(".json-editor-btn-delete")
+            $("[data-schemapath='root.choosen_snippets'").find(".json-editor-btn-delete")
+            .first()
+            .after('<button type="button" class="btn btn-default" id="refresh_asset_snippets"><span class="glyphicon glyphicon-refresh"></span> Asset snippets</button>')
+
+            $("#refresh_asset_snippets").click (e) ->
+              e.preventDefault()
+              snippetsEditor = window.spreadsheetEditor.getEditor("root.choosen_snippets")
+              snippets = snippetsEditor.getValue()
+              for snippet in snippets
+                # When page is load, a hidden element is created holding the
+                # asset_id, model_id and snippet_id of assets_snippets choosen at SERVICE.
+                # This function update the asset snippet case user choose other asset.
+                # It uses the position identifier to select the new choosen asset for the correponding asset_snippet
+                $.get "../../snippets/get_json?id=" + snippet.snippet_id + "&asset_id=" + snippet.asset_id + "&model_id=" + snippet.model_id, (data) ->
+                  data = filter_snippet_data(data)
+                  index = _.findIndex( snippets, {asset_id: data.snippet.asset_id, snippet_id: data.snippet.snippet_id} )
+                  data.snippet.position = snippets[index].position
+                  # Update the editor data
+                  ranges_editor = window.spreadsheetEditor.getEditor( "root.choosen_snippets."+index.toString()+".value.ranges")
+                  # I dont know exactly why, but first seting the node null and than seting the data works, 
+                  # but if I set it directly when I call .getValue() i cant get the updated data
+                  #ranges_editor.setValue(null)
+                  # *UPDATE: I think its solved now, dont need to set null anymore
+                  ranges_editor.setValue(data.snippet.value.ranges)
+                  window.spreadsheetEditor.getEditor( "root.choosen_snippets."+index.toString()+".automation").setValue(data.snippet.automation)
+                  
+
+            ################################################################################
+            # Refresh math model
+            ################################################################################
+
+            # add refresh button
+            #$(".container-model").find(".json-editor-btn-edit")
+            $("[data-schemapath='root.model'").find(".json-editor-btn-edit")
+            .first()
+            .after('<button type="button" class="btn btn-default" id="refresh_math_snippet"><span class="glyphicon glyphicon-refresh"></span> Math snippets</button>')
+
+            $("#refresh_math_snippet").click (e) ->
+              e.preventDefault()
+              if confirm "Do you want to update this spreadsheet to the latest version?"
+                setTimeout (->
+                  $.get "../../snippets/get_json?id=" + window.spreadsheetEditor.getValue().model._id, (data) ->
+                    # update tags
+                    data.snippet.value._tag_list = data.tag_list
+                    model_editor = window.spreadsheetEditor.getEditor('root.model')
+                    model_editor_value = model_editor.getValue()
+                    # Dont allow _id to be overwrite
+                    delete data.snippet.value._id
+                    # Clear data
+                    delete data.snippet.value.procedure
+                    new_model_editor_value = $.extend({}, model_editor_value, data.snippet.value)
+                    model_editor.setValue(new_model_editor_value)
+                    update_hot_settings(new_model_editor_value)
+                ), 100
+
+            
+
+          editor = window.spreadsheetEditor.getEditor("root.model")
+          if (editor is null) or (editor is undefined)
+            # If its first time creating the editor, we need to set data before
+            # and reference to root intead of root.model
+            editor = window.spreadsheetEditor.getEditor("root")
+            value = 
+              model: data
+              choosen_snippets: []
+              #worksheets: []
+          else
+            value = data
+          editor.setValue(value)
+          window.SnippetsObserver()
+
+          ################################################################################
+          # Handsontable
+          ################################################################################    
+          settings = window.entries_hot_settings(data)
+          #console.log settings
+          window.hot = new Handsontable( $("#hot_container")[0], settings )
+          #window.hot.loadData(window.spreadsheetEditor.getEditor("root.worksheet").getValue())
+          window.hot.loadData(JSON.parse($("#spreadsheet_spreadsheet_json").val()))
+
+          # If its on standalone mode
+          if standaloneMode()
+            changes = []
+            hot.getData().map (x, i) ->
+              changes.push [
+                i
+                null
+                null
+                null
+              ]
+              return
+            # Process all data
+            try
+              process_entries(changes)
+            catch e
+              console.log e
+            
+        ################################################################################
+        # Auto save
+        ################################################################################
+        
+        window.spreadsheetEditor.on "change", () ->
+          clearTimeout window.auto_save_handler
+          
+          window.auto_save_handler = setTimeout((->
+            auto_save()
+            return
+          ), 1000)
+
+
+    ################################################################################
+    # Filter data to fit choosen snippets schema
+    ################################################################################
+
+    window.filter_snippet_data = (data) ->
+      data.snippet.label = data.model.name + " " + data.snippet.value.unit + " " + data.snippet.value.kind + " - " + data.asset.identification
+      data.snippet.asset_id = data.asset.id
+      data.snippet.snippet_id = data.snippet.id
+      data.snippet.model_id = data.model.id
+
+      # Set tags
+      data.snippet._tag_list = data.tag_list
+      
+      data.snippet.automation = {}
+      data.snippet.automation.visa_address = data.asset.visa_address
+      code = data.model.code.automation
+      code = code + ("\n\n" + data.snippet.value.automation).replace(/\n/g, "\n\t")
+
+      data.snippet.automation.code = code
+
+      # Manage reclassifications
+      if data.asset.use_reclassification
+        # Reject disabled reclassifications
+        enabled_reclassification_ranges = _.reject data.asset.reclassification, (x) ->
+          x.enabled is false
+
+        # Remove enabled/disabled properties, so they dont appears on choosen snippets
+        enabled_reclass_ranges_omit = enabled_reclassification_ranges.map (x) ->
+          return _.omit(x, 'enabled')
+        # Add reclassification to range, where it exists
+        enabled_reclass_ranges_omit.map (r) ->
+          index = _.findIndex(data.snippet.value.ranges, (x) ->
+            return x._identifier.toString() is r._identifier.toString()
+          )
+          # If range found, add reclassificaions key to proper location
+          if index > -1
+            data.snippet.value.ranges[index].reclassification = r.uncertainties
+
+      # Filter some stuff
+      
+      delete data.snippet.value.automation
+      delete data.model
+      delete data.asset
+      delete data.snippet.id
+      delete data.tag_list
+      delete data.snippet.validated
+      delete data.snippet.created_at
+      delete data.snippet.flavor
+      delete data.snippet.laboratory_id
+      delete data.snippet.updated_at
+      return data
+
+    ################################################################################
+    # Create user interface to choose snippets, when click on the search icon next to tags
+    ################################################################################
+
+    # actiion to search icon for the assets
     $(".search_fields").click (e) ->
       # Set a attribute on clicked element
       # But first, clear all
@@ -394,7 +1206,9 @@ jQuery ->
         $(this).attr("active", false)
       $(this).attr("active", true)
       # Reach tag list
-      tag_list = $(this).parent().prev().val().split(/[\s,]+/).join() # This will trim the tags
+      asset_tags = $(this).parent().prev().val().split(/[\s,]+/) # This will trim the tags
+      math_tags = spreadsheetEditor.getEditor("root.model._tag_list").getValue().split(/[\s,]+/)
+      tag_list = _.uniq(_.sortBy(math_tags.concat(asset_tags))).join()
       # Fill hidden with tags
       $("#pre_tags").val(tag_list)
       # Removes all tags
@@ -407,396 +1221,96 @@ jQuery ->
       snippetDataTable.fnDraw()
       $('#myModal').modal('toggle')
 
-    # Action to submit form
-    autoSave = (cb = false) ->
-      #$("#snippets_tags_filter").tagsinput('removeAll')
-      ht = $('#handsontable').handsontable('getInstance')
-      # If not inicialized, ask user to choose the spreadsheet model
-      if typeof ht is "undefined"
-        # Ensure that the datatable is seted to math model filtering
-        if $.data($("#snippets")[0], "flavor").toString() is "1"
-          flavor = ["2"]
-          $.data($("#snippets")[0], "flavor", flavor )
-          snippetDataTable.fnDraw()
-        $('#myModal').modal('show')
-        return
-      # Get data from dom
-      data = $('.table-json').data("temp-data")
-      # Update it with handsontable data
-      data.table_data = ht.getData()
-      # Updata now with asset-snippets data
-      data.asset_snippets = chosenAssetsEditor.getValue()
-      # Store assets data, it will always be overwitten with fresh data
-      data.assets = assets_json
-      # Store it again, updated
-      $(".table-json").data( "temp-data", data )
-      # Convert to string and store it on the hidden field, 
-      # so rails can save to database
-      $(".table-json").val( JSON.stringify(data) )
-      # Submit the form
-      $(".spreadsheet_feature").submit()
-      # If callback function sent, call it!
-      if cb
-        cb()
 
-    assyncUpdate = (id, i) ->
-      $.get "../../snippets/get_json?id=" + id, (data) ->
-        # Finaly, update the data
-        chosenAssetsEditor.getEditor( "root.snippets."+i.toString()+".value.ranges" ).setValue(data.snippet.value.ranges)
-    # This action is useful to user update the assets on the snippets editor when 
-    # they are changed at the service
-    $("#refresh_snippets").click (e) ->
-      e.preventDefault()
-      snippetsEditor = chosenAssetsEditor.getEditor("root.snippets")
-      snippets = snippetsEditor.getValue()
-      service_assets = $(".asset_json_data")
-      for snippet, i in snippets
-        $(".position_map[value='" + snippet.position + "']").each ->
-          $(snippet).attr( "asset_id", $(this).attr("asset_id") )
-          # Update asset_info
-          chosenAssetsEditor.getEditor( "root.snippets."+i.toString() ).setValue(snippet)
-          assyncUpdate(snippet.snippet_id, i)
-    # Button click      
-    $(".getdata").click (e) ->
-      e.preventDefault()
-      autoSave()
+    ################################################################################
+    # Update handsontable settings
+    ################################################################################
 
-    window.ocpuSend = () ->
-      ht = $('#handsontable').handsontable('getInstance')
-      json = $('.table-json').data("temp-data")
-      # Get handsontable instance
-      # If already defined, get current col headers
-      oldColHeaders = _.keys(json.table_data[0])
-      colHeaders = ht.getColHeader()
-      # Remove unused colHeaders
-      if oldColHeaders.length
-        colHeadersDiff = _.difference oldColHeaders, colHeaders
-        #console.log "Omiting old cols: " + colHeadersDiff
-        json.table_data = json.table_data.map (x) ->
-          _.omit x, colHeadersDiff
-      #console.log json.table_data
-      oc = json.value.output_columns
-      fmt_oper = json.value.format_operations
-      #because identity is in base
-      ocpu.seturl "//public.opencpu.org/ocpu/library/base/R"
-      #arguments
-      mysnippet = new ocpu.Snippet($(".table-json").data( "temp-data").value.script)
-      #perform the request
-      req = ocpu.call("identity",
-        x: mysnippet
-      , (session) ->
-        ocpu.seturl session.loc + "R"
-        req = ocpu.call("main",
-          object: json
-        , (session) ->
-          session.getObject ((result) ->
-            uut_data = do_uut_lookup($(".table-json").data("temp-data"))
-            uut_prefixes = uut_data.uut_prefixes
-            # Map to array of arrays to 
-            # feed handsontable
-            outData = result.data.map (x, ht_line) ->
-              for fmt in fmt_oper
-                # remove + sign at begining of string and convert to Big
-                # Removing the + avoid problems with the Big library
-                num = new Big(x[fmt.output_column].toString().match(/[^\s+].*/)[0])
-                
-                # Scale value with prefix
-                prefix = uut_prefixes[ht_line].trim()
-                k = get_prefix(prefix)
-                num = num.div(k)
-                
-                # Call function and apply string arguments converted to array
-                num = Big.prototype[fmt.operation].apply( num, (fmt.argument).split(",").map (str_arg) -> 
-                  if str_arg.length
-                    # Check if is NOT number
-                    if isNaN(str_arg)
-                      splt_string = str_arg.split(".")
-                      if splt_string.length > 1
-                        col_title = splt_string[0].trim()
-                        # Search by col title
-                        HT_value = x[col_title]
-                        # if undefined, look on json
-                        if HT_value is undefined
-                          HT_value = json.table_data[ht_line][col_title]
-                        # the second slice is the function to be called
-                        return auxFormatingFunctions[splt_string[1].trim()](HT_value)
-                    else
-                      return parseFloat(str_arg)
-                  else
-                    return ""
-                )
-                res = num.toString()
-                x[fmt.output_column] = res
-              oc.map (y) ->
-                return x[y.name]
-            firstOutIndex = ht.propToCol(oc[0].name)
-            ht.populateFromArray(0, firstOutIndex, outData)
-            # Sync details
-            temp_data = $('.table-json').data("temp-data")
-            temp_data.details = result.details
-            $(".table-json").data( "temp-data", temp_data )
-            return
-          ),
-            digits: 10
-          return 
+    window.update_hot_settings = ->
+      if window.hot_settings_update_handler isnt undefined
+        clearTimeout window.hot_settings_update_handler
+
+      window.hot_settings_update_handler = setTimeout (->
+        editor_data = window.spreadsheetEditor.getEditor('root.model').getValue()
+        new_settings = window.entries_hot_settings(editor_data)
+        #old_settings = window.hot.getSettings()
+        #new_settings = $.extend(true, 
+        #  old_settings,
+        #  settings
+        #)
+        
+        delete new_settings.afterChange
+        window.hot.updateSettings new_settings
+        #window.hot.loadData(window.spreadsheetEditor.getEditor("root.worksheet").getValue())
+        window.hot.loadData(JSON.parse($("#spreadsheet_spreadsheet_json").val()))
+        window.hot.render()
+      ), 1000
+
+
+    ################################################################################
+    # Chart function
+    ################################################################################
+
+    window.plot_chart = () ->
+      influence_vars = model_influence_vars()
+
+      # Get results, and set serie name
+      data = hot.getData().map((x) ->
+        obj = x._results
+        serie_keys = []
+        influence_vars.map((v) ->
+          if (x[v].readout isnt null) and (x[v].readout isnt undefined)
+            if (x[v].prefix is undefined) or (x[v].prefix is null)
+              prefix = ''
+            else
+              prefix = x[v].prefix
+            serie_keys.push(v + ': ' + if x[v].readout is undefined then '' else x[v].readout.toString() + if prefix is undefined then '' else ' ' + prefix.toString())
         )
+        obj.serie_name = serie_keys.toString()
+        return obj
       )
-      
-      #if R returns an error, alert the error message
-      req.fail ->
-        alert "Server error: " + req.responseText
+
+      # Reject data without readout
+      data = _.reject(data,  (x) ->
+        return x.uut_readout is undefined
+      )
+
+      # Sort
+      data = _.sortBy(data, (x) ->
+        return x.uut_readout
+      )
+
+      x_key_parser = (x) ->
+        return x
+
+      series = set_chart_series(data, "uut_readout", x_key_parser)
+
+
+      chart_unit = get_chart_unit(data).trim()
+
+      $('#chart_container').highcharts
+        credits: enabled: false
+        exporting: enabled: true
+        chart:
+          type: 'spline'
+          zoomType: 'xy'
+        title: text: $("#spreadsheet_tag_list").val()
+        xAxis:
+          type: 'number'
+          title: text: 'Point'
+          minRange: 1e-12
+        yAxis:
+          title: text: if chart_unit is "" then "" else "error (" + chart_unit + ")"
+        plotOptions: spline: marker: enabled: true
+        tooltip: shared: true
+        series: series
+
+      # Fix chart positioning on bootstrap modal
+      $('#chart').on 'show.bs.modal', ->
+        $('#chart_container').css 'visibility', 'hidden'
         return
-      req.always ->
-        #$("button").removeAttr "disabled"
+      $('#chart').on 'shown.bs.modal', ->
+        $('#chart_container').css 'visibility', 'initial'
+        chart = $('#chart_container').highcharts()
+        chart.reflow()
         return
-      return
-
-    window.buildHandsontable = (data, func_tag_list = false) ->
-      columns = []
-      colHeaders = []
-      dataSchema = {}
-      selectedCell = {}
-      # Build assets-snippets editor, if exists
-      if typeof data.asset_snippets isnt "undefined"
-        chosenAssetsEditor.setValue data.asset_snippets
-
-      # Set color to cols acording to asset defined schema
-      colorRenderer = (instance, td, row, col, prop, value, cellProperties) ->
-        Handsontable.renderers.TextRenderer.apply this, arguments
-        $(td).css background: columns[col]["color"]
-        return
-
-      # Function to add cols to datatable
-      addCol = (headerTxt, color, options = null) ->
-        dataSchema[headerTxt] = null
-        colHeaders.push headerTxt
-        columns.push 
-          data: headerTxt
-          color: color
-          renderer: colorRenderer
-      # Map variable names to replications quantity
-      data.value.variables.map (v) ->
-        # Get the index of col added to hold the snippet autocomplete  
-        colCount = addCol(v.name + " Snippet", v.color, true)
-        # Add the autocomplete
-        col = columns[colCount-1]
-        col.type = 'autocomplete'
-        col.source = (query, process) ->
-          autocomplete_label_list = chosenAssetsEditor.getEditor("root.snippets").getValue().map (s) ->
-            s.label.trim()
-          process autocomplete_label_list
-          return        
-        col.strict = true
-        col.allowInvalid = true
-        # Add cols for input variables, the number of replication defined
-        if v.kind.indexOf('Invisible') < 0
-          i = 0
-          while i < data.value.replications
-            i++
-            colHeader = v.name + " " + i.toString()
-            addCol(colHeader, v.color, { type: 'autocomplete', source: [] } )
-        return
-      # Set influence quantities cols
-      data.value.influence_quantities.map (iq) ->
-        addCol(iq.name, iq.color, true)
-      data.value.output_columns.map (iq) ->
-        addCol(iq.name, iq.color, true)
-      # build table
-      $container = $("#handsontable")
-      #Handsontable.Dom.addClass($container, 'table')
-      $container.handsontable
-        data: data.table_data
-        dataSchema: dataSchema
-        colHeaders: colHeaders
-        autoColumnSize: true
-        columns: columns
-        contextMenu: true
-        contextMenu:
-          callback: (key, options) ->
-            if key is "plot"
-              chart_data = []
-              ht = $('#handsontable').handsontable('getInstance')
-              selection = ht.getSelected()
-              chart_data = ht.getData()
-
-              # Map units for each row uut
-              uut_units = $('.table-json').data('temp-data').table_data.map((x) ->
-                x._unit
-              )
-              # UUT targed col name
-              point_value_key = $('.table-json').data("temp-data").value.uut_col.output_column
-              # Remove the last undefined row
-              uut_units.splice(-1,1)
-
-              # Apply filter to data, alow only valid entries
-              chart_data = _.filter(chart_data, (a) -> a.U isnt null)
-
-              chart_data = sortByKey(chart_data, "readout")
-
-              # Define if label for plot is a uniq unit, or if its mixed
-              if _.uniq(uut_units).length is 1
-                plot_unit = uut_units[0].toString()
-              else
-                plot_unit = ""
-              # Get influence quantities to create labels for chart
-              infl = $(".table-json").data("temp-data").value.influence_quantities.map((x) ->
-                x.name
-              )
-              # Join inflence quantities from each row to a array of strings
-              infl_join = chart_data.map((x) ->
-                infl.map (y) ->
-                  x[y]
-              ).map (x) ->
-                x.toString()
-              infl_join_uniq = _.uniq(infl_join)
-
-              # Map to create series for points and errors
-              series_points = infl_join_uniq.map (x) ->
-                name: x
-                type: "spline"
-                data: []
-                tooltip:
-                  pointFormat: "<span style=\"font-weight: bold; color: {series.color}\">{series.name}</span>, error: <b>{point.y}</b>, "                
-              series_error = infl_join_uniq.map (x) ->
-                name: x + " error"
-                type: "errorbar"
-                data: []
-                tooltip:
-                  pointFormat: "U: <b>{point.low}</b> to <b>{point.high}</b><br/>"
-              series = []
-
-              series = $.map(series_points, (v, i) ->
-                [
-                  v
-                  series_error[i]
-                ]
-              )
-              # Feed series object with handsontable data
-              for infl_item, infl_i in infl_join
-                prefix_val = get_prefix(chart_data[infl_i]._prefix)
-                data_i = infl_join_uniq.indexOf(infl_item)
-                error = new Big(chart_data[infl_i].e).times(prefix_val)
-                U = new Big(chart_data[infl_i].U).times(prefix_val)
-                UUT_readout = new Big(chart_data[infl_i][point_value_key]).times(prefix_val)
-                lower_limit = parseFloat(error.minus(U))
-                upper_limit = parseFloat(error.plus(U))
-                # Point
-                series[data_i*2].data.push([parseFloat(UUT_readout), parseFloat(error)])
-                # Error bars
-                series[data_i*2+1].data.push([parseFloat(UUT_readout), lower_limit, upper_limit])
-                # individual colors
-                color = Highcharts.getOptions().colors[data_i]
-                series[data_i*2].color = color
-                series[data_i*2+1].color = color
-              $("#chart-container").html("")
-              # Show modal
-              $('#chartModal').modal('toggle')
-              $("#chart-container").highcharts
-                credits:
-                  enabled: false
-                chart:
-                  zoomType: "xy"
-                title:
-                  text: "Error vs Calibration Point"
-                subtitle:
-                  text: "Series for <b> " + infl.toString() + "</b> influence quantities:"
-                  floating: true,
-                  align: 'center',
-                  x: -10,
-                  verticalAlign: 'bottom',
-                  y: -20
-                yAxis: [ # Primary yAxis
-                  labels:
-                    format: "{value} " + plot_unit
-                    style:
-                      color: Highcharts.getOptions().colors[1]
-                  title:
-                    text: "Error"
-                    style:
-                      color: Highcharts.getOptions().colors[1]
-                ]
-                tooltip:
-                  headerFormat: "{point.key} " + plot_unit + "<br/>",
-                  valueSuffix: " " + plot_unit
-                  shared: true
-                series: series
-            if key is "save"
-              # Save spreadsheet
-              autoSave()
-            if key is "calc"
-              # Save spreadsheet and send ocpuSend function as callback
-              autoSave( ocpuSend )
-            if key is "update"
-              if confirm "Do you want to update this spreadsheet to the latest version?"
-                setTimeout (->
-                  $.get "../../snippets/get_json?id=" + $('.table-json').data("temp-data").id, (data) ->
-                    buildHandsontable(data.snippet, data.tag_list)
-                ), 100
-            if key is "details"
-              row_detail = $('.table-json').data("temp-data").details[selectedCell.row]
-              if typeof row_detail isnt "undefined"
-                details_body = $('#detailsModal').find(".modal-body")
-                details_body.html("")
-                for detail, i in row_detail
-                  # Check if details is corrected formated
-                  if (typeof detail.type isnt "undefined") and (typeof detail.value isnt "undefined")
-                    content = ""
-                    if detail.type[0] is "raw"
-                      content = detail.value[0]
-                    if detail.type[0] is "table"
-                      content = '<table class="table table-striped table-bordered" cellspacing="0" width="100%"></table>'
-                    new_div = $('<div/>',
-                        id: 'detail_' + i,
-                        #className: 'foobar',
-                        html: content
-                    )
-                    details_body.append(new_div)
-                    # Init datatables if is table
-                    if detail.type[0] is "table"
-                      colnames = []
-                      # Get colnames from the key of json object
-                      colnames = $.map(detail.value[0], (k, i) ->
-                        return {"title": i}
-                      )
-                      # Map values to array
-                      data_set = detail.value.map (x) ->
-                        $.map x, (v, i) -> [v]
-                      $(new_div).find("table").dataTable
-                        "data": data_set
-                        "columns": colnames
-                # Show modal
-                $('#detailsModal').modal('toggle')
-            return
-          items:
-            row_above:
-              disabled: ->
-                #if first row, disable this option
-                $("#handsontable").handsontable("getSelected")[0] is 0
-            row_below: {}
-            hsep1: "---------"
-            remove_row: {}
-            hsep2: "---------"
-            plot:
-              name: "Chart"            
-            details:
-              name: "Details"
-            update:
-              name: "Update"
-            save:
-              name: "Save"
-            calc:
-              name: "Calculate"
-        afterChange: (changes, source) ->
-          if source isnt "loadData"
-            timeout_sync()
-            timeout_save()
-        afterOnCellMouseDown: (event, coords, TD) ->
-          selectedCell = coords
-        minSpareRows: 1
-      # Set the functionality tag to data
-      if func_tag_list
-        data.func_tag_list = func_tag_list
-      # Save data to table_json hidden input. Maybe change this to use localstorage on the future?
-      $(".table-json").data( "temp-data", data )
-      syncHTSnippets($container.handsontable('getInstance'))
-    # Listen for changes on editor, and labels to be used

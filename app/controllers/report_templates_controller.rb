@@ -24,7 +24,16 @@ class ReportTemplatesController < ApplicationController
 
   # GET /report_templates/new
   def new
-    @report_template = ReportTemplate.new
+    @report_template = ReportTemplate.new()
+    respond_to do |format|
+      if @report_template.save
+        format.html { redirect_to edit_report_template_path(@report_template.id), notice: 'Report Template was successfully created.' }
+        format.json { render action: 'edit', status: :created, location: @report_template }
+      else
+        format.html { render action: 'new' }
+        format.json { render json: @report_template.errors, status: :unprocessable_entity }
+      end
+    end
   end
 
   # GET /report_templates/1/edit
@@ -52,8 +61,9 @@ class ReportTemplatesController < ApplicationController
   def update
     respond_to do |format|
       if @report_template.update(report_template_params)
-        format.html { redirect_to edit_report_template_path(@report_template), notice: 'Report template was successfully updated.' }
-        format.json { head :no_content }
+        #format.html { redirect_to edit_report_template_path(@report_template), notice: 'Report template was successfully updated.' }
+        #format.json { head :no_content }
+        format.js { render :js=>'console.log("saved!");' }
       else
         format.html { render action: 'edit' }
         format.json { render json: @report_template.errors, status: :unprocessable_entity }

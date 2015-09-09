@@ -1,6 +1,6 @@
 class User < ActiveRecord::Base
   #attr_reader :raw_invitation_token
-  include TheRole::User
+  include TheRole::Api::User
   belongs_to :laboratory
   belongs_to :company
   has_many :services

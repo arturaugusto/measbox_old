@@ -1,8 +1,1 @@
-<%= wicked_pdf_stylesheet_link_tag "application" %>
-<style type="text/css">
-	table { page-break-inside: avoid }
-</style>
-<meta charset="utf-8" />
-<div class="froala-view">
-	<%= raw @report.value.html_safe  %>
-</div>
+<%= render :partial => 'report' %>

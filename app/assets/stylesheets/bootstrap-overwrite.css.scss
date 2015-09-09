@@ -7,6 +7,8 @@
 	-moz-box-sizing: initial;
 	box-sizing: initial;
 }
+
+
 .hello_intro{
 	margin-top: -10px;
     margin-bottom: 0px;
@@ -20,4 +22,24 @@
 }
 
 
-@import "bootstrap/theme";
+.results_wraper .dataTables_wrapper {
+    display: inline-table;
+}
+
+.markdown_textarea {
+  display: none;
+  border:1px solid #999999;
+  width: 100%;
+  font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
+}
+
+
+.chart-modal .modal-dialog {
+  width: 80%;
+  padding: 0;
+}
+
+.chart-modal .modal-content {
+  
+}
+//@import "bootstrap/theme";

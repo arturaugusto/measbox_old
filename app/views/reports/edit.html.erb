@@ -1,4 +1,9 @@
+<%= mathjax_tag %>
 <%- model_class = Report -%>
+<%= link_to service_path(@report.service, :tab => 'reports'), :class => 'btn btn-default' do -%>
+  <span class="glyphicon glyphicon-list-alt"></span>
+  Back
+<%- end -%>
 <div class="page-header">
   <h1><%=t '.title', :default => [:'helpers.titles.edit', 'Edit %{model}'], :model => model_class.model_name.human.titleize %></h1>
 </div>

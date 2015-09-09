@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link href="/assets/nv.d3.min.css?body=1" rel="stylesheet" type="text/css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
+  <script src="/assets/nv.d3.min.js?body=1"></script>
+  <style>
+    text {
+      font: 12px sans-serif;
+    }
+    svg {
+      display: block;
+    }
+    html, body, #chart1, svg {
+      margin: 0px;
+      padding: 0px;
+      height: 100%;
+      width: 100%;
+    }
+    
+    body {
+      background-color: #FFFFFF;
+    }
+
+  g.nv-group path {
+    stroke-opacity: 0.5;
+    stroke-width: 5px;
+  }
+
+  </style>
+</head>
+<body>
+
+<div id="chart1" class="with-3d-shadow with-transitions">
+  <svg></svg>
+</div>
+
+<script>
+
+  var update = function(data){
+    d3.select('#chart1 svg')
+      .datum(data)
+      .call(chart);
+    t = d3.select('#chart1 svg').selectAll(".nv-groups")
+    
+    console.log(chart.yAxis.scale()(4e-3))
+
+    /*
+    t.append('line')
+    .attr({
+        x1: chart.xAxis.scale()(0),
+        y1: chart.yAxis.scale()(10),
+        x2: chart.xAxis.scale()(3),
+        y2: chart.yAxis.scale()(10)
+    })
+    .style("stroke", "#000");
+    nv.utils.windowResize(chart.update);*/
+
+
+
+    chart.dispatch.on('stateChange', function(e) { ('New State:', JSON.stringify(e)); });
+    return chart;
+
+  }
+
+  // register our custom symbols to nvd3
+  // make sure your path is valid given any size because size scales if the chart scales.
+  nv.utils.symbolMap.set('line', function(size) {
+    //var size = Math.sqrt(300)
+    return 'M' + (-size*4) + ',' + (size/2) +
+           'L' + size*4 + ',' + (size/2)
+  });
+
+  nv.utils.symbolMap.set('thin-x', function(size) {
+      //size = 10
+      //size = chart.yAxis.scale()(10)
+      return 'M' + (-size/2) + ',' + (-size/2) +
+              'l' + size + ',' + size +
+              'm0,' + -(size) +
+              'l' + (-size) + ',' + size;
+  });
+
+  // create the chart
+  var chart;
+  nv.addGraph(function() {
+    chart = nv.models.scatterChart()
+      //.showDistX(true)
+      //.showDistY(true)
+      .showXAxis(false)
+      .useVoronoi(false)
+      //.color(d3.scale.category10().range())
+      .duration(300)
+    ;
+    chart.dispatch.on('renderEnd', function(){
+      console.log('render complete');
+    });
+    //chart.xAxis.tickFormat(d3.format('0.3e'));
+    chart.yAxis.tickFormat(d3.format('0.3e'));
+
+  update([])
+    return 0;
+  });
+
+</script>
+</body>
+</html>

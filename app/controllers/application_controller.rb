@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
 	include TheRole::Controller
+	#include TheRole::Api::User
 	#before_filter :configure_permitted_parameters, if: :devise_controller?
 
 	#before_filter :configure_permitted_parameters, if: :devise_controller?

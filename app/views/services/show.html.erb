@@ -16,18 +16,6 @@
   <li class="<%= 'active' if params[:tab] == 'reports' %>"><a href="#reports" data-toggle="tab">Reports</a></li> 
 </ul>
 <div class="tab-content">
-  <!--
-  <div id="service" class="tab-pane <%= 'active' if params[:tab] == 'service' or (params[:tab] == nil) %>">
-    <dl class="dl-horizontal">
-      <br>
-      <dt><strong><%= model_class.human_attribute_name(:details) %>:</strong></dt>
-      <% @details_lines.each do |d| %>
-        <dd><%= d %></dd>
-      <% end %>
-    </dl>
-    
-  </div>
-  -->
   <div id="spreadsheets" class="tab-pane <%= 'active' if params[:tab] == 'spreadsheets' or (params[:tab] == nil) %>">
     <%- model_class = Spreadsheet -%>
     <br>
@@ -35,7 +23,7 @@
       <thead>
         <tr>
           <th></th>
-          <th><%= model_class.human_attribute_name(:description) %></th>
+          <!-- <th><%= model_class.human_attribute_name(:description) %></th> -->
           <th>Tags</th>
           <th><%= model_class.human_attribute_name(:created_at) %></th>
           <th><%=t '.actions', :default => t("helpers.actions") %></th>
@@ -45,12 +33,12 @@
         <% @spreadsheets.each do |spreadsheet| %>
           <tr data-id="<%= spreadsheet.id %>">
             <td class="my-handle"><span class="fa fa-arrows-v" aria-hidden="true"></span></td>
-            <td><%= link_to spreadsheet.description.to_s, edit_spreadsheet_path(spreadsheet) %></td>
+            <!-- <td><%= link_to spreadsheet.description.to_s, edit_spreadsheet_path(spreadsheet), :data => { :no_turbolink => true } %></td> -->
             <td><%= spreadsheet.tag_list %></td>
             <td><%= spreadsheet.created_at %></td>
             <td>
-              <%= link_to t('.edit', :default => t("helpers.links.edit")),
-                          edit_spreadsheet_path(spreadsheet), :class => 'btn btn-default btn-xs' %>
+              <%= link_to t('.edit', :default => t("helpers.links.edit") ),
+                          edit_spreadsheet_path(spreadsheet), :class => 'btn btn-default btn-xs', :data => { :no_turbolink => true } %>
               <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
                           spreadsheet_path(spreadsheet),
                           :method => :delete,

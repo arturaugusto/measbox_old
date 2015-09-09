@@ -1,16 +1,17 @@
 GIT
   remote: git://github.com/Nerian/bootstrap-datepicker-rails.git
-  revision: ce35ce0abb21ddd78154936905ab547446b3539d
+  revision: 486f26e0c4cbbc6e55a1d8a477a550f5a6594a8d
   specs:
-    bootstrap-datepicker-rails (1.3.1.1)
+    bootstrap-datepicker-rails (1.4.0)
       railties (>= 3.0)
 
 GIT
-  remote: git://github.com/arturaugusto/the_role_multi_tenancy.git
-  revision: 3792b897f539ca148629d9c3b3120942711e1ca1
+  remote: git://github.com/arturaugusto/the_role_api.git
+  revision: c39419738e484db283d1b32aeed15c4d9b1c79c0
   specs:
-    the_role (2.5.4)
-      rails (>= 3, < 5)
+    the_role_api (3.0.3)
+      multi_json
+      rails (>= 3.2, < 5)
       the_string_to_slug (~> 1.2)
 
 GIT
@@ -25,37 +26,46 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    actionmailer (4.1.0)
-      actionpack (= 4.1.0)
-      actionview (= 4.1.0)
-      mail (~> 2.5.4)
-    actionpack (4.1.0)
-      actionview (= 4.1.0)
-      activesupport (= 4.1.0)
-      rack (~> 1.5.2)
+    actionmailer (4.2.3)
+      actionpack (= 4.2.3)
+      actionview (= 4.2.3)
+      activejob (= 4.2.3)
+      mail (~> 2.5, >= 2.5.4)
+      rails-dom-testing (~> 1.0, >= 1.0.5)
+    actionpack (4.2.3)
+      actionview (= 4.2.3)
+      activesupport (= 4.2.3)
+      rack (~> 1.6)
       rack-test (~> 0.6.2)
-    actionview (4.1.0)
-      activesupport (= 4.1.0)
+      rails-dom-testing (~> 1.0, >= 1.0.5)
+      rails-html-sanitizer (~> 1.0, >= 1.0.2)
+    actionview (4.2.3)
+      activesupport (= 4.2.3)
       builder (~> 3.1)
       erubis (~> 2.7.0)
-    activemodel (4.1.0)
-      activesupport (= 4.1.0)
+      rails-dom-testing (~> 1.0, >= 1.0.5)
+      rails-html-sanitizer (~> 1.0, >= 1.0.2)
+    activejob (4.2.3)
+      activesupport (= 4.2.3)
+      globalid (>= 0.3.0)
+    activemodel (4.2.3)
+      activesupport (= 4.2.3)
       builder (~> 3.1)
-    activerecord (4.1.0)
-      activemodel (= 4.1.0)
-      activesupport (= 4.1.0)
-      arel (~> 5.0.0)
-    activesupport (4.1.0)
-      i18n (~> 0.6, >= 0.6.9)
+    activerecord (4.2.3)
+      activemodel (= 4.2.3)
+      activesupport (= 4.2.3)
+      arel (~> 6.0)
+    activesupport (4.2.3)
+      i18n (~> 0.7)
       json (~> 1.7, >= 1.7.7)
       minitest (~> 5.1)
-      thread_safe (~> 0.1)
+      thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
-    acts-as-taggable-on (3.4.4)
+    acts-as-taggable-on (3.5.0)
       activerecord (>= 3.2, < 5)
-    acts_as_list (0.6.0)
+    acts_as_list (0.7.2)
       activerecord (>= 3.0)
-    arel (5.0.1.20140414130214)
+    arel (6.0.3)
     bcrypt (3.1.10)
     bootstrap-generators (3.1.1.3)
       railties (>= 3.1.0)
@@ -67,11 +77,11 @@ GEM
     coffee-rails (4.0.1)
       coffee-script (>= 2.2.0)
       railties (>= 4.0.0, < 5.0)
-    coffee-script (2.3.0)
+    coffee-script (2.4.1)
       coffee-script-source
       execjs
-    coffee-script-source (1.9.1)
-    devise (3.4.1)
+    coffee-script-source (1.9.1.1)
+    devise (3.5.2)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
       railties (>= 3.2.6, < 5)
@@ -82,11 +92,11 @@ GEM
       actionmailer (>= 3.2.6, < 5)
       devise (>= 3.2.0)
     erubis (2.7.0)
-    execjs (2.3.0)
-    font-awesome-sass (4.3.1)
+    execjs (2.6.0)
+    font-awesome-sass (4.3.2.1)
       sass (~> 3.2)
-    haml (4.0.6)
-      tilt
+    globalid (0.3.6)
+      activesupport (>= 4.1.0)
     hike (1.2.3)
     i18n (0.7.0)
     jbuilder (1.0.2)
@@ -96,39 +106,53 @@ GEM
       jquery-rails
       railties (>= 3.1)
       sass-rails
-    jquery-rails (3.1.2)
-      railties (>= 3.0, < 5.0)
+    jquery-rails (4.0.4)
+      rails-dom-testing (~> 1.0)
+      railties (>= 4.2.0)
       thor (>= 0.14, < 2.0)
     jquery-turbolinks (2.1.0)
       railties (>= 3.1.0)
       turbolinks
-    json (1.8.2)
-    libv8 (3.16.14.7)
-    mail (2.5.4)
-      mime-types (~> 1.16)
-      treetop (~> 1.4.8)
-    mime-types (1.25.1)
-    minitest (5.5.1)
-    multi_json (1.10.1)
+    json (1.8.3)
+    libv8 (3.16.14.11)
+    loofah (2.0.2)
+      nokogiri (>= 1.5.9)
+    mail (2.6.3)
+      mime-types (>= 1.16, < 3)
+    mathjax-rails (2.5.1)
+      railties (>= 3.0)
+    mime-types (2.6.1)
+    mini_portile (0.6.2)
+    minitest (5.8.0)
+    multi_json (1.11.2)
     mustache (0.99.4)
+    nokogiri (1.6.6.2)
+      mini_portile (~> 0.6.0)
     orm_adapter (0.5.0)
-    pg (0.18.1)
-    polyglot (0.3.5)
-    puma (2.11.1)
-      rack (>= 1.1, < 2.0)
-    rack (1.5.2)
+    pg (0.18.2)
+    puma (2.13.1)
+    rack (1.6.4)
     rack-test (0.6.3)
       rack (>= 1.0)
-    rails (4.1.0)
-      actionmailer (= 4.1.0)
-      actionpack (= 4.1.0)
-      actionview (= 4.1.0)
-      activemodel (= 4.1.0)
-      activerecord (= 4.1.0)
-      activesupport (= 4.1.0)
+    rails (4.2.3)
+      actionmailer (= 4.2.3)
+      actionpack (= 4.2.3)
+      actionview (= 4.2.3)
+      activejob (= 4.2.3)
+      activemodel (= 4.2.3)
+      activerecord (= 4.2.3)
+      activesupport (= 4.2.3)
       bundler (>= 1.3.0, < 2.0)
-      railties (= 4.1.0)
-      sprockets-rails (~> 2.0)
+      railties (= 4.2.3)
+      sprockets-rails
+    rails-deprecated_sanitizer (1.0.3)
+      activesupport (>= 4.2.0.alpha)
+    rails-dom-testing (1.0.7)
+      activesupport (>= 4.2.0.beta, < 5.0)
+      nokogiri (~> 1.6.0)
+      rails-deprecated_sanitizer (>= 1.0.1)
+    rails-html-sanitizer (1.0.2)
+      loofah (~> 2.0)
     rails-i18n (4.0.4)
       i18n (~> 0.6)
       railties (~> 4.0)
@@ -137,18 +161,18 @@ GEM
       rails_stdout_logging
     rails_serve_static_assets (0.0.4)
     rails_stdout_logging (0.0.3)
-    railties (4.1.0)
-      actionpack (= 4.1.0)
-      activesupport (= 4.1.0)
+    railties (4.2.3)
+      actionpack (= 4.2.3)
+      activesupport (= 4.2.3)
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     rake (10.4.2)
     rdoc (4.2.0)
       json (~> 1.4)
-    recaptcha (0.3.6)
-    ref (1.0.5)
-    responders (1.1.2)
-      railties (>= 3.2, < 4.2)
+    recaptcha (0.4.0)
+    ref (2.0.0)
+    responders (2.1.0)
+      railties (>= 4.2.0, < 5)
     sass (3.2.19)
     sass-rails (4.0.5)
       railties (>= 4.0.0, < 5.0)
@@ -158,32 +182,26 @@ GEM
     sdoc (0.4.1)
       json (~> 1.7, >= 1.7.7)
       rdoc (~> 4.0)
-    simple_form (3.0.3)
+    simple_form (3.0.4)
       actionpack (~> 4.0)
       activemodel (~> 4.0)
-    sprockets (2.12.3)
+    sprockets (2.12.4)
       hike (~> 1.2)
       multi_json (~> 1.0)
       rack (~> 1.0)
       tilt (~> 1.1, != 1.3.0)
-    sprockets-rails (2.2.4)
+    sprockets-rails (2.3.2)
       actionpack (>= 3.0)
       activesupport (>= 3.0)
       sprockets (>= 2.8, < 4.0)
-    the_role_bootstrap3_ui (1.1)
-      haml
-      rails (>= 3, < 5)
     the_string_to_slug (1.2)
       rails-i18n (~> 4.0.0.pre)
-    therubyracer (0.12.1)
+    therubyracer (0.12.2)
       libv8 (~> 3.16.14.0)
       ref
     thor (0.19.1)
-    thread_safe (0.3.4)
+    thread_safe (0.3.5)
     tilt (1.4.1)
-    treetop (1.4.15)
-      polyglot
-      polyglot (>= 0.3.1)
     turbolinks (2.5.3)
       coffee-rails
     tzinfo (1.2.2)
@@ -191,7 +209,6 @@ GEM
     uglifier (2.7.1)
       execjs (>= 0.3.0)
       json (>= 1.8.0)
-    underscore-rails (1.7.0)
     warden (1.2.3)
       rack (>= 1.0)
     wicked_pdf (0.11.0)
@@ -199,14 +216,15 @@ GEM
     will_paginate (3.0.7)
     will_paginate-bootstrap (1.0.1)
       will_paginate (>= 3.0.3)
-    wkhtmltopdf-binary (0.9.9.3)
+    wkhtmltopdf-heroku (2.12.2.4)
+    wkhtmltopdf-installer (0.12.2.1.3)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   activerecord-session_store!
-  acts-as-taggable-on (~> 3.4.2)
+  acts-as-taggable-on (~> 3.5.0)
   acts_as_list
   bootstrap-datepicker-rails!
   bootstrap-generators (~> 3.1.1)
@@ -220,21 +238,24 @@ DEPENDENCIES
   jquery-datatables-rails (~> 3.1.1)
   jquery-rails
   jquery-turbolinks
+  mathjax-rails
   mustache (= 0.99.4)
   pg
   puma
-  rails (= 4.1.0)
+  rails (= 4.2.3)
   rails_12factor
   recaptcha
   sass-rails (~> 4.0.0)
   sdoc
   simple_form (~> 3.0.2)
-  the_role (= 2.5.4)!
-  the_role_bootstrap3_ui (= 1.1)
+  the_role_api (~> 3.0)!
   therubyracer
   turbolinks
   uglifier (>= 1.3.0)
-  underscore-rails
   wicked_pdf
   will_paginate-bootstrap
-  wkhtmltopdf-binary
+  wkhtmltopdf-heroku
+  wkhtmltopdf-installer
+
+BUNDLED WITH
+   1.10.5

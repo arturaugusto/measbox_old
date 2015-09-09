@@ -13,7 +13,10 @@ MeasWeb::Application.routes.draw do
   end
 
   resources :spreadsheets do
-    collection { post :sort }
+    collection do
+      post :sort
+      get :get_tendency
+    end
   end
 
   resources :manufacturers
@@ -78,6 +81,9 @@ MeasWeb::Application.routes.draw do
     end
   end    
   match '/' => "laboratories#new", via: [:get, :post, :put, :patch, :delete]
+
+  mathjax 'mathjax'
+  
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

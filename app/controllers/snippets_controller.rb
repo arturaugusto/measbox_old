@@ -5,7 +5,19 @@ class SnippetsController < ApplicationController
 
   def get_json
     @snippet = Snippet.find(params[:id])
-    render json: { snippet: @snippet, tag_list: @snippet.functionality_list.to_s }
+    if params[:model_id] then
+      @model = Model.includes(:manufacturer).where(:id => params[:model_id]).first
+    else
+      @model = {}
+    end
+
+    if params[:asset_id] then
+      @asset = Asset.find(params[:asset_id])
+    else
+      @asset = {}
+    end
+
+    render json: { snippet: @snippet, tag_list: (@snippet.functionality_list + @snippet.model_list).to_s, model: @model.as_json(:include => :manufacturer), asset: @asset }
   end
 
   # GET /snippets/autocomplete
@@ -127,6 +139,6 @@ class SnippetsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def snippet_params
-      params.require(:snippet).permit(:flavor, :value, :model_list, :functionality_list, :tags, :id, :validated)
+      params.require(:snippet).permit(:flavor, :value, :model_list, :functionality_list, :tags, :id, :validated, :model_id)
     end
 end

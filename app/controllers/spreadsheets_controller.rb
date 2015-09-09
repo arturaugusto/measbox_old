@@ -1,16 +1,28 @@
 class SpreadsheetsController < ApplicationController
-  before_filter :authenticate_user!
-  before_action :role_required, only: [:create, :edit, :index]
+  before_filter :authenticate_user!, except: [:index]
+  before_action :role_required, only: [:create, :edit]
   before_action :set_spreadsheet, only: [:show, :edit, :update, :destroy, :cant_manage]
 
   def autocomplete
     render json: Snippet.find(:flavor => 1).tagged_with(params[:tags])
   end
 
+  def get_tendency
+    @spreadsheets = Spreadsheet.where('spreadsheet_json @> ?', [{:_range_id => (params[:_range_id]).to_i, :_uut_id => params[:_uut_id]}].to_json )
+    #SELECT * FROM spreadsheets WHERE spreadsheet_json @> '[{"_range_id":1440247768538, "_uut_id":"5407f3ed-4505-47dc-bf65-865bad15cd28"}]';
+    @tendency = []
+    @spreadsheets.each do |s|
+
+      s[:spreadsheet_json].map{ |r| if not r["_results"].empty? then @tendency << {:calibration_date => s.service.calibration_date, :_results => r["_results"]} end }
+    end
+    render :json => @tendency
+  end
+
   # GET /spreadsheets
   # GET /spreadsheets.json
   def index
-    @spreadsheets = Spreadsheet.all
+    #@spreadsheet = Spreadsheet.new()
+    #@spreadsheets = Spreadsheet.all
   end
 
   # GET /spreadsheets/1
@@ -120,6 +132,6 @@ class SpreadsheetsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def spreadsheet_params
-      params.require(:spreadsheet).permit(:id, :description, :mathematical_model, :table_json, :service_id, :position, :tag_list)
+      params.require(:spreadsheet).permit(:id, :description, :mathematical_model, :table_json, :service_id, :position, :tag_list, :spreadsheet_json)
     end
 end

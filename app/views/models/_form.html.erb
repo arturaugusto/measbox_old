@@ -2,13 +2,14 @@
   <%= f.error_notification %>
 
   <div class="form-inputs">
-    <%= f.input :model_list, label: 'Model tags' %>  
+    <%= f.input :model_list, label: 'Model tags', input_html: { value: @model.model_list.join(",") } %>  
     <%= f.input :name, input_html: { class: 'form-control' } %>
     
     <%= render "shared/modal_choose_value", f: f, :association => :manufacturer, :cols => [:name, :created_at] , :value => (@model.manufacturer.nil? ? "Choose a manufacturer..." : @model.manufacturer.name) %>
     
     <%= render "shared/modal_choose_value", f: f, :association => :kind, :cols => [:name, :created_at] , :value => (@model.kind.nil? ? "Choose a type of instrument..." : @model.kind.name) %>    
 
+    <%= f.input :code, as: :text, label: false, input_html: { value: @model.code.to_json } %>
   </div>
   <br>
   <div class="form-actions">

@@ -9,6 +9,7 @@ class AssetsController < ApplicationController
     render :json => @asset, :include => {:model => {:only => :name, :include => [{:kind => {:only => :name} }, {:manufacturer => {:only => :name} }] } }
   end
 
+
   # GET /assets
   # GET /assets.json
   def index
@@ -31,6 +32,10 @@ class AssetsController < ApplicationController
 
   # GET /assets/1/edit
   def edit
+    @avaliable_ranges = @asset.model.nil? ? nil : Snippet.tagged_with(@asset.model.models[0].name, :on => :models)
+    #@ranges = Snippet.tagged_with([params[:tag]], :wild => true, :any => true)
+
+
   end
 
   # POST /assets
@@ -81,6 +86,6 @@ class AssetsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def asset_params
-      params.require(:asset).permit(:serial, :company_id, :identification, :certificate, :calibration_date, :due_date, :visa_address, :model_id)
+      params.require(:asset).permit(:serial, :company_id, :identification, :certificate, :calibration_date, :due_date, :visa_address, :model_id, :reclassification, :use_reclassification, :avaliable)
     end
 end

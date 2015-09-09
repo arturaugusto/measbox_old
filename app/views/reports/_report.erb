@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <style type="text/css">
+      tr {
+        page-break-inside: avoid !important;
+      }
+    </style>
+    <%= wicked_pdf_stylesheet_link_tag "application" %>  
+    <%= wicked_pdf_stylesheet_link_tag "MathJax_fonts" %>  
+    <style type="text/css">
+      <%= raw @laboratory.custom_forms['styles'].html_safe %>
+    </style>
+  </head>
+  <body>
+    <div id="report_value_html" class="report_view">
+      <%= @report.value_html.html_safe %>
+    </div>
+  </body>
+</html>
+
+

@@ -10,9 +10,8 @@
       <div class="form-inputs">
     <%= f.input :description, input_html: { class: 'form-control' } %>
   </div>
-  <div id="editor_holder" class="roles_feature"></div>
   <div class="form-inputs">
-    <%= f.hidden_field :the_role %>
+    <%= f.input :the_role, as: :text, input_html: { value: @role.the_role.to_json } %>
   </div>  
   <br>
   <div class="form-actions">

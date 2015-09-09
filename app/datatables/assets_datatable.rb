@@ -19,7 +19,7 @@ private
   def data
     assets.map do |asset|
       [
-        link_to(asset.identification.length == 0 ? "Undentified" : asset.identification, edit_asset_path(asset), :tab => 'asset', :class => 'add_asset_fields', :data => {:id => asset.id } ),
+        link_to( (asset.identification.nil? or asset.identification.length == 0) ? "Undentified" : asset.identification, edit_asset_path(asset), :tab => 'asset', :class => 'add_asset_fields', :data => {:id => asset.id } ),
         asset.serial,
         asset.certificate,
         asset.calibration_date.nil? ? "" : asset.calibration_date.strftime("%B %e, %Y"),

@@ -1,13 +1,13 @@
-<%= simple_form_for @laboratory, :html => { :role => 'form' } do |f| %>
+<%= simple_form_for @laboratory, :remote => true, :html => { :role => 'form', :class => 'laboratory_feature' } do |f| %>
 	<div class="form-group">
 	  <%= f.input :name, input_html: { class: 'form-control' } %>
 	</div>
 	<div class="form-group">  
 	  <%= f.input :subdomain, input_html: { class: 'form-control'} %>
 	</div>
-    <%= f.input :custom_forms, as: :hidden %>
-    <div class="custom_forms_holder"></div>
+    <%= f.input :custom_forms, as: :text, input_html: { value: @laboratory.custom_forms.to_json } %>
 
-  <%= f.button :submit, :class => 'btn btn-primary' %>
+  <%#= f.button :submit, :class => 'btn btn-primary' %>
+  <a href="#" class="btn btn-primary getdata">Update Laboratory</a>
   <br><br>
 <% end %>

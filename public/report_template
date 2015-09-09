@@ -1,0 +1,48 @@
+### Cert. No. {{service.information.certificates[0].cert_number}}
+
+**Customer:**  
+> {{ uut_assets[0].company.name }}  
+> {{ uut_assets[0].company.details }}
+
+**Item: **
+
+
+|Description              | Model              |  Serial        |
+|:-----------------------:| :-----------------:| :-------------: |
+|{{a.model.kind.name}}    | {{a.model.name}}   | {{a.serial}}   |
+
+
+Calibration Information:
+Calibration Date: {{service.calibration_date}}
+Calibrated By: {{service.user.title}} {{service.user.name}}
+Procedures: {% for p in service.information.procedures %}{% if loop.last %} and {% endif %}{{p.procedure}}{% if not loop.last %}, {% endif %}{% endfor %}.
+Enviromental: {{service.information.enviromental_conditions.temperature}}, {{service.information.enviromental_conditions.humidity}}
+Purchase order: {{service.order_number}}
+
+Notes: 
+{% for n in service.information.notes %}{{n.note}}{% if not loop.last %}<br>{% endif %}{% endfor %}
+Certificate Date: {{ now|date('Y-m-d') }}
+
+Assets:
+Description Model SN Certificate Due
+{{a.model.kind.name}} {{a.model.name}} {{a.serial}} {{a.certificate}} {{a.due_date|date('M./Y')}}
+Results:
+UUT
+Reference
+Error
+Admissive Error
+Uncertainty
+k
+𝛎
+({{t._prefix}}{{t._unit}})
+({{t._prefix}}{{t._unit}})
+({{t._prefix}}{{t._unit}})
+({{t._prefix}}{{t._unit}})
+({{t._prefix}}{{t._unit}})
+​ ​
+{{t.UUT}} {{t.Reference}} {{t.e}}
+{{t.MPE}}
+{{t.U}}
+{{t.k}}
+{{t.veff}}
+

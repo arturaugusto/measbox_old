@@ -3,6 +3,7 @@
 # You can use CoffeeScript in this file: http://coffeescript.org/
 jQuery ->
 	# Set tags input. model model list looks strange..
+	create_json_editor('#model_code', window.modelAutomationCodeSchema)
 	$("#model_model_list,#snippet_model_list").tagsinput
 		tagClass: (item) -> return 'label label-danger'
 		typeahead:

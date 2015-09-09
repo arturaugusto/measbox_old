@@ -1,12 +1,13 @@
 <%= simple_form_for @service do |f| %>
+  <div class="service_assets_datatables_feature">
   <%= f.input :order_number, input_html: { class: 'form-control' } %>
   <%= f.input :details, input_html: { class: 'form-control'} %>
   <br>
   <%= f.input :validated, as: :boolean, boolean_style: :inline, label: false, input_html: { :data => {toggle: 'toggle', on: 'Validated', off: 'Unvalidated', onstyle: 'success'} } %>  
   <br>
   <div class="laboratory_id" data-lab-id="<%= current_user.laboratory_id %>"></div>
-  <%= f.input :information, as: :hidden %>
   <div class="information_holder"></div>
+  <%= f.input :information, as: :text, label: false, input_html: { value: @service.information.to_json } %>
   <%= render "shared/modal_choose_value", f: f, :association => :user, :cols => [:name] , :value => (@service.user.nil? ? "Calibrated by..." : @service.user.name) %>
   <br>
   <%= render "shared/datepicker", f: f, :field => :calibration_date %><br>
@@ -14,14 +15,14 @@
 
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title">Click on the asset to put it on your workbench:</h3>
+      <h3 class="panel-title">Click on the asset to put it on your workbench</h3>
     </div>
     <div class="panel-body">
       <%= render "shared/assets_datatable" %>
 
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h3 class="panel-title">Workbench</h3>
+          <h3 class="panel-title">Click over a workbench item below to enable replace it</h3>
         </div>
         <div class="panel-body">
           <div class="service_assets">

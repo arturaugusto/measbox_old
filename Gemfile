@@ -1,9 +1,10 @@
 source 'https://rubygems.org'
+ruby '2.1.6'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.1.0'
+#gem 'rails', '4.1.0'
+gem 'rails', '4.2.3'
 gem 'rails_12factor'
-#gem 'ruby', '2.0.0'
 gem 'pg'
 # Use sqlite3 as the database for Active Record
 #gem 'sqlite3'
@@ -36,11 +37,6 @@ gem 'jquery-turbolinks'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 1.0.1'
 #gem 'thin'
-group :doc do
-  # bundle exec rake doc:rails generates the API under doc/api.
-  gem 'sdoc', require: false
-end
-
 # Use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
 
@@ -52,14 +48,16 @@ gem 'will_paginate-bootstrap'
 gem 'jquery-datatables-rails', '~> 3.1.1'
 gem 'bootstrap-datepicker-rails', :require => 'bootstrap-datepicker-rails', :git => 'git://github.com/Nerian/bootstrap-datepicker-rails.git'
 #gem 'lodash-rails'
-gem 'underscore-rails'
-gem 'acts-as-taggable-on', '~> 3.4.2'
+#gem 'acts-as-taggable-on', '~> 3.4.2'
+gem 'acts-as-taggable-on', '~> 3.5.0'
+
 gem 'devise'
 gem 'devise_invitable', '~> 1.3.4'
 #gem 'the_role'
-gem 'the_role', '2.5.4',
-	git: 'git://github.com/arturaugusto/the_role_multi_tenancy.git'
-gem 'the_role_bootstrap3_ui', '1.1'
+#gem 'the_role', '2.5.4',
+#	git: 'git://github.com/arturaugusto/the_role_multi_tenancy.git'
+#gem 'the_role_bootstrap3_ui', '1.1'
+gem 'the_role_api', '~> 3.0', :github => 'arturaugusto/the_role_api'
 #gem 'milia', '~>1.0'
 #gem 'devise-basecamper'
 #gem 'apartment'
@@ -78,5 +76,14 @@ gem "mustache", "0.99.4"
 gem 'acts_as_list'
 gem 'font-awesome-sass'
 #gem 'twitter-typeahead-rails', :git => "git://github.com/yourabi/twitter-typeahead-rails.git"
-gem 'wicked_pdf'
-gem 'wkhtmltopdf-binary'
+gem 'wicked_pdf'#, github: 'mileszs/wicked_pdf'
+
+group :doc do
+  # bundle exec rake doc:rails generates the API under doc/api.
+  gem 'sdoc', require: false
+end
+
+gem 'wkhtmltopdf-installer', :group => :development
+#gem 'wkhtmltopdf-binary', :group => :development
+gem 'wkhtmltopdf-heroku', :group => :production
+gem 'mathjax-rails'

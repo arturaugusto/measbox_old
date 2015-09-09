@@ -1,6 +1,6 @@
 class LaboratoriesController < ApplicationController
-  skip_before_filter :verify_authenticity_token, :only => [:new]
-  before_action :role_required, only: [:update, :destroy, :edit, :index]
+  #skip_before_filter :verify_authenticity_token, :only => [:new]
+  before_action :role_required, only: [:update, :destroy, :edit, :index, :show]
   before_action :set_laboratory, only: [:edit, :update]
 
   def show
@@ -80,136 +80,159 @@ class LaboratoriesController < ApplicationController
 <table width="100%">
   <tbody>
     <tr>
-      <td><span style="font-size: 14px;"><strong>Customer:</strong></span></td>
+      <td><strong>Customer:</strong></td>
 
-      <td><span style="font-size: 14px;">&nbsp;{{ uut_assets[0].company.name }}</span></td>
+      <td>&nbsp;{{ uut_assets[0].company.name }}</td>
     </tr>
 
     <tr>
       <td></td>
 
-      <td><span style="font-size: 14px;">&nbsp;{{ uut_assets[0].company.details }}</span></td>
+      <td>&nbsp;{{ uut_assets[0].company.details }}</td>
     </tr>
   </tbody>
 </table>
-</span><b>Item:&nbsp;</b><br>
-{% filter wrap_table %}{% for a in uut_assets %}<br>
-
-<table>
+<b>Item:&nbsp;</b><br>
+</span>
+<table wrap_code_open="{% filter wrap_table %}{% for a in uut_assets %}" wrap_code_close="{% endfor %}{% endfilter %}">
   <tbody>
     <tr>
-      <th>Description</th>
+      <th><span style="font-size: 14px;">Description</span></th>
 
-      <th>Model</th>
+      <th><span style="font-size: 14px;">Model</span></th>
 
-      <th>Serial</th>
+      <th><span style="font-size: 14px;">Serial</span></th>
     </tr>
 
     <tr>
-      <td>{{a.model.kind.name}}</td>
+      <td><span style="font-size: 14px;">{{a.model.kind.name}}</span></td>
 
-      <td>{{a.model.name}}</td>
+      <td><span style="font-size: 14px;">{{a.model.name}}</span></td>
 
-      <td>{{a.serial}}</td>
+      <td><span style="font-size: 14px;">{{a.serial}}</span></td>
     </tr>
   </tbody>
 </table>
-{% endfor&nbsp;%}{% endfilter&nbsp;%}<b>Calibration Information:</b>
+<b><span style="font-size: 14px;">Calibration Information:</span></b>
 <table width="100%">
   <tbody>
     <tr>
-      <td><strong>Calibration Date:</strong></td>
+      <td><strong><span style="font-size: 14px;">Calibration Date:</span></strong></td>
 
-      <td>{{service.calibration_date}}</td>
+      <td><span style="font-size: 14px;">{{service.calibration_date}}</span></td>
     </tr>
 
     <tr>
-      <td><strong>Calibrated By:</strong></td>
+      <td><strong><span style="font-size: 14px;">Calibrated By:</span></strong></td>
 
-      <td>{{service.user.title}}&nbsp;{{service.user.name}}</td>
+      <td><span style="font-size: 14px;">{{service.user.title}}&nbsp;{{service.user.name}}</span></td>
     </tr>
 
     <tr>
-      <td><strong>Procedures:</strong></td>
+      <td><strong><span style="font-size: 14px;">Procedures:</span></strong></td>
 
-      <td>{% for p in service.information.procedures %}{% if loop.last %} and {% endif %}{{p.procedure}}{% if not loop.last %}, {% endif %}{% endfor %}.</td>
+      <td><span style="font-size: 14px;">{% for p in service.information.procedures %}{% if loop.last %} and {% endif %}{{p.procedure}}{% if not loop.last %}, {% endif %}{% endfor %}.</span></td>
     </tr>
 
     <tr>
-      <td><strong>Enviromental:</strong></td>
+      <td><strong><span style="font-size: 14px;">Enviromental:</span></strong></td>
 
-      <td>{{service.information.enviromental_conditions.temperature}},&nbsp;{{service.information.enviromental_conditions.humidity}}</td>
+      <td><span style="font-size: 14px;">{{service.information.enviromental_conditions.temperature}},&nbsp;{{service.information.enviromental_conditions.humidity}}</span></td>
     </tr>
   </tbody>
 </table>
-<b>Purchase order:&nbsp;</b>{{service.order_number}}<br>
+<span style="font-size: 14px;"><b>Purchase order:&nbsp;</b>{{service.order_number}}<br>
+<br>
 <b>Notes:</b>&nbsp;<br>
-{% for n in service.information.notes %}{{n.note}}{% if not loop.last %}&lt;br&gt;{% endif %}{% endfor %}<br>
+                         {% for n in service.information.notes %}{{n.note}}{% if not loop.last %}&lt;br&gt;{% endif %}{% endfor %}<br>
 <b>Certificate Date:</b>&nbsp;{{ now|date(\'Y-m-d\')&nbsp;}}<b><br>
-         Assets</b><br>
-{% filter wrap_table %}{% for a in ref_assets %}<br>
-
-<table>
+</b><br>
+<b>Assets:</b><br>
+</span>
+<table wrap_code_open="{% filter wrap_table %}{% for a in ref_assets %}" wrap_code_close="{% endfor %}{% endfilter %}" wrap_caption="">
   <tbody>
     <tr>
-      <th style="text-align: center;">Descricao</th>
+      <th style="text-align: center;"><span style="font-size: 14px;">Description</span></th>
 
-      <th style="text-align: center;">Modelo</th>
+      <th style="text-align: center;"><span style="font-size: 14px;">Model</span></th>
 
-      <th style="text-align: center;">Numero de serie</th>
+      <th style="text-align: center;"><span style="font-size: 14px;">SN</span></th>
 
-      <th style="text-align: center;">Certificado</th>
+      <th style="text-align: center;"><span style="font-size: 14px;">Certificate</span></th>
 
-      <th style="text-align: center;">Validade</th>
+      <th style="text-align: center;"><span style="font-size: 14px;">Due</span></th>
     </tr>
 
     <tr>
-      <td style="text-align: center;">{{a.model.kind.name}}</td>
+      <td style="text-align: center;"><span style="font-size: 14px;">{{a.model.kind.name}}</span></td>
 
-      <td style="text-align: center;">{{a.model.name}}</td>
+      <td style="text-align: center;"><span style="font-size: 14px;">{{a.model.name}}</span></td>
 
-      <td style="text-align: center;">{{a.serial}}</td>
+      <td style="text-align: center;"><span style="font-size: 14px;">{{a.serial}}</span></td>
 
-      <td style="text-align: center;">{{a.certificate}}</td>
+      <td style="text-align: center;"><span style="font-size: 14px;">{{a.certificate}}</span></td>
 
-      <td style="text-align: center;">{{a.due_date|date(\'M./Y\')}}</td>
+      <td style="text-align: center;"><span style="font-size: 14px;">{{a.due_date|date(\'M./Y\')}}</span></td>
     </tr>
   </tbody>
 </table>
-{% endfor %}{% endfilter %}<br>
-<b>Results</b><br>
-<b></b>{% for s in spreadsheets %}{{s.description}}{% filter wrap_table %}{% for t in s.table_json.table_data %}
-<table>
+<span style="font-size: 14px;"><b>Results:</b><br>
+</span>
+<table wrap_code_open="{% filter unify_header_and_row(2) %}{% for s in spreadsheets %}{{s.description}}{% for t in s.table_json.table_data %}{% set table_index = loop.index0 %}" wrap_code_close="{% endfor %}{% endfor %}{% endfilter %}" wrap_caption="{{ s.table_json.uut_ranges[table_index].name }}" wrap_class="{{ s.table_json.lookup[table_index].range_index }}">
   <tbody>
     <tr>
-      <th style="text-align: center;">UUT<br>
-         ({{t._prefix}}<span style="-webkit-text-stroke-width: 0px; background-color: rgb(230, 230, 230); color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t._unit}})</span></th>
-
-      <th style="text-align: center;">Reference<br>
-         ({{t._prefix}}<span style="-webkit-text-stroke-width: 0px; background-color: rgb(230, 230, 230); color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t._unit}})</span></th>
-
-      <th style="text-align: center;">Error<br>
-<span style="-webkit-text-stroke-width: 0px; background-color: rgb(230, 230, 230); color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">({{t._prefix}}<span style="box-sizing: content-box;">{{t._unit}})</span></span></th>
-
-      <th style="text-align: center;">Admissive Error<br>
-<span style="-webkit-text-stroke-width: 0px; background-color: rgb(230, 230, 230); box-sizing: content-box; color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">({{t._prefix}}{{t._unit}})</span></th>
-
-      <th style="text-align: center;">Uncertainty<br>
-<span style="-webkit-text-stroke-width: 0px; background-color: rgb(230, 230, 230); color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">({{t._prefix}}{{t._unit}})</span></th>
-
-      <th style="text-align: center;">k<br>
-<br>
+      <th style="text-align: center;"><span style="font-size: 14px;">UUT</span><br>
       </th>
 
-      <th style="text-align: center;"><span style="font-size: 17px;">&#120526;</span><br>
-<br>
+      <th style="text-align: center;"><span style="font-size: 14px;">Reference</span><br>
+      </th>
+
+      <th style="text-align: center;"><span style="font-size: 14px;">Error</span><br>
+      </th>
+
+      <th style="text-align: center;"><span style="font-size: 14px;">Admissive Error</span><br>
+      </th>
+
+      <th style="text-align: center;"><span style="font-size: 14px;">Uncertainty</span><br>
+      </th>
+
+      <th style="text-align: center;"><span style="font-size: 14px;">k</span><br>
+      </th>
+
+      <th style="text-align: center;"><span style="font-size: 14px;"></span><br>
       </th>
     </tr>
 
     <tr>
-      <td style="text-align: center;">{{t.UUT}}</td>
+      <td style="text-align: center;">
+        <div style="text-align: center;"><span style="font-size: 14px;">({{t._prefix}}<span style="-webkit-text-stroke-width: 0px; float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-style: normal; font-variant: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t._unit}})</span></span></div>
+      </td>
 
-      <td style="text-align: center;">{{t.Reference}}</td>
+      <td style="text-align: center;">
+        <div style="text-align: center;"><span style="font-size: 14px;">({{t._prefix}}<span style="-webkit-text-stroke-width: 0px; color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-style: normal; font-variant: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t._unit}})</span></span></div>
+      </td>
+
+      <td style="text-align: center;">
+        <div style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">({{t._prefix}}<span style="box-sizing: content-box;">{{t._unit}})</span></span></div>
+      </td>
+
+      <td style="text-align: center;">
+        <div style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; box-sizing: content-box; color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">({{t._prefix}}{{t._unit}})</span></div>
+      </td>
+
+      <td style="text-align: center;">
+        <div style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">({{t._prefix}}{{t._unit}})</span></div>
+      </td>
+
+      <td></td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="text-align: center;"><span style="font-size: 14px;">{{t.UUT}}</span></td>
+
+      <td style="text-align: center;"><span style="font-size: 14px;">{{t.Reference}}</span></td>
 
       <td style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t.e}}</span><br>
       </td>
@@ -223,12 +246,12 @@ class LaboratoriesController < ApplicationController
       <td style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t.k}}</span><br>
       </td>
 
-      <td style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t.veff}}</span><br>
-      </td>
+      <td style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t.veff}}</span></td>
     </tr>
   </tbody>
 </table>
-{%&nbsp;endfor %}{%&nbsp;endfilter %}{%&nbsp;endfor %}
+<br>
+<br>
 '
           )
           @main_company = Company.new(:laboratory => @laboratory, name: @laboratory.name)

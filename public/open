@@ -1,0 +1,319 @@
+1  2
+
+
+
+<svg width="400" height="110"><rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /></svg>
+
+* Quando for uut, nao copiar a reclassificacao!
+
+
+
+
+* API com python
+
+
+
+- calculo incerteza js
+- Grafico funciona?
+- update spreadsheet funciona?
+- report functiona?
+
+- criar o websocket server, com instrucoes para manipular a planilha
+
+- testar a troca de asset (instrumento). Ver se funciona no spreadsheet
+
+* Flag de utilizavel como padrao no asset
+* Utilizar MathJS no lugar da minha propria lib js :-(
+* 
+
+
+
+
+
+
+_.filter(temp1.spreadsheets[0].table_json.value.variables, function(x){return(x.kind[0] === "UUT")} )
+
+This is how I solved my problem.
+
+First, I run:
+
+heroku run 'gem install rake ' --app measbox
+
+And I got this message
+
+Running `gem install rake ` attached to terminal... up, run.7295
+Fetching: rake-10.4.2.gem (100%)
+rake's executable "rake" conflicts with /app/vendor/ruby-2.0.0/bin/rake
+Overwrite the executable? [yN]  
+
+
+I choose No, and them, knowing the path to rake, I could run 
+
+heroku run /app/vendor/ruby-2.0.0/bin/rake db:migrate --app measbox
+
+
+{% for s in spreadsheets %}{{s.description}}{% filter wrap_table %}{% for t in s.table_json.table_data %}{% set range_index = loop.index %}
+
+{% endfor %}{% endfilter %}{% endfor %}	
+
+
+{{ s.table_json.uut_ranges[range_index].name }}
+
+
+t = $.parseHTML("<span><table wrap_class='1'><tr><td>lalala</td></ŧr><tr><td>xxxxlalala</td></ŧr><tr><td>lalala</td></ŧr><tr><td>lalala</td></ŧr><caption>table1</caption></table><table wrap_class='1'><tr><td>lalala</td></ŧr><tr><td>xxxx2 lalala</td></ŧr><tr><td>lalala</td></ŧr><tr><td>lalala</td></ŧr><caption>table1</caption></table><table wrap_class='2'><tr><td>lalala</td></ŧr><tr><td>xxxx2 lalala</td></ŧr><tr><td>lalala</td></ŧr><tr><td>lalala</td></ŧr><caption>table2</caption></table></span>")
+
+
+
+
+captions = _.uniq($(t).find("caption").map(function(i, x){return($(x).text())}))
+''''''''''''''''''''''
+
+
+t = $.parseHTML("<span><table wrap_class='1'><tr><td>lalala</td></ŧr><tr><td>xxxxlalala</td></ŧr><tr><td>lalala</td></ŧr><tr><td>lalala</td></ŧr><caption>table1</caption></table><table wrap_class='1'><tr><td>lalala</td></ŧr><tr><td>xxxx2 lalala</td></ŧr><tr><td>lalala</td></ŧr><tr><td>lalala</td></ŧr><caption>table1</caption></table><table wrap_class='2'><tr><td>lalala</td></ŧr><tr><td>xxxx2 lalala</td></ŧr><tr><td>lalala</td></ŧr><tr><td>lalala</td></ŧr><caption>table2</caption></table></span>")
+
+uut_ids = [1,2,2]
+
+uut_ids = _.uniq(uut_ids)
+
+wt = $(t).find("[wrap_class]")
+
+$(wt[0]).find('tr:last').append($(wt[1]).find("tr"))
+
+
+
+
+
+
+  // create a array of size n repeating val
+  rep = function(val, n){
+    var that = this;
+    this.val = val;
+    this.arr = [];
+
+    this.build_obj_item = function(){
+      return Object.create(that.val);
+    }
+    this.build_val_item = function(){
+      return that.val;
+    }
+
+    if(typeof this.val === "object"){
+      this.build_item = this.build_obj_item;
+    }else{
+      this.build_item = this.build_val_item;
+    }
+
+    this.size_arr = [];
+    for(var i = 0; i < n; i++){
+      this.size_arr.push(undefined);
+    }
+
+    return this.size_arr.map(function(){
+      //return that.build_item(that.val);
+      return Object.create(this.val);
+    }.bind(this));
+    
+  }
+
+
+
+
+
+
+    schema = {}
+
+      Object.create(schema)
+      Object.create(schema)
+
+
+  var sample_obj = {
+    "func": "X1 + X2 + X3 + X4",
+    "cl": 0.95,
+    "method": "mc",
+    "variables": [
+      {
+        "name": "X1",
+        "value": 0,
+        "uncertainties": [
+          {
+            "name": "Unc",
+            "value": 1,
+            "distribution": "uniform"
+          }
+        ]
+      },
+      {
+        "name": "X2",
+        "value": 0,
+        "uncertainties": [
+          {
+            "name": "Unc",
+            "value": 1,
+            "distribution": "uniform"
+          }
+        ]
+      },
+      {
+        "name": "X3",
+        "value": 0,
+        "uncertainties": [
+          {
+            "name": "Unc",
+            "value": 1,
+            "distribution": "uniform"
+          }
+        ]
+      },
+      {
+        "name": "X4",
+        "value": 0,
+        "uncertainties": [
+          {
+            "name": "Unc",
+            "value": 1,
+            "distribution": "uniform"
+          }
+        ]
+      }
+    ],
+    "correlation": {"variables": ["VI", "VC"], "correlation:" 0}
+  }
+
+
+  var sample_obj = {
+    "func": "Ls + D + d1 + d2 - Ls * (delta_alpha * (teta_0 + Delta) + alpha_s * delta_teta)",
+    "cl": 0.95,
+    "method": "mc",
+    "variables": [
+
+      {
+        "name": "Lnom",
+        "prefix": "n",
+        "value": 50000000,
+        "uncertainties": []
+      },
+
+      {
+        "name": "Ls",
+        "prefix": "n",
+        "value": 50000623,
+        "uncertainties": [
+          {
+            "name": "Unc",
+            "value": 75e-9,
+            "distribution": "studentt",
+            "k": 3,
+            "df": 18
+          }
+        ]
+      },
+      {
+        "name": "D",
+        "prefix": "n",
+        "value": 215,
+        "uncertainties": [
+          {
+            "name": "Unc",
+            "value": 13e-9,
+            "distribution": "studentt",
+            "k": Math.sqrt(5),
+            "df": 24
+          }
+        ]
+      },
+      {
+        "name": "d1",
+        "prefix": "n",
+        "value": 0,
+        "uncertainties": [
+          {
+            "name": "Unc",
+            "value": 10e-9,
+            "distribution": "studentt",
+            "ci": 0.95,
+            "df": 5
+          }
+        ]
+      },
+
+      {
+        "name": "d2",
+        "prefix": "n",
+        "value": 0,
+        "uncertainties": [
+          {
+            "name": "Unc",
+            "value": 20e-9,
+            "distribution": "studentt",
+            "k": 3,
+            "df": 8
+          }
+        ]
+      },
+      {
+        "name": "alpha_s",
+        "value": 11.5e-6,
+        "uncertainties": [
+          {
+            "name": "Unc",
+            "value": 2e-6,
+            "distribution": "uniform"
+          }
+        ]
+      },
+      {
+        "name": "teta_0",
+        "value": -0.1,
+        "uncertainties": [
+          {
+            "name": "Unc",
+            "value": 0.2,
+            "distribution": "normal"
+          }
+        ]
+      },
+      {
+        "name": "Delta",
+        "value": 0,
+        "uncertainties": [
+          {
+            "name": "Unc",
+            "value": 0.5,
+            "distribution": "arcsine"
+          }
+        ]
+      },
+      {
+        "name": "delta_alpha",
+        "value": 0,
+        "uncertainties": [
+          {
+            "name": "Unc",
+            "value": 1.1e-6,
+            "distribution": "uniform"
+          }
+        ]
+      },
+      {
+        "name": "delta_teta",
+        "value": 0,
+        "uncertainties": [
+          {
+            "name": "Unc",
+            "value": 0.075,
+            "distribution": "uniform"
+          }
+        ]
+      }
+
+
+
+    ],
+    "influence_quantities": [
+      {
+        "name": "freq",
+        "value": 0.01,
+        "prefix": ""
+      }
+    ]
+  }

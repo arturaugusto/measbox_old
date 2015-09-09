@@ -1,19 +1,15 @@
-<%= javascript_tag do %>
-  window.value = <%= raw @snippet.value.to_json %>
-<% end %>
-
 <%= simple_form_for(@snippet) do |f| %>
   <%= f.error_notification %>
 
   <div class="form-inputs snippet_feature">
-  <%= f.input :model_list %>
-  <%= f.input :functionality_list %>
-  <%= f.input :flavor, collection: [['Asset modeling',1], ['Mathematical modeling',2]], prompt: "Choose snippet flavor...", input_html: { class: 'form-control' } %>
+  <%= f.input :model_list, input_html: { value: @snippet.model_list.join(",") } %>
+  <%= f.input :functionality_list, input_html: { value: @snippet.functionality_list.join(",") } %>
+  <%= f.input :flavor, collection: [['Asset modeling',1], ['Mathematical modeling',2]], prompt: "Choose snippet flavor...", as: (if @snippet.flavor != nil then :hidden else :select end), input_html: { class: 'form-control' } %>
   <br>
   <%= f.input :validated, as: :boolean, boolean_style: :inline, label: false, input_html: { :data => {toggle: 'toggle', on: 'Validated', off: 'Unvalidated', onstyle: 'success'} } %>
-    <%= f.input :value, as: :hidden %>
+  <%= f.input :value, as: :text, label: false, input_html: { value: @snippet.value.to_json } %>
   </div>
-  <span id="editor_holder" class="ranges_template_feature"></span>
+  <span class="ranges_template_feature"></span>
   <br>
   <div class="form-actions">
     <%= f.button :submit, :class => 'btn btn-primary' %>

@@ -7,6 +7,12 @@ class Asset < ActiveRecord::Base
 	has_many :workbenches, -> { order("position ASC") }
 	has_many :services, :through => :workbenches
 	default_scope { where(laboratory_id: Laboratory.current_id) }
+	before_save :default_values
+
+	def default_values
+		self.reclassification ||= "{}"
+	end
+
 	attr_accessor :changeable
 	attr_accessor :button_role
 	attr_accessor :position

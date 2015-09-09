@@ -19,7 +19,7 @@ private
   def data
     values.map do |value|
       [
-        link_to(value.name, {:action => "edit", :id => value.id}, :class => 'value_chooser_option', :data => {:id => value.id, :name => value.name, :dismiss => 'modal'} ),
+        link_to(value.name == "" ? "Undefined" : value.name, {:action => "edit", :id => value.id}, :class => 'value_chooser_option', :data => {:id => value.id, :name => value.name, :dismiss => 'modal'} ),
         value.created_at.strftime("%B %e, %Y")
       ]
     end

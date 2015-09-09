@@ -20,22 +20,16 @@ jQuery ->
 				fnDrawCallback: (oSettings) ->
 			$(".input-daterange").datepicker forceParse: false
 	$(".information_holder").each ->
+		# Hide while it loads from request
+		$("#service_information").hide()
 		element = this
 		$.getJSON("../../laboratories/" + $(".laboratory_id").data("lab-id") + ".json").done (json) ->
-			schema = json.custom_forms
-			editor = new JSONEditor(element,
-				theme: "bootstrap3"
-				iconlib: "bootstrap3"
-				disable_collapse: false
-				schema: schema
-				)
-			data_string = $('#service_information').val()
-			if data_string isnt ""
-				editor.setValue JSON.parse(data_string)
-			editor.on "change", ->
-				data = editor.getValue()
-				data_string_2 = JSON.stringify(data)
-				$('#service_information').val(data_string_2)
+			try
+				schema = JSON.parse(json.custom_forms.services)
+				create_json_editor("#service_information", schema)
+			catch e
+				$("#service_information").val("{}")
+			
 
 	$(".sortable_elements").each ->
 		# Sortable
