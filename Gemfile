@@ -28,7 +28,8 @@ gem 'coffee-rails', '~> 4.0.0.rc1'
 gem 'therubyracer', platforms: :ruby
 #gem 'less-rails' #Sprockets (what Rails 3.1 uses for its asset pipeline) supports LESS
 # Use jquery as the JavaScript library
-gem 'jquery-rails'
+#gem 'jquery-rails'
+gem 'jquery-rails', '4.0.4' # using this until datatables-rails support newest version of jquery. Ref: http://stackoverflow.com/questions/31149836/uncaught-typeerror-cannot-use-in-operator-to-search-for-length-in-triger
 
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
 gem 'turbolinks'
@@ -45,7 +46,7 @@ gem 'puma'
 gem 'simple_form', '~> 3.0.2'
 gem 'will_paginate-bootstrap'
 #gem 'jquery-datatables-rails', git: 'git://github.com/rweng/jquery-datatables-rails.git'
-gem 'jquery-datatables-rails', '~> 3.1.1'
+gem 'jquery-datatables-rails', '~> 3.3.0'
 gem 'bootstrap-datepicker-rails', :require => 'bootstrap-datepicker-rails', :git => 'git://github.com/Nerian/bootstrap-datepicker-rails.git'
 #gem 'lodash-rails'
 #gem 'acts-as-taggable-on', '~> 3.4.2'
