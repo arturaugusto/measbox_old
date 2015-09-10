@@ -128,6 +128,8 @@ jQuery ->
             s.table_json.choosen_snippets
           )
 
+
+          console.log choosen_snippets_flat
           # Unpack ranges from snippets
           ranges_flat = _.flatten choosen_snippets_flat.map((s) ->
             return s.value.ranges
