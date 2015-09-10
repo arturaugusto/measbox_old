@@ -43,9 +43,11 @@ class LaboratoriesController < ApplicationController
       respond_to do |format|
         if @laboratory.save
           # Create a admin role and a technican role
-          @inactive_role = Role.new(:laboratory_id => @laboratory, :name => 'inactive', :title => 'Inactive', :description => 'Inactive account', :the_role => { :system => {:administrator => false} } )
-          @admin_role = Role.new(:laboratory_id => @laboratory, :name => 'admin', :title => 'Admin role', :description => 'Can manage anything', :the_role => { :system => {:administrator => true} } )
-          @technican_role = Role.new(:laboratory_id => @laboratory, :name => 'technican', :title => 'Technician', :description => 'Technican can manage services.', 
+          Rails.logger.info "$$$$$$$$$$$$$$$$$"
+          Rails.logger.info @laboratory.id
+          @inactive_role = Role.new(:laboratory_id => @laboratory.id.to_s, :name => 'inactive', :title => 'Inactive', :description => 'Inactive account', :the_role => { :system => {:administrator => false} } )
+          @admin_role = Role.new(:laboratory_id => @laboratory.id.to_s, :name => 'admin', :title => 'Admin role', :description => 'Can manage anything', :the_role => { :system => {:administrator => true} } )
+          @technican_role = Role.new(:laboratory_id => @laboratory.id.to_s, :name => 'technican', :title => 'Technician', :description => 'Technican can manage services.', 
             :the_role => 
               { :services => 
                 { :index => true, :create => true, :edit => true, :update_unvalidated => false, :update_validated => true, :destroy_unvalidated => true, :destroy_validated => false}, 
@@ -73,191 +75,67 @@ class LaboratoriesController < ApplicationController
                 { :administrator => false}
               })
               
-          @report_template = ReportTemplate.new(:laboratory_id => @laboratory, :name => 'Default', :value => 
-'
-<div style="text-align: center;"><span style="font-size: 22px;">Cert. No. {{service.information.certificates[0].cert_number}}</span></div>
-<span style="font-size: 14px;">
-<table width="100%">
-  <tbody>
-    <tr>
-      <td><strong>Customer:</strong></td>
+          @report_template = ReportTemplate.new(:laboratory_id => @laboratory.id.to_s, :name => 'Default', :value => 
+"
+Calibration Certificate
+=============================
+     
+'''
+Item
+'''
+Description              | Model              | Serial  
+---------------------------|---------------------|---------
+{% for a in uut_assets -%}
+{{a.model.kind.name}}    | {{a.model.name}}   | {{a.serial}} 
+{%- endfor %}   
 
-      <td>&nbsp;{{ uut_assets[0].company.name }}</td>
-    </tr>
+'''
+Calibration Information
+'''
+   |    |   |    |
+--:|:--|--:|:--|
+**Customer Name:**   |   {{ uut_assets[0].company.name }}  | **Certificate Number:** | {{service.information.certificates[0].cert_number}} 
+**Address:**                |   {{ uut_assets[0].company.details }} | **Calibration Date:** | {{service.calibration_date|date('M d, Y')}}
+**PO Number:**          |   {{service.order_number}}                | **Certificate Date:** | {{ now|date('M d, Y') }}  
+**Procedures:**           | {% for p in service.information.procedures -%}{{p.procedure}}, version {{p.version}}{%- endfor %} | **Temperature:** | {{service.information.enviromental_conditions.temperature}} &plusmn; 3 ºC
+**Notes:**  | {%- for n in service.information.notes -%} - {{n.note}} <br> {%- endfor -%} | **Relative humidity:**  |  {{service.information.enviromental_conditions.humidity}}  &plusmn; 10 %
 
-    <tr>
-      <td></td>
 
-      <td>&nbsp;{{ uut_assets[0].company.details }}</td>
-    </tr>
-  </tbody>
-</table>
-<b>Item:&nbsp;</b><br>
-</span>
-<table wrap_code_open="{% filter wrap_table %}{% for a in uut_assets %}" wrap_code_close="{% endfor %}{% endfilter %}">
-  <tbody>
-    <tr>
-      <th><span style="font-size: 14px;">Description</span></th>
+**Calibrated By:** {{service.user.title}} {{service.user.name}}  
 
-      <th><span style="font-size: 14px;">Model</span></th>
 
-      <th><span style="font-size: 14px;">Serial</span></th>
-    </tr>
 
-    <tr>
-      <td><span style="font-size: 14px;">{{a.model.kind.name}}</span></td>
+'''
+Assets:
+'''
+   Description         | Model            | SN           | Certificate       | Due  
+:---------------------:|:----------------:|:------------:|:-----------------:|:----:
+{% for r in ref_assets -%}
+{{r.model.kind.name}}  | {{r.model.name}} | {{r.serial}} | {{r.certificate}} |  {{r.due_date|date('M d, Y')}}
+{%- endfor %}
 
-      <td><span style="font-size: 14px;">{{a.model.name}}</span></td>
 
-      <td><span style="font-size: 14px;">{{a.serial}}</span></td>
-    </tr>
-  </tbody>
-</table>
-<b><span style="font-size: 14px;">Calibration Information:</span></b>
-<table width="100%">
-  <tbody>
-    <tr>
-      <td><strong><span style="font-size: 14px;">Calibration Date:</span></strong></td>
 
-      <td><span style="font-size: 14px;">{{service.calibration_date}}</span></td>
-    </tr>
-
-    <tr>
-      <td><strong><span style="font-size: 14px;">Calibrated By:</span></strong></td>
-
-      <td><span style="font-size: 14px;">{{service.user.title}}&nbsp;{{service.user.name}}</span></td>
-    </tr>
-
-    <tr>
-      <td><strong><span style="font-size: 14px;">Procedures:</span></strong></td>
-
-      <td><span style="font-size: 14px;">{% for p in service.information.procedures %}{% if loop.last %} and {% endif %}{{p.procedure}}{% if not loop.last %}, {% endif %}{% endfor %}.</span></td>
-    </tr>
-
-    <tr>
-      <td><strong><span style="font-size: 14px;">Enviromental:</span></strong></td>
-
-      <td><span style="font-size: 14px;">{{service.information.enviromental_conditions.temperature}},&nbsp;{{service.information.enviromental_conditions.humidity}}</span></td>
-    </tr>
-  </tbody>
-</table>
-<span style="font-size: 14px;"><b>Purchase order:&nbsp;</b>{{service.order_number}}<br>
-<br>
-<b>Notes:</b>&nbsp;<br>
-                         {% for n in service.information.notes %}{{n.note}}{% if not loop.last %}&lt;br&gt;{% endif %}{% endfor %}<br>
-<b>Certificate Date:</b>&nbsp;{{ now|date(\'Y-m-d\')&nbsp;}}<b><br>
-</b><br>
-<b>Assets:</b><br>
-</span>
-<table wrap_code_open="{% filter wrap_table %}{% for a in ref_assets %}" wrap_code_close="{% endfor %}{% endfilter %}" wrap_caption="">
-  <tbody>
-    <tr>
-      <th style="text-align: center;"><span style="font-size: 14px;">Description</span></th>
-
-      <th style="text-align: center;"><span style="font-size: 14px;">Model</span></th>
-
-      <th style="text-align: center;"><span style="font-size: 14px;">SN</span></th>
-
-      <th style="text-align: center;"><span style="font-size: 14px;">Certificate</span></th>
-
-      <th style="text-align: center;"><span style="font-size: 14px;">Due</span></th>
-    </tr>
-
-    <tr>
-      <td style="text-align: center;"><span style="font-size: 14px;">{{a.model.kind.name}}</span></td>
-
-      <td style="text-align: center;"><span style="font-size: 14px;">{{a.model.name}}</span></td>
-
-      <td style="text-align: center;"><span style="font-size: 14px;">{{a.serial}}</span></td>
-
-      <td style="text-align: center;"><span style="font-size: 14px;">{{a.certificate}}</span></td>
-
-      <td style="text-align: center;"><span style="font-size: 14px;">{{a.due_date|date(\'M./Y\')}}</span></td>
-    </tr>
-  </tbody>
-</table>
-<span style="font-size: 14px;"><b>Results:</b><br>
-</span>
-<table wrap_code_open="{% filter unify_header_and_row(2) %}{% for s in spreadsheets %}{{s.description}}{% for t in s.table_json.table_data %}{% set table_index = loop.index0 %}" wrap_code_close="{% endfor %}{% endfor %}{% endfilter %}" wrap_caption="{{ s.table_json.uut_ranges[table_index].name }}" wrap_class="{{ s.table_json.lookup[table_index].range_index }}">
-  <tbody>
-    <tr>
-      <th style="text-align: center;"><span style="font-size: 14px;">UUT</span><br>
-      </th>
-
-      <th style="text-align: center;"><span style="font-size: 14px;">Reference</span><br>
-      </th>
-
-      <th style="text-align: center;"><span style="font-size: 14px;">Error</span><br>
-      </th>
-
-      <th style="text-align: center;"><span style="font-size: 14px;">Admissive Error</span><br>
-      </th>
-
-      <th style="text-align: center;"><span style="font-size: 14px;">Uncertainty</span><br>
-      </th>
-
-      <th style="text-align: center;"><span style="font-size: 14px;">k</span><br>
-      </th>
-
-      <th style="text-align: center;"><span style="font-size: 14px;"></span><br>
-      </th>
-    </tr>
-
-    <tr>
-      <td style="text-align: center;">
-        <div style="text-align: center;"><span style="font-size: 14px;">({{t._prefix}}<span style="-webkit-text-stroke-width: 0px; float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-style: normal; font-variant: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t._unit}})</span></span></div>
-      </td>
-
-      <td style="text-align: center;">
-        <div style="text-align: center;"><span style="font-size: 14px;">({{t._prefix}}<span style="-webkit-text-stroke-width: 0px; color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-style: normal; font-variant: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t._unit}})</span></span></div>
-      </td>
-
-      <td style="text-align: center;">
-        <div style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">({{t._prefix}}<span style="box-sizing: content-box;">{{t._unit}})</span></span></div>
-      </td>
-
-      <td style="text-align: center;">
-        <div style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; box-sizing: content-box; color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">({{t._prefix}}{{t._unit}})</span></div>
-      </td>
-
-      <td style="text-align: center;">
-        <div style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">({{t._prefix}}{{t._unit}})</span></div>
-      </td>
-
-      <td></td>
-
-      <td></td>
-    </tr>
-
-    <tr>
-      <td style="text-align: center;"><span style="font-size: 14px;">{{t.UUT}}</span></td>
-
-      <td style="text-align: center;"><span style="font-size: 14px;">{{t.Reference}}</span></td>
-
-      <td style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t.e}}</span><br>
-      </td>
-
-      <td style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t.MPE}}</span><br>
-      </td>
-
-      <td style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t.U}}</span><br>
-      </td>
-
-      <td style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t.k}}</span><br>
-      </td>
-
-      <td style="text-align: center;"><span style="-webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); color: rgb(51, 51, 51); float: none; font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.6000003814697px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px;">{{t.veff}}</span></td>
-    </tr>
-  </tbody>
-</table>
-<br>
-<br>
-'
+{% for r in cal_ranges -%}
+'''
+{{ r.end_fmt }} {{ r.last_prefix }}{{ r.unit }}  
+$$ {{ r.mpe_TeX }} $$
+'''
+ UUT | Reference | Error | Admissive Error | Uncertainty | k  | &#120584;<sub>eff</sub>
+:---:|:---------:|:-----:|:---------------:|:-----------:|:--:|:--:
+{% for p in r.points -%}
+{% if p.prefix_transition -%}
+**({{p.uut_prefix}}{{p.uut_unit}})** | **({{p.uut_prefix}}{{p.uut_unit}})** | **({{p.uut_prefix}}{{p.uut_unit}})** | **({{p.uut_prefix}}{{p.uut_unit}})** | **({{p.uut_prefix}}{{p.uut_unit}})** | |
+{%- endif -%}
+{{p.uut_readout_fmt}} | {{p.correct_value_fmt}} | {{p.err_fmt}} | {{p.mpe_fmt}} | {{p.U_fmt}} | {{p.k_fmt}}  | {{p.veff_fmt}}
+{%- endfor %}
+{% endfor %}
+"
           )
           @main_company = Company.new(:laboratory => @laboratory, name: @laboratory.name)
           if (@main_company.save and @admin_role.save and @technican_role.save and @inactive_role.save) and (@report_template.save)
-            format.html { redirect_to @laboratory, notice: 'Laboratory was successfully created.' }
-            format.json { render action: 'show', status: :created, location: @laboratory }
+            format.html { redirect_to(controller: 'my_devise/registrations', action: 'new', subdomain: @laboratory.subdomain) }
+            #format.json { render action: '/users/sign_up', status: :created, location: @laboratory, :subdomain => @laboratory.subdomain }
           else
             format.html { render action: 'new' }
             format.json { render json: @laboratory.errors, status: :unprocessable_entity }

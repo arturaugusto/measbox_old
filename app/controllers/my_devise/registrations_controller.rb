@@ -1,15 +1,18 @@
 class MyDevise::RegistrationsController < Devise::RegistrationsController
 	skip_before_filter :verify_authenticity_token, :only => [:create]
 	def new
+		if User.count == 0 then
+			flash[:notice] = 'Laboratory was successfully created. The first registered user will have administrative privileges'
+		end
 		super
 	end
 
 	def create
 		if (verify_recaptcha) or (Rails.env.development?)
 			build_resource(sign_up_params)
-			resource_saved = resource.save
+			resource.save
 			yield resource if block_given?
-			if resource_saved
+			if resource.persisted?
 				# Set user to admin if its the first user created
 				if User.count == 1
 					resource.update( role: Role.with_name(:admin) )
