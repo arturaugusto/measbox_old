@@ -88,3 +88,5 @@ gem 'wkhtmltopdf-installer', :group => :development
 #gem 'wkhtmltopdf-binary', :group => :development
 gem 'wkhtmltopdf-heroku', :group => :production
 gem 'mathjax-rails'
+
+gem "non-stupid-digest-assets"
