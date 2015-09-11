@@ -73,7 +73,11 @@ class LaboratoriesController < ApplicationController
                 { :administrator => false}
               })
               
-          @report_template = ReportTemplate.new(:laboratory_id => @laboratory.id.to_s, :name => 'Default', :value => 
+          # I wish using this: &#120584;<sub>eff</sub> as nu symbol get working...
+          @report_template = ReportTemplate.new(:laboratory_id => @laboratory.id.to_s, 
+            :name => 'Default', 
+            :pdf_options => {"orientation"=>"Portrait", "page_size"=>"A4", "margin"=>{"top"=>10, "bottom"=>10, "left"=>10, "right"=>10}, "header"=>{"left"=>"", "center"=>"", "right"=>"Cert. n{{certificates[0].cert_number}}", "spacing"=>0, "font_name"=>"Helvetica", "font_size"=>12}, "footer"=>{"left"=>"", "center"=>"[page]/[toPage]", "right"=>"", "spacing"=>0, "font_name"=>"Helvetica", "font_size"=>12}},
+            :value => 
 "
 Calibration Certificate
 =============================
@@ -119,7 +123,7 @@ Assets:
 {{ r.end_fmt }} {{ r.last_prefix }}{{ r.unit }}  
 $$ {{ r.mpe_TeX }} $$
 '''
- UUT | Reference | Error | Admissive Error | Uncertainty | k  | &#120584;<sub>eff</sub>
+ UUT | Reference | Error | Admissive Error | Uncertainty | k  | <i>v</i><span style='font-size:0.6em;'>eff</span>
 :---:|:---------:|:-----:|:---------------:|:-----------:|:--:|:--:
 {% for p in r.points -%}
 {% if p.prefix_transition -%}
