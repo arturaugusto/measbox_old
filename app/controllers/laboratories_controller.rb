@@ -43,8 +43,6 @@ class LaboratoriesController < ApplicationController
       respond_to do |format|
         if @laboratory.save
           # Create a admin role and a technican role
-          Rails.logger.info "$$$$$$$$$$$$$$$$$"
-          Rails.logger.info @laboratory.id
           @inactive_role = Role.new(:laboratory_id => @laboratory.id.to_s, :name => 'inactive', :title => 'Inactive', :description => 'Inactive account', :the_role => { :system => {:administrator => false} } )
           @admin_role = Role.new(:laboratory_id => @laboratory.id.to_s, :name => 'admin', :title => 'Admin role', :description => 'Can manage anything', :the_role => { :system => {:administrator => true} } )
           @technican_role = Role.new(:laboratory_id => @laboratory.id.to_s, :name => 'technican', :title => 'Technician', :description => 'Technican can manage services.', 

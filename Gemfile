@@ -86,7 +86,7 @@ end
 
 gem 'wkhtmltopdf-installer', :group => :development
 #gem 'wkhtmltopdf-binary', :group => :development
-gem 'wkhtmltopdf-heroku', :group => :production
+gem 'wkhtmltopdf-heroku', :group => :production, :tag => 'v2.3.5'
 gem 'mathjax-rails'
 
-gem "non-stupid-digest-assets"
+gem "non-stupid-digest-assets" # Ref: https://github.com/rails/sprockets-rails/issues/49#issuecomment-24835988, https://github.com/mileszs/wicked_pdf/issues/188, http://stackoverflow.com/questions/7275636/rails-3-1-0-actionviewtemplateerror-application-css-isnt-precompiled/7278355#7278355
