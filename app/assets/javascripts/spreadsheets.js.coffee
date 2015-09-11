@@ -323,7 +323,7 @@ jQuery ->
 
         # Trend chart
         if (_range_id isnt undefined) and (_uut_id isnt undefined)
-          $.get "http://lab1.lvh.me:3000/spreadsheets/get_tendency?_range_id=" + _range_id + "&_uut_id=" + _uut_id, (data) ->
+          $.get "/spreadsheets/get_tendency?_range_id=" + _range_id + "&_uut_id=" + _uut_id, (data) ->
            
             # flat and grouped by calibration date
             grouped_data = _.groupBy data.map((x) ->
