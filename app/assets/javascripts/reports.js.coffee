@@ -21,8 +21,10 @@ jQuery ->
       css = ''
       # Get all style tag content
       Array::map.call document.getElementsByTagName('style'), (s) ->
-        data = s.firstChild.data
-        css += '<style type="text/css">' + data + '</style>'
+        first_child = s.firstChild
+        if first_child isnt null
+          data = s.firstChild.data
+          css += '<style type="text/css">' + data + '</style>'
       
       # Split string containing styles
       # reject lines that contain fonts an than join again
