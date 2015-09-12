@@ -1,4 +1,5 @@
 <%- model_class = Laboratory -%>
+<!--
 <div class="row">
       <div class="col-sm-4">
         <h3>Wherever you are</h3>
@@ -12,11 +13,13 @@
         <h3>Ready to use Procedures</h3>
         <p>With Measbox you can access pre-built procedures and others created by the community. Perfect to exchange knowledge in a reproducible manner.</p>
       </div>
-    </div>
+</div>
+-->
 
 <div class="page-header">
-  <h1>And it's free!</h1>
-  <p class="lead">You can register and start using right now, our first public beta.</p>
-  <p class="lead"><%=t '.title', :default => [:'helpers.titles.create', 'Register your %{model}'], :model => model_class.model_name.human.titleize %></p >
+  <p class="lead">Measbox is a web based community-driven metrology information source. Starting from assets management, passing through instrument automation and control to uncertainties estimation and reporting.</p>
+  <p class="lead">Now you can access the first beta test release!</p>
+  Check the <a target="_blank" href="https://www.youtube.com/user/arturaugusto/videos">youtube channel</a> to learn more from screencasts.<br><br>
+  <p class="lead"><%=t '.title', :default => [:'helpers.titles.create', 'Register your %{model}:'], :model => model_class.model_name.human.titleize %></p >
 </div>
 <%= render :partial => 'form' %>
