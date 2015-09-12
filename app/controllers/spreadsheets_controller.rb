@@ -12,8 +12,9 @@ class SpreadsheetsController < ApplicationController
     #SELECT * FROM spreadsheets WHERE spreadsheet_json @> '[{"_range_id":1440247768538, "_uut_id":"5407f3ed-4505-47dc-bf65-865bad15cd28"}]';
     @tendency = []
     @spreadsheets.each do |s|
-
-      s[:spreadsheet_json].map{ |r| if not r["_results"].empty? then @tendency << {:calibration_date => s.service.calibration_date, :_results => r["_results"]} end }
+      if not s.service.nil?
+        s[:spreadsheet_json].map{ |r| if not r["_results"].empty? then @tendency << {:calibration_date => s.service.calibration_date, :_results => r["_results"]} end }
+      end
     end
     render :json => @tendency
   end

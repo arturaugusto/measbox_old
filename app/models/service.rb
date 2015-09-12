@@ -1,8 +1,8 @@
 class Service < ActiveRecord::Base
-	has_many :reports
-	has_many :spreadsheets
+	has_many :reports, dependent: :destroy
+	has_many :spreadsheets, dependent: :destroy
 	#has_and_belongs_to_many :assets, join_table: :workbenches, primary_key: :id
-	has_many :workbenches, -> { order "position"}
+	has_many :workbenches, -> { order "position"}, dependent: :destroy
 	has_many :assets, :through => :workbenches
 	belongs_to :user
 	validates_presence_of :order_number

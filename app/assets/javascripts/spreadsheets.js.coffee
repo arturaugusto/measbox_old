@@ -177,7 +177,7 @@ jQuery ->
       if units.length > 0
         _chart_unit = " " + units[0]
       else
-        _chart_unit ""
+        _chart_unit = ""
       return _chart_unit
 
     ################################################################################
@@ -240,7 +240,7 @@ jQuery ->
         series.push
           name: serie_name + ' MPE'
           type: 'line'
-          color: "#000000"
+          color: "#FF1000"
           dashStyle: "ShortDash"
           marker: symbol: "diamond"
           data: upper_point_mpe
@@ -252,7 +252,7 @@ jQuery ->
         series.push
           linkedTo:':previous'
           type: 'line'
-          color: "#000000"
+          color: "#FF1000"
           dashStyle: "ShortDash"
           marker: symbol: "diamond"
           data: lower_point_mpe
@@ -329,11 +329,12 @@ jQuery ->
             grouped_data = _.groupBy data.map((x) ->
               obj = x._results
               obj.calibration_date = x.calibration_date
+              if obj.calibration_date is null
+                console.warn "Calibration_date is null. Trend chart will not be shown properly."
               obj.serie_name = "Serie"
               return obj
             ), "calibration_date"
 
-            # Find closest point for comparision
             choosen_data = []
             _.keys(grouped_data).map((k) ->
               group = grouped_data[k]
@@ -349,6 +350,22 @@ jQuery ->
                     Math.abs(_results.uut_readout - x.uut_readout)
                   )[0]
                   choosen_data.push(closest)
+              else
+                # Find where scope have exact same keys
+                group_with_same_keys = _.filter(group, (g) ->
+                  arr1 = _.keys(_results.scope)
+                  arr2 = _.keys(g.scope)
+                  # Compare if arrays have same keys
+                  # http://stackoverflow.com/questions/1773069/using-jquery-to-compare-two-arrays-of-javascript-objects
+                  return $(arr1).not(arr2).length is 0 and $(arr2).not(arr1).length is 0
+                )
+                if group_with_same_keys.length
+                  group = group_with_same_keys
+                  # find closest item
+                  closest = _.sortBy(group, (x) ->
+                    Math.abs(_results.uut_readout - x.uut_readout)
+                  )[0]
+                  choosen_data.push(closest)
             )
             # Sort
             choosen_data = _.sortBy(choosen_data, (x) ->
@@ -359,8 +376,11 @@ jQuery ->
               return Date.parse(x)
             
             series = set_chart_series(choosen_data, "calibration_date", x_key_parser)
-            chart_unit = choosen_data[0].uut_unit
-            
+            if choosen_data.length
+              chart_unit = choosen_data[0].uut_unit
+            else
+              chart_unit = ""
+
             $('#trend_container').highcharts
               credits: enabled: false
               exporting: enabled: true
