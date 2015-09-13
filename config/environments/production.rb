@@ -24,7 +24,7 @@ MeasWeb::Application.configure do
 
   # set true Needed when using wiked_pdf??
   config.serve_static_assets = true
-  config.assets.precompile += ['bootstrap-overwrite.css']
+  config.assets.precompile += ['bootstrap-overwrite.css.scss']
 
   # Compress JavaScripts and CSS.
   config.assets.js_compressor = :uglifier
