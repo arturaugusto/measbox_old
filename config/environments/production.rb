@@ -23,7 +23,7 @@ MeasWeb::Application.configure do
   #config.serve_static_assets = false
 
   # set true Needed when using wiked_pdf??
-  config.serve_static_assets = false
+  config.serve_static_assets = true
   config.assets.precompile += ['bootstrap-overwrite.css']
 
   # Compress JavaScripts and CSS.
