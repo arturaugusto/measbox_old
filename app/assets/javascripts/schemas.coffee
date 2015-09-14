@@ -393,7 +393,7 @@ window.mathFormSchema =
   title: 'Model'
   options:
     disable_edit_json: false
-    disable_properties: false
+    disable_properties: true
     disable_collapse: false
     collapsed: false
   properties:
@@ -433,20 +433,22 @@ window.mathFormSchema =
           influence:
             type: 'boolean'
             title: 'Influence'
+            format: 'checkbox'
             default: false
           readout:
             type: 'boolean'
             title: 'Readout'
+            format: 'checkbox'
             default: true
       default: 
         [
           {
-            "name": "VI",
+            "name": "UUT",
             "color": "#ffffe7",
             "influence": false
           }
           {
-            "name": "VC",
+            "name": "Ref",
             "color": "#f2f1ff",
             "influence": false
           }
@@ -462,7 +464,7 @@ window.mathFormSchema =
       type: 'code'
       format: 'matlab'
       title: 'Mathematical model'
-      default: 'VI - VC'
+      default: 'UUT - Ref'
       options:
         height: '40px'        
     additional_options:
@@ -600,6 +602,11 @@ window.reclassificationFormSchema =
 window.assetFormSchema = 
   type: "object"
   title: "Asset snippet"
+  options:
+    collapsed: true
+    disable_edit_json: false
+    disable_properties: true
+    disable_collapse: false
   properties:
     name:
       title: "Name"
@@ -632,7 +639,7 @@ window.assetFormSchema =
         options:
           collapsed: true     
           disable_edit_json: true
-          disable_properties: false
+          disable_properties: true
         properties:
           limits:
             type: "object"
@@ -642,7 +649,7 @@ window.assetFormSchema =
             options:
               collapsed: true     
               disable_edit_json: true
-              disable_properties: false
+              disable_properties: true
             properties:
               start:
                 title: "Range start"
@@ -780,6 +787,9 @@ window.spreadsheetEntriesSchema =
 window.modelAutomationCodeSchema = 
   options:
     collapsed: true
+    disable_edit_json: true
+    disable_properties: true
+    disable_collapse: false
   type: "object"
   title: "Model Automation"
   properties:
