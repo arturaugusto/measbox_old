@@ -17,9 +17,18 @@
 -->
 
 <div class="page-header">
-  <p class="lead">Measbox is a metrology community-driven web based information source.</p>
-  <p class="lead">Proud to present this beta test release!</p>
-  Check the <a target="_blank" href="https://www.youtube.com/user/arturaugusto/videos">youtube channel</a> if you wish to learn more from screencasts.<br><br>
+  <p class="lead">Measbox aims to be a web based community-driven metrological information source.</p>
+  <p class="lead">Glad to present the first beta testing release!</p>
+
+  <p>Watch the following 6 min introductory video (no audio required) from our <a target="_blank" href="https://www.youtube.com/user/arturaugusto/videos">youtube channel</a> to get the idea how would be the calibration of a digital multimeter:</p>
+  <center>
+    <!-- 16:9 aspect ratio -->
+    <div class="embed-responsive embed-responsive-16by9">
+      <iframe class="embed-responsive-item" width="854" height="480" src="https://www.youtube.com/embed/wx0R1OfwH4s" frameborder="0" allowfullscreen></iframe>
+    </div>
+  </center>
+  <br>
+  
   <p class="lead"><%=t '.title', :default => [:'helpers.titles.create', 'Register your %{model}:'], :model => model_class.model_name.human.titleize %></p >
 </div>
 <%= render :partial => 'form' %>

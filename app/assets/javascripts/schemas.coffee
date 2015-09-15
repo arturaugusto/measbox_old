@@ -189,7 +189,7 @@ window.pdfOptionsSchema =
           type: "string"
         right:
           type: "string"
-          default: "Cert. n{{certificates[0].cert_number}}"
+          default: ""
         spacing:
           type: "number"
         font_name:

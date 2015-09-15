@@ -97,7 +97,7 @@ Calibration Information
    |    |   |    |
 --:|:--|--:|:--|
 **Customer Name:**   |   {{ uut_assets[0].company.name }}  | **Certificate Number:** | {{service.information.certificates[0].cert_number}} 
-**Address:**                |   {{ uut_assets[0].company.details }} | **Calibration Date:** | {{service.calibration_date|date('M d, Y')}}
+**Address:**                |   {{ uut_assets[0].company.address }} | **Calibration Date:** | {{service.calibration_date|date('M d, Y')}}
 **PO Number:**          |   {{service.order_number}}                | **Certificate Date:** | {{ now|date('M d, Y') }}  
 **Procedures:**           | {% for p in service.information.procedures -%}{{p.procedure}}, version {{p.version}}{%- endfor %} | **Temperature:** | {{service.information.enviromental_conditions.temperature}} &plusmn; 3 ºC
 **Notes:**  | {%- for n in service.information.notes -%} - {{n.note}} <br> {%- endfor -%} | **Relative humidity:**  |  {{service.information.enviromental_conditions.humidity}}  &plusmn; 10 %
