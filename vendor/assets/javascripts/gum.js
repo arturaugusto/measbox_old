@@ -362,7 +362,6 @@
       });
     }
     if (typeof readout === "object"){
-      console.log(readout);
       var n = readout.length;
       // Case n is 0 or 1, it will be a array with only none or one value,
       // so in this case, set readout as only one numeric value
@@ -391,7 +390,7 @@
         this.uncertainties_var_names.push(v.name);
       }
     }
-    this._scope[v.name] = mean_value * prefix + v.correction;
+    this._scope[v.name] = mean_value * prefix;
   }
 
   var type_b_uncertainties = function(v){
@@ -407,14 +406,6 @@
         "k": u.k
       }
       that.uncertainties.push(unc);
-      // Init correction
-      if (v.correction === undefined){
-        v.correction = 0;
-      }
-      // Increment correction
-      if (typeof u.correction === "number"){
-        v.correction += u.correction;
-      }
     });
     // Create the flat version of var_names repeating the name, uncertainties.length times
     this.uncertainties_var_names = this.uncertainties_var_names.concat( [], rep(v.name, v.uncertainties.length) );
@@ -604,7 +595,7 @@
     // Output
     this.y = this._xfunc.iterate();
 
-    // UNDER DEVELOPMENT
+    // UNDER DEVELOPMENT ***************************************
     // Monte Carlo
     // 
 

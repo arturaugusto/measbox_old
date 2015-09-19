@@ -571,6 +571,9 @@ jQuery ->
       $(td).css "background": "#EEE"
 
     mathjs_eval_res = (formula, scope, res_var) ->
+      #console.log "-----------"
+      #console.log formula
+      #console.log scope
       if formula is undefined then return 0
       if typeof formula is "number" then return formula
       eval_res = mathjs.eval(formula, scope)
@@ -651,12 +654,11 @@ jQuery ->
 
         # init max permissive error
         this._mpe = 0
-
-        # Hold extra information to the label
-        #this._uut_range_label = ""
         # Hold resolution for each variable
         this._resolutions = {}
         this._units = {}
+        var_range_unc = {}
+        var_range_scope = {}
         unc_source_obj.variables.map (v, var_index) ->
           # get snippet by label
           snippet = _.findWhere(snippets_editor.getValue(), {label: window.hot.getDataAtRowProp(row_num, v.name).snippet} )
@@ -666,7 +668,8 @@ jQuery ->
           # the first index is the UUT
           if var_index is 0 then that._uut_id = snippet.asset_id
           # Copy scope by val
-          scope = Object.create(that.base_scope)
+          #scope = Object.create(that.base_scope)
+          scope = JSON.parse JSON.stringify that.base_scope
           scope.readout = that.base_scope[v.name]
           scope.is_fixed = if snippet.value.kind is "Fixed" then true else false
           scope.is_uut = (v.name is that._uut_name)
@@ -694,44 +697,53 @@ jQuery ->
 
             truth_test = mathjs.eval(r.limits.autorange_conditions, scope)
             if truth_test
-              # Set extra info to the label when uut range is found
-              #if scope.is_uut
-              #  #that._uut_range_label = " (" + r.name + ")"
-              #  that._uut_range_label = " (teste)"
-
               # Check for reclassifications
               if r.reclassification isnt undefined
                 uncertainties = r.reclassification
               else
                 uncertainties = r.uncertainties
-
-              u_list = uncertainties.map (range_u) ->
-                u_res = mathjs_eval_res(range_u.formula, scope, "u")
-                c_res = mathjs_eval_res(range_u.correction, scope, "c")
-                # Get possible max permissive error increment
-                if range_u.name is "MPE"
-                  that._mpe += u_res
-                  # When unc is MPE and variable is UUT, dont add uncertanty to budget
-                  if scope.is_uut
-                    u_res = 0
-
-                u_obj = 
-                  name: range_u.name
-                  value: u_res
-                  distribution: range_u.distribution
-                  correction: parseFloat(c_res)
-
-                if range_u.k isnt undefined then u_obj.k = range_u.k
-                if range_u.df isnt undefined then u_obj.df = range_u.df
-                if range_u.ci isnt undefined then u_obj.ci = range_u.ci
-                return u_obj
-              # add uncertainties
-              unc_source_obj.variables[var_index].uncertainties = u_list
-              # If is fixed, need to set the readout value to GUM variable entry
-              if scope.is_fixed
-                unc_source_obj.variables[var_index].value = scope.readout
               # Range found, break loop
               break
+            
+          # Set fixed values and corrections
+          total_correction = 0
+          var_range_unc[v.name] = uncertainties
+          uncertainties.map (range_u) ->
+            c_res = mathjs_eval_res(range_u.correction, scope, "c")
+            total_correction = total_correction + c_res
+          # If is fixed, need to set the readout value to GUM variable entry
+          corr_value = scope.readout + total_correction
+          if scope.is_fixed
+            unc_source_obj.variables[var_index].value = corr_value
+          that.base_scope[v.name] = corr_value
+          var_range_scope[v.name] = scope
+
+        # Now with a updated scope, set uncertanties
+        unc_source_obj.variables.map (v, var_index) ->
+          # Set scope
+          scope = $.extend({}, var_range_scope[v.name], that.base_scope)
+          scope.readout = scope[v.name]
+          u_list = var_range_unc[v.name].map (range_u) ->
+            u_res = mathjs_eval_res(range_u.formula, scope, "u")
+            # Get possible max permissive error increment
+            if range_u.name is "MPE"
+              that._mpe += u_res
+              # When unc is MPE and variable is UUT, dont add uncertanty to budget
+              if scope.is_uut
+                u_res = 0
+
+            u_obj = 
+              name: range_u.name
+              value: u_res
+              distribution: range_u.distribution
+
+            if range_u.k isnt undefined then u_obj.k = range_u.k
+            if range_u.df isnt undefined then u_obj.df = range_u.df
+            if range_u.ci isnt undefined then u_obj.ci = range_u.ci
+            return u_obj
+          # add uncertainties
+          unc_source_obj.variables[var_index].uncertainties = u_list
+
         # Get snippet object
         worksheet_snippet = _.findWhere(snippets_editor.getValue(), {label: window.hot.getDataAtRowProp(row_num, this._uut_name).snippet})
         # Set label text
