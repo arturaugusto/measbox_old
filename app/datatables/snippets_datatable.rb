@@ -20,10 +20,10 @@ private
     snippets.map do |snippet|
       
       if snippet.flavor == 1 then
-        link_text = "Asset"
+        link_text = "Instrument"
         link_class = "asset_snippet_chooser"
       else
-        link_text = "Mathematical"
+        link_text = "Procedure"
         link_class = "math_snippet_chooser"
        end
       [

@@ -248,6 +248,11 @@ jQuery ->
     ################################################################################
 
     toggleModelList = ->
+
+      # If snippet is already defined, show tags controls
+      if $("#snippet_flavor").val() isnt ""
+        $(".hidden_tags_input").toggle()
+
       if parseInt($("#snippet_flavor").val()) is flvr.math
         $(".snippet_model_list").hide()
         # remove all model tags

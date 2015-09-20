@@ -2,9 +2,13 @@
   <%= f.error_notification %>
 
   <div class="form-inputs snippet_feature">
-  <%= f.input :model_list, input_html: { value: @snippet.model_list.join(",") } %>
-  <%= f.input :functionality_list, input_html: { value: @snippet.functionality_list.join(",") } %>
-  <%= f.input :flavor, collection: [['Asset modeling',1], ['Mathematical modeling',2]], prompt: "Choose snippet flavor...", as: (if @snippet.flavor != nil then :hidden else :select end), input_html: { class: 'form-control' } %>
+
+  <div class="hidden_tags_input">
+    <%= f.input :model_list, :label => "Associate with models", input_html: { value: @snippet.model_list.join(",") } %>
+    <%= f.input :functionality_list, :label => "Procedure groups", input_html: { value: @snippet.functionality_list.join(",") } %>
+  </div>
+
+  <%= f.input :flavor, collection: [['Instrument',1], ['Procedure',2]], prompt: "Choose template type...", as: (if @snippet.flavor != nil then :hidden else :select end), input_html: { class: 'form-control' } %>
   <br>
   <%= f.input :validated, as: :boolean, boolean_style: :inline, label: false, input_html: { :data => {toggle: 'toggle', on: 'Validated', off: 'Unvalidated', onstyle: 'success'} } %>
   <%= f.input :value, as: :text, label: false, input_html: { value: @snippet.value.to_json } %>
@@ -12,6 +16,6 @@
   <span class="ranges_template_feature"></span>
   <br>
   <div class="form-actions">
-    <%= f.button :submit, :class => 'btn btn-primary' %>
+    <%= f.button :submit, action_name.humanize + " Template", :class => 'btn btn-primary' %>
   </div>
 <% end %>

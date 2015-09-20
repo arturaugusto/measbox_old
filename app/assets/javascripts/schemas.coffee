@@ -390,7 +390,7 @@ window.uncertaintiesSchema = uncertainties:
 
 window.mathFormSchema = 
   type: 'object'
-  title: 'Model'
+  title: 'Procedure template'
   options:
     disable_edit_json: false
     disable_properties: true
@@ -601,7 +601,7 @@ window.reclassificationFormSchema =
 
 window.assetFormSchema = 
   type: "object"
-  title: "Asset snippet"
+  title: "Instrument template"
   options:
     collapsed: true
     disable_edit_json: false
@@ -704,7 +704,7 @@ window.assetFormSchema =
 window.choosenSnippetsSchema =
   type: "array"
   format: "tabs"
-  title: "Chosen snippets"
+  title: "Chosen templates"
   options:
     disable_edit_json: true
     disable_properties: true
@@ -712,7 +712,7 @@ window.choosenSnippetsSchema =
     collapsed: true
   items:
     type: "object"
-    title: "snippet"
+    title: "template"
     headerTemplate: "{{ self.label }}"
     options:
       collapsed: true

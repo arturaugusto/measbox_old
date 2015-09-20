@@ -22,7 +22,8 @@
 en:
   hello: "Hello world"
   activerecord:
-    models:
+    Snippet: "Template"
+    snippets:
       kind:
         one: Type
         other: Types

@@ -51,7 +51,7 @@
                 </ul>
               </li>
 
-              <%= content_tag(:li, link_to("Snippets", snippets_path), class: "#{ controller_name=="snippets"? "active" : "" }" ) %>
+              <%= content_tag(:li, link_to("Templates", snippets_path), class: "#{ controller_name=="snippets"? "active" : "" }" ) %>
             <% end %>
             <% if user_signed_in? %>
               <%= content_tag(:li, link_to( content_tag(:i, "", class: "glyphicon glyphicon-user") + " " +current_user.email, edit_user_path(current_user) ), class: "#{ (controller_name=="users" and current_user.id == params[:id])? "active" : "" }" ) %>
