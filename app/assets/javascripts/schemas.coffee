@@ -390,7 +390,7 @@ window.uncertaintiesSchema = uncertainties:
 
 window.mathFormSchema = 
   type: 'object'
-  title: 'Procedure template'
+  title: 'Procedure'
   options:
     disable_edit_json: false
     disable_properties: true
@@ -523,7 +523,7 @@ window.mathFormSchema =
             '---\n\n' +
 
             'k: {{k_fmt}}  \n' +
-            '&#120642;<sub>eff</sub>: {{veff_fmt}}  \n'
+            '<i>v</i><sub>eff</sub>: {{veff_fmt}}  \n'
     ###            
     procedure:
       propertyOrder: 5
@@ -704,7 +704,7 @@ window.assetFormSchema =
 window.choosenSnippetsSchema =
   type: "array"
   format: "tabs"
-  title: "Chosen templates"
+  title: "Instrumentation"
   options:
     disable_edit_json: true
     disable_properties: true
@@ -775,7 +775,7 @@ window.choosenSnippetsSchema =
 
 window.spreadsheetEntriesSchema =
   type: "object",
-  title: "Data input"
+  title: "Templates"
   options:
     disable_edit_json: false
     disable_properties: false

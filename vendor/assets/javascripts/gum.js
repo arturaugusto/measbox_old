@@ -82,9 +82,17 @@
   // Sum array
   var sum = function(arr){
     var res = 0;
-    for (var i = arr.length - 1; i >= 0; i--) {
-      res += parseFloat(arr[i]);
-    };
+    // If first item of array is not number, check all valures and parse to float
+    var parse_values = typeof arr[0] !== "number" ? true : false;
+    if (parse_values){
+      for (var i = arr.length - 1; i >= 0; i--) {
+        res += parseFloat(arr[i]);
+      };
+    }else{
+      for (var i = arr.length - 1; i >= 0; i--) {
+        res += arr[i];
+      };
+    }
     return(res);
   }
 
@@ -109,11 +117,21 @@
     });
   };
 
+  var area = function(x, y, h){
+    var n = y.length;
+    var sum_y_samples = sum(y);
+    var sum_y = sum_y_samples - (y[0] + y[n-1])/2;
+    var integral;
+    var integral = sum_y*h;
+    return(integral);
+  }
+
   // Trapezoidal integration method.
   // translated from R: http://www.r-bloggers.com/trapezoidal-integration-conceptual-foundations-and-a-statistical-application-in-r/
   var trapezoidal = function(f, t_start, t_end, h){
     var x = seq(t_start, t_end, h);
     var y = sampler(f, x);
+    return(area(x, y, h));
     var n = y.length;
     var sum_y_samples = sum(y);
     var sum_y = sum_y_samples - (y[0] + y[n-1])/2;
@@ -132,6 +150,7 @@
   function invt(v, cl){
     if(cl >= 1 || cl <= 0){
       console.error("confidence level must be < 1 and > 0");
+      return;
     }
     var v_max = 300;
     // limit deg freedom
@@ -238,15 +257,19 @@
     }
 
     // run a iteration of function
-    this.iterate = function(x){
+    this.iterate = function(x, by_ref){
       var scope_updt = {};
       var arg_type = typeof x;
+      // Defines if scope will be copied by ref or reference
+      if (typeof by_ref === 'undefined') { by_ref = false; }
       // If a object is passed, use it as scope
+      // *** Será que preciso usar Object.create aqui? Isto demora muito!
       if(arg_type === "object"){
-        scope_updt = Object.create(x);
+        by_ref ? scope_updt = x : scope_updt = Object.create(x);
       }else{
-        scope_updt = Object.create(that.math_scope);
+        by_ref ? scope_updt = that.math_scope : scope_updt = Object.create(that.math_scope);
       }
+      
       // Accept numeric or string arguments. Strings can be accepted because 
       // they can contain informations such as complex numbers to be parsed 
       // on mathjs, but this was not tested.
@@ -264,43 +287,17 @@
   // create a array of size n repeating val
   var rep = function(val, n){
     var out = [];
-    for (var i = n - 1; i >= 0; i--) {
-      if(typeof val === "object"){
-        // If its a object, return a new one, without passing the iriginal as referenca
+    // If its a object, return a new one, without passing the iriginal as referenca
+    if(typeof val === "object"){
+      for (var i = n - 1; i >= 0; i--) {
         out.push(Object.create(val));
-      }else{
-        out.push(val);
-      }
-    };
-    return out;
-  }
-
-
-  // create a array of size n repeating val
-  var rep2 = function(val, n){
-    var that = this;
-    this.val = val;
-
-    this.build_obj_item = function(){
-      return Object.create(that.val);
-    }
-    this.build_val_item = function(){
-      return that.val;
-    }
-
-    if(typeof this.val === "object"){
-      this.build_item = this.build_obj_item;
+      };
     }else{
-      this.build_item = this.build_val_item;
+      for (var i = n - 1; i >= 0; i--) {
+        out.push(val);
+      };
     }
-
-
-    var arr = [].slice.apply(new Float64Array(n));
-    this.arr = arr;
-
-    return this.arr.map(function(){
-      that.build_item(that.val);
-    })
+    return out;
   }
 
   // Probability distributions
@@ -420,38 +417,6 @@
     this._variables_ci_obj[v.name] = Math.abs(ci);
   }
 
-  // Set monte carlo inputs simulations, binded to main mc scope
-  var mc_simulations = function(u, i){
-    var that = this;
-    var args = [];
-    this.var_name = that.uncertainties_var_names[i];
-    var val = that.mc._scope[i][that.var_name];
-    var effective_dist = u.distribution
-    if(u.distribution === "uniform"){
-      args = [-u.value, u.value];
-    }else if(u.distribution === "triangular"){
-      args = [-u.value, 0, u.value];
-    }else if(u.distribution === "studentt"){
-      args = [u.df];
-    }else if(u.distribution === "beta"){
-      args = [u.alpha, u.beta];
-    }else if(u.distribution === "arcsine"){
-      // Arcsine is a specific case of beta distribution
-      effective_dist = "beta";
-      args = [-0.5, 0.5];
-    }else{ 
-      args = [0, u.value]; // Arguments for normal distribution
-    }
-    var pdf = jStat[effective_dist];
-    this.samples = rand_array(that.mc.M, pdf, args);
-    // Sum samples to expectation/modified expectation
-    // and update scope value for the iteration
-    that.mc._scope.map(function(_, j){
-      that.mc._scope[j][that.var_name] += that.samples[j];
-      return void 0;
-    });
-  }
-
   // taken from http://stackoverflow.com/questions/26941168/javascript-interpolate-an-array-of-numbers
   function interpolateArray(data, fitCount) {
 
@@ -476,32 +441,6 @@
   // javascript version of Matlab linspace
   var linspace = function(start, end, n){
     return interpolateArray([start, end], n);
-  }
-
-  // Determine The shortest coverage interval
-  // JCGM 101:2008, item D.7
-  var sci = function(values, alpha){
-    /*
-    Translated from: http://blogs.datall-analyse.nl/#post26
-    #function for calculating the shortest coverage interval
-    sci <- function (values, alpha=.05){
-    sortedSim <- sort(values)
-    nsim <- length(values)
-    covInt <- sapply( 1:(nsim-round((1-alpha)*nsim) ), function(i) {
-    sortedSim[1+round((1-alpha)*nsim)+(i-1)]-sortedSim[1+(i-1)]})
-    lcl <- sortedSim[which(covInt==min(covInt))]
-    ucl <- sortedSim[1+round((1-alpha)*nsim)+(which(covInt==min(covInt))-1)]
-    c(lcl, ucl)
-    }
-    */
-    var M = values.length;
-    this.alpha = alpha === undefined ? 0.05 : alpha;
-    var cov_interv = values.slice(0,M-Math.round((1-this.alpha)*M)).map(function(_, i) {
-      return values[Math.round((1-this.alpha)*M)+i]-values[i];
-    })
-    var lower_cl = values[cov_interv.indexOf(Math.min.apply(void 0, cov_interv))];
-    var upper_cl = values[Math.round((1-this.alpha)*M)+(cov_interv.indexOf(Math.min.apply(void 0, cov_interv))-1)];
-    return [lower_cl, upper_cl, cov_interv];
   }
 
   var GUM = function(obj){
@@ -598,52 +537,237 @@
     // UNDER DEVELOPMENT ***************************************
     // Monte Carlo
     // 
-
-    if(this.obj.method === "mc"){
+    if(this.obj.mc){
+    //if(true){
       this.mc = {};
-      this.mc.M = 10000;
-      // Create MC scope, repeating the expectation values from GUM framework scope
-      this.mc._scope = rep(this._scope, this.mc.M);
-      // MC distributions inputs simulations
-      this.uncertainties.map(mc_simulations.bind(this));
-
+      this.mc.M = 30000;
       
-      /*this.obj.variables.map(function(v){
-        var that = this;
-        console.log(v.name + " average, max, min: ")
-        var sum = 0;
-        var arr = [];
-        for (var i = that.mc._scope.length - 1; i >= 0; i--) {
-          sum += that.mc._scope[i][v.name];
-          arr.push(that.mc._scope[i][v.name]);
-        };
-        console.log(sum/that.mc._scope.length);
-        console.log( Math.max.apply(void 0, arr) );
-        console.log( Math.min.apply(void 0, arr) );
-        console.log( jStat.histogram(arr, 50).toString().replace(/,/g, "\n") );
-      }.bind(this))*/
-
-      // Compute simulations for model
-      console.log("Computing...");
       this.mc._iterations = [];
-      for (var i = this.mc.M - 1; i >= 0; i--) {
-        this.mc._iterations.push(this._xfunc.iterate(this.mc._scope[i]));
+      // Compute simulations for model
+      var mc_sd = Infinity
+      var num_tolerance = 0;
+      var n_dig = 2;
+      var h = 1; // brusts of iterations
+
+      var hist_x_min = 0;
+      var hist_x_max = 0;
+      var check_stable_h = 10;
+      // Monitoring parameters
+      var results_of_interest = {s_y: [], s_u: [], s_y_low: [], s_y_high: []};
+      var stabilized;
+      this.mc._trials_exceeded = false;
+      console.log("Computing...");
+      while ( true ) {
+        // Create MC scope, repeating the expectation values from GUM framework scope
+        this.mc._scope = rep(this._scope, this.mc.M);
+        // MC distributions inputs simulations
+        this.uncertainties.map(mc_simulations.bind(this));
+        for (var i = this.mc.M - 1; i >= 0; i--) {
+          this.mc._iterations.push(this._xfunc.iterate(this.mc._scope[i], true));
+        };
+        // Mean value
+        this.mc._iterations_mean = sum(this.mc._iterations) / (this.mc.M * h);
+        // ref: 7.6 Estimate of the output quantity and the associated standard uncertainty JCGM_101_2008_E.pdf
+        this.mc.uc = Math.sqrt(jStat.sumsqrd( inc_arr(this.mc._iterations, this.mc._iterations_mean)) * (1/((this.mc.M * h)-1)));
+        // parameter to monitor on adaptative MC
+        results_of_interest.s_u.push(this.mc.uc);
+        results_of_interest.s_y.push(this.mc._iterations_mean);
+        // Its slow to run this here
+        // TODO: Think if its mandatory check sci parameters 
+        // for stabilization
+        /**
+        // Sort iterations
+        this.mc._iterations.sort(function sortNumber(a,b){return a - b});
+        // ref: 7.7 Coverage interval for the output quantity
+        this.mc.p = (1 - this.obj.cl);
+        // The shortest coverage interval
+        this.mc.sci_limits = sci(this.mc._iterations, this.mc.p);
+        results_of_interest.s_y_low.push(this.mc.sci_limits[0]);
+        results_of_interest.s_y_high.push(this.mc.sci_limits[1]);
+        **/
+
+        if (h > check_stable_h){
+          // Define numerical tolerance
+          // ref: 7.9.2 Numerical tolerance associated with a numerical value JCGM_101_2008_E.pdf
+          num_tolerance = parseFloat("1e"+(this.mc.uc/(Math.pow(10,n_dig-1))).toExponential().split("e")[1])/2;
+          // standard desviation for adaptative MC
+
+          // Check if all parameters of intesert are valid,
+          // by comparing if its < 2*tolerance
+          stabilized = true;
+          Object.keys(results_of_interest).map(function(k){
+            var item_size = results_of_interest[k].length;
+            if (item_size > 0) {
+              var mean = sum(results_of_interest[k]) / item_size;
+              var s = sd(results_of_interest[k], mean);
+              stabilized = stabilized && (num_tolerance > s*2);
+              console.log(k);
+              console.log(s*2);
+            };
+            return void 0;
+          })
+
+          if(h > check_stable_h*10){
+            console.warn("Monte carlo trials exceeded!");
+            this.mc._trials_exceeded = true;
+          };
+          if (stabilized || this.mc._trials_exceeded){
+
+            // Sort iterations
+            this.mc._iterations.sort(function sortNumber(a,b){return a - b});
+            // ref: 7.7 Coverage interval for the output quantity
+            this.mc.p = (1 - this.obj.cl);
+            // The shortest coverage interval
+            this.mc.sci_limits = sci(this.mc._iterations, this.mc.p);
+
+            // Compute a histogram
+            this.mc.histogram = {}
+            this.mc.histogram.y = jStat.histogram(this.mc._iterations, 100);
+            iter_n = this.mc._iterations.length;
+            hist_x_min = this.mc._iterations[0];
+            hist_x_max = this.mc._iterations[iter_n-1];
+            this.mc.histogram.x = seq(hist_x_min, hist_x_max, (hist_x_max - hist_x_min) / this.mc.histogram.y.length );
+
+
+            console.log("Finish!");
+            break;
+          }          
+        }
+        console.log("Burst " + h);
+        h = h + 1;
+      }
+      // Update M
+      this.mc.M =  this.mc._iterations.length;
+      // Equivalent interval for GUM
+      for (var i = this.mc.histogram.x.length - 1; i >= 1; i--) {
+        if ( (this.mc.histogram.x[i] >= this.U) && (this.mc.histogram.x[i-1] <= this.U) ){
+          this.mc._hist_gum_eq_high_i = i;
+        }
+        else if ( (this.mc.histogram.x[i] >= -this.U) && (this.mc.histogram.x[i-1] <= -this.U) ){
+          this.mc._hist_gum_eq_low_i = i;
+        }
       };
-      console.log("Finish!");
-      // Sort iterations
-      this.mc._iterations.sort(function sortNumber(a,b){return a - b});
-      // Mean value
-      this.mc._iterations_mean = sum(this.mc._iterations) / this.mc.M;
-      // Compute a histogram
-      this.mc.histogram = jStat.histogram(this.mc._iterations, 100);
-      // ref: 7.6 Estimate of the output quantity and the associated standard uncertainty CGM_101_2008_E.pdf
-      this.mc.uc = Math.sqrt(jStat.sumsqrd( inc_arr(this.mc._iterations, this.mc._iterations_mean)) * (1/(this.mc.M-1)));
-      // ref: 7.7 Coverage interval for the output quantity
-      this.mc.p = (1 - this.obj.cl);
-      // The shortest coverage interval
-      this.mc.sci_limits = sci(this.mc._iterations, this.mc.p);
+      var step = this.mc.histogram.x[1]-this.mc.histogram.x[0];
+      var hist_area = area(this.mc.histogram.x, this.mc.histogram.y, step);
+      // apply correction to histogram samples
+      this.mc.histogram.y = jStat( this.mc.histogram.y ).divide(hist_area)[0];
+      // Studentt curve
+      this.mc.gum_curve = this.mc.histogram.x.map(function(i){
+        return jStat.studentt.pdf(i/that.uc, that.veff)/that.uc;
+      });
+
+      // Validation
+      this.mc.num_tolerance = num_tolerance;
+      this.mc.n_dig = n_dig;
+      // GUM validated?
+      this.mc.d_low = Math.abs(this.y - this.U - this.mc.sci_limits[0])
+      this.mc.d_high = Math.abs(this.y + this.U - this.mc.sci_limits[1])
+      this.mc.GUF_validated = (this.mc.d_low < num_tolerance) && (this.mc.d_high < num_tolerance);
+
+      console.log(this.mc)
     }
     return(void 0);
   }
+
+
+    // Translated from https://gist.github.com/endolith/255291#file-parabolic-py
+    var parabolic = function(f, x){
+      var xv = 1/2. * (f[x-1] - f[x+1]) / (f[x-1] - 2 * f[x] + f[x+1]) + x;
+      var yv = f[x] - 1/4. * (f[x-1] - f[x+1]) * (xv - x);
+      return [xv, yv];
+    }
+
+
+  // Ref: http://www.hevi.info/2012/03/interpolating-and-array-to-fit-another-size/
+  function interpolateArray(data, fitCount) {
+    var linearInterpolate = function (before, after, atPoint) {
+      return before + (after - before) * atPoint;
+    };
+
+    var newData = new Array();
+    var springFactor = new Number((data.length - 1) / (fitCount - 1));
+    newData[0] = data[0]; // for new allocation
+    for ( var i = 1; i < fitCount - 1; i++) {
+      var tmp = i * springFactor;
+      var before = new Number(Math.floor(tmp)).toFixed();
+      var after = new Number(Math.ceil(tmp)).toFixed();
+      var atPoint = tmp - before;
+      newData[i] = linearInterpolate(data[before], data[after], atPoint);
+    }
+    newData[fitCount - 1] = data[data.length - 1]; // for new allocation
+    return newData;
+  };
+
+
+  // Determine The shortest coverage interval
+  // JCGM 101:2008, item D.7
+  var sci = function(values, alpha){
+    /*
+    Translated from: http://blogs.datall-analyse.nl/#post26
+    #function for calculating the shortest coverage interval
+    sci <- function (values, alpha=.05){
+      sortedSim <- sort(values)
+      nsim <- length(values)
+      covInt <- sapply( 1:(nsim-round((1-alpha)*nsim) ), function(i) {
+        sortedSim[1+round((1-alpha)*nsim)+(i-1)]-sortedSim[1+(i-1)]
+      })
+      lcl <- sortedSim[which(covInt==min(covInt))]
+      ucl <- sortedSim[1+round((1-alpha)*nsim)+(which(covInt==min(covInt))-1)]
+      c(lcl, ucl)
+    }
+    */
+
+    var size_to_interpolate = 0;
+    if (values.length < size_to_interpolate) {
+      console.log("Interpolate...");
+      values = interpolateArray(values, size_to_interpolate);
+      console.log("Interpolate... Done!");
+    };
+
+    var M = values.length;
+    this.alpha = alpha === undefined ? 0.05 : alpha;
+    var cov_interv = values.slice(0,M-Math.round((1-this.alpha)*M)).map(function(_, i) {
+      return values[Math.round((1-this.alpha)*M)+i]-values[i];
+    })
+    var lower_cl_i = cov_interv.indexOf(Math.min.apply(void 0, cov_interv));
+    var lower_cl = values[lower_cl_i];
+    var upper_cl_i = Math.round((1-this.alpha)*M)+(cov_interv.indexOf(Math.min.apply(void 0, cov_interv))-1);
+    var upper_cl = values[upper_cl_i];
+    //return [lower_cl, upper_cl, cov_interv];
+    return [lower_cl, upper_cl];
+  }
+
+  // Set monte carlo inputs simulations, binded to main mc scope
+  var mc_simulations = function(u, i){
+    var that = this;
+    var args = [];
+    this.var_name = that.uncertainties_var_names[i];
+    var val = that.mc._scope[i][that.var_name];
+    var effective_dist = u.distribution
+    if(u.distribution === "uniform"){
+      args = [-u.value, u.value];
+    }else if(u.distribution === "triangular"){
+      args = [-u.value, 0, u.value];
+    }else if(u.distribution === "studentt"){
+      args = [u.df];
+    }else if(u.distribution === "beta"){
+      args = [u.alpha, u.beta];
+    }else if(u.distribution === "arcsine"){
+      // Arcsine is a specific case of beta distribution
+      effective_dist = "beta";
+      args = [-0.5, 0.5];
+    }else{ 
+      args = [0, u.value]; // Arguments for normal distribution
+    }
+    var pdf = jStat[effective_dist];
+    this.samples = rand_array(that.mc.M, pdf, args);
+    // Sum samples to expectation/modified expectation
+    // and update scope value for the iteration
+    for (var i = this.mc._scope.length - 1; i >= 0; i--) {
+      this.mc._scope[i][this.var_name] += this.samples[i];
+    };
+  }
+
+
   window.GUM = GUM;
 })();

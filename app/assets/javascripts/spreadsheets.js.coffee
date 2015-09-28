@@ -99,6 +99,27 @@ jQuery ->
   # Spreadsheet specific
   $(".spreadsheet_feature").each ->
 
+    # Fix chart positioning on bootstrap modal
+    # data chart:
+    $('#chart').on 'show.bs.modal', ->
+      $('#chart_container').css 'visibility', 'hidden'
+      return
+    $('#chart').on 'shown.bs.modal', ->
+      $('#chart_container').css 'visibility', 'initial'
+      chart = $('#chart_container').highcharts()
+      chart.reflow()
+      return
+    # Monte Carlo
+    $('#mcPlot').on 'show.bs.modal', ->
+      $('#mc_container').css 'visibility', 'hidden'
+      return
+    $('#mcPlot').on 'shown.bs.modal', ->
+      $('#mc_container').css 'visibility', 'initial'
+      chart = $('#mc_container').highcharts()
+      chart.reflow()
+      return
+
+
     $("#spreadsheet_tag_list").tagsinput
 
 
@@ -497,6 +518,8 @@ jQuery ->
         curr_data = hot.getData()[options.end.row]
         build_unc_table(curr_data._results, curr_data._range_id, curr_data._uut_id)
         $('#rowDetails').modal('toggle')
+      if key is "mc"
+        process_entries([hot.getSelected()], true)
       return
 
     snippets_autocomplet_source = (query, process) ->
@@ -587,7 +610,7 @@ jQuery ->
         res = eval_res
       return res
 
-    process_entries = (changes) ->
+    process_entries = (changes, mc) ->
       that = this
       ################################################################################
       # When changes exists and its not seting results
@@ -759,7 +782,12 @@ jQuery ->
 
         # Entry data
         console.log "Entry data"
-        console.log unc_source_obj
+
+        # Check for monte carlo
+        if mc is true
+          unc_source_obj.mc = true
+        else
+          unc_source_obj.mc = false
 
         try
           calc = new GUM(unc_source_obj)
@@ -789,6 +817,101 @@ jQuery ->
           "units": this._units
           #"_uut_id": this._uut_id
           #"_range_id": this._range_id
+
+        if mc is true
+          $('#mcPlot').modal('toggle')
+          # Unit on tooltip
+          tooltip_unit = if _results.uut_unit isnt '-' then _results.uut_unit else ''
+          y_ax_unit = if _results.uut_unit isnt '-' then _results.uut_unit else 'unit'
+          mc = calc.mc
+          mc_chart = new (Highcharts.Chart)(
+            credits: enabled: false
+            title: text: "Probability density function"
+            chart:
+              renderTo: 'mc_container'
+              type: 'column'
+            xAxis: 
+              title: text: y_ax_unit
+              plotLines: [ {
+                value: mc.sci_limits[0]
+                color: 'blue'
+                width: 2
+                #label:
+                #  text: 'MCM low: ' + mc.sci_limits[0].toExponential(3)
+                #  style: color: 'black'
+              }, {
+                value: mc.sci_limits[1]
+                color: 'blue'
+                width: 2
+                #label:
+                #  text: 'MCM high: ' + mc.sci_limits[1].toExponential(3)
+                #  style: color: 'black'
+              }, {
+                value: -calc.U
+                color: '#FF1000'
+                dashStyle: 'shortdash'
+                width: 2
+                #label:
+                #  text: 'GUM low: ' + -calc.U.toExponential(3)
+                #  style: color: 'black'
+              }, {
+                value: calc.U
+                color: '#FF1000'
+                dashStyle: 'shortdash'
+                width: 2
+                #label:
+                #  text: 'GUM high: ' + calc.U.toExponential(3)
+                #  style: color: 'black'                
+              } ]
+              #categories: calc.mc.histogram.x
+              labels: formatter: ->
+                @value.toExponential(2)
+            yAxis:
+              title: text: "Probability density/(1/" + y_ax_unit + ")"
+            series: [
+              {
+                name: 'MC'
+                data: calc.mc.histogram.y 
+                pointStart: calc.mc.histogram.x[0]
+                pointInterval: calc.mc.histogram.x[1] - calc.mc.histogram.x[0]
+                tooltip:
+                  headerFormat: '<b>{series.name}</b><br>'
+                  pointFormatter: () ->
+                    return '<b>U:</b> ' + this.x.toExponential(2) + ' ' + tooltip_unit
+              },{
+                name: 'GUM'
+                data: calc.mc.gum_curve
+                color: '#FF1000'
+                type: 'spline'
+                pointStart: calc.mc.histogram.x[0]
+                pointInterval: calc.mc.histogram.x[1] - calc.mc.histogram.x[0]
+                tooltip:
+                  headerFormat: '<b>{series.name}</b><br>'
+                  pointFormatter: () ->
+                    return '<b>U:</b> ' + this.x.toExponential(2) + ' ' + tooltip_unit
+              }
+            ]
+            plotOptions: column:
+              shadow:false
+              borderWidth:.5
+              borderColor:'blue'
+              pointPadding:0
+              groupPadding:0
+              color: 'rgba(204,204,204,.65)'
+          )
+          _results.mc = _.omit(mc, ['_scope', '_iterations', '_iterations_mean', 'histogram', 'histogram_x', 'gum_curve']);
+          gum_text = 
+            '<table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-striped"><caption><b>RESULTS</b></caption>' + \
+            '<tr><td>M</td><td> <b>' + mc.M + '</b></td></tr>' + \
+            '<tr><td>y</td><td> <b>' + mc._iterations_mean.toExponential(2) + '</b></td></tr>' + \
+            '<tr><td>u(y)</td><td> <b>' + mc.uc.toExponential(2) + '</b></td></tr>' + \
+            '<tr><td>~' + Math.round((1 - mc.p)*100) + ' % coverage interval</td><td> <b>[' + mc.sci_limits[0].toExponential(2) + ', ' + mc.sci_limits[1].toExponential(2) + ']</b></td></tr>' + \
+            '<tr><td>d<sub>low</sub></td><td> <b>' + mc.d_low.toExponential(2) + '</b></td></tr>' + \
+            '<tr><td>d<sub>high</sub></td><td> <b>' + mc.d_high.toExponential(2) + '</b></td></tr>' + \
+            '<tr><td>GUF validated (δ = ' + mc.num_tolerance + ')?</td><td> <b>' + mc.GUF_validated + '</b></td></tr>' + \
+            '</table>'
+          $("#gum_text").html(gum_text);
+          
 
         # Copy var values to results
         _.extend(_results, calc._scope, that.base_scope)
@@ -891,7 +1014,7 @@ jQuery ->
         else
           # Snippet col
           that.dataSchema[v.name]["snippet"] = null
-          that.col_headers.push v.name+" snippet"
+          that.col_headers.push v.name+' inst.'
           that.columns.push
             data: v.name+".snippet"
             color: v.color
@@ -977,6 +1100,8 @@ jQuery ->
               name: "Chart"
             details:
               name: "Details"
+            mc:
+              name: "Monte Carlo"
             permalink:
               name: "Permalink"
             run_automation:
@@ -1057,7 +1182,7 @@ jQuery ->
         window.spreadsheetEditor = create_json_editor("#spreadsheet_table_json", window.spreadsheetEntriesSchema)
         window.spreadsheetEditor.on "ready", () ->
 
-          if not standaloneMode()
+          if not standaloneMode
             ################################################################################
             # Refresh choosen snippets TODO: Clean this, maybe using other aproach, like other json-editor
             ################################################################################
@@ -1145,7 +1270,7 @@ jQuery ->
           window.hot.loadData(JSON.parse($("#spreadsheet_spreadsheet_json").val()))
 
           # If its on standalone mode
-          if standaloneMode()
+          if standaloneMode
             changes = []
             hot.getData().map (x, i) ->
               changes.push [
@@ -1336,13 +1461,3 @@ jQuery ->
         plotOptions: spline: marker: enabled: true
         tooltip: shared: true
         series: series
-
-      # Fix chart positioning on bootstrap modal
-      $('#chart').on 'show.bs.modal', ->
-        $('#chart_container').css 'visibility', 'hidden'
-        return
-      $('#chart').on 'shown.bs.modal', ->
-        $('#chart_container').css 'visibility', 'initial'
-        chart = $('#chart_container').highcharts()
-        chart.reflow()
-        return

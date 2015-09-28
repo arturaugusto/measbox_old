@@ -3,9 +3,40 @@
 # You can use CoffeeScript in this file: http://coffeescript.org/
 jQuery ->
 
-  # CHeck if spreadsheet is on standalone mode
-  window.standaloneMode = () ->
-    return not $(".edit_spreadsheet, .snippet_datatables_feature").length
+  $(".spreadsheet_feature, .snippet_datatables_feature").each ->
+    # If spreadsheet is on standalone mode
+    window.standaloneMode = false
+
+    # http://stackoverflow.com/questions/979975/how-to-get-the-value-from-the-url-parameter
+    query_string = {}
+    query = window.location.search.substring(1)
+    vars = query.split('&')
+    if query.length
+      i = 0
+      while i < vars.length
+        pair = vars[i].split('=')
+        # If first entry with this name
+        if typeof query_string[pair[0]] == 'undefined'
+          query_string[pair[0]] = decodeURIComponent(pair[1])
+          # If second entry with this name
+        else if typeof query_string[pair[0]] == 'string'
+          arr = [
+            query_string[pair[0]]
+            decodeURIComponent(pair[1])
+          ]
+          query_string[pair[0]] = arr
+          # If third or later entry with this name
+        else
+          query_string[pair[0]].push decodeURIComponent(pair[1])
+        i++
+      try
+        content = JSON.parse LZString.decompressFromEncodedURIComponent query_string.data
+        # Dfine as standalone
+        if typeof content.data is "object" then window.standaloneMode = true
+        window.standaloneContent = content
+        console.log content
+      catch e
+        console.log e
 
   # Flavor map, for better readbility
   flvr = 
@@ -36,7 +67,7 @@ jQuery ->
 
     tableContainer = $('#snippets')
 
-    if not standaloneMode()
+    if not standaloneMode
       window.snippetDataTable = tableContainer.dataTable
         responsive: true
         fnSetFilteringDelay: 2000
@@ -145,37 +176,10 @@ jQuery ->
       #$(".input-daterange").datepicker forceParse: false
       # Open modal
       table_json = $("#spreadsheet_table_json").val()
-
-      # http://stackoverflow.com/questions/979975/how-to-get-the-value-from-the-url-parameter
-      query_string = {}
-      query = window.location.search.substring(1)
-      vars = query.split('&')
-      if query.length
-        i = 0
-        while i < vars.length
-          pair = vars[i].split('=')
-          # If first entry with this name
-          if typeof query_string[pair[0]] == 'undefined'
-            query_string[pair[0]] = decodeURIComponent(pair[1])
-            # If second entry with this name
-          else if typeof query_string[pair[0]] == 'string'
-            arr = [
-              query_string[pair[0]]
-              decodeURIComponent(pair[1])
-            ]
-            query_string[pair[0]] = arr
-            # If third or later entry with this name
-          else
-            query_string[pair[0]].push decodeURIComponent(pair[1])
-          i++
-        try
-          content = JSON.parse LZString.decompressFromEncodedURIComponent query_string.data
-          console.log content
-          table_json = JSON.stringify content.data
-          $("#spreadsheet_table_json").val( table_json )
-          $("#spreadsheet_spreadsheet_json").val( JSON.stringify content.input )
-        catch e
-          console.log e
+      if window.standaloneMode
+        table_json = JSON.stringify window.standaloneContent.data
+        $("#spreadsheet_table_json").val( table_json )
+        $("#spreadsheet_spreadsheet_json").val( JSON.stringify standaloneContent.input )
 
       if (table_json is "") or (table_json is "{}")
         $('#myModal').modal('show')
