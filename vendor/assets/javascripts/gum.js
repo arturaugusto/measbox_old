@@ -185,11 +185,11 @@
 
   // Create a array of random n number for the suplied distribution and arguments (requies jStat)
   function rand_array(n, pdf, args){
-    var arr = [].slice.apply(new Float64Array(n));
-    var samples = arr.map(function(_){
-      return pdf.sample.apply(void 0, args);
-    })
-    return samples;
+    var arr = [];
+    for (var i = n - 1; i >= 0; i--) {
+      arr.push( pdf.sample.apply(void 0, args) );
+    };
+    return arr;
   }
 
   // Use richardon extrapolation: http://en.wikipedia.org/wiki/Richardson_extrapolation
@@ -540,6 +540,7 @@
     if(this.obj.mc){
     //if(true){
       this.mc = {};
+      this.mc._init_time = Date.now();
       this.mc.M = 30000;
       
       this.mc._iterations = [];
@@ -653,7 +654,7 @@
       this.mc.histogram.y = jStat( this.mc.histogram.y ).divide(hist_area)[0];
       // Studentt curve
       this.mc.gum_curve = this.mc.histogram.x.map(function(i){
-        return jStat.studentt.pdf(i/that.uc, that.veff)/that.uc;
+        return jStat.studentt.pdf((i-that.mc._iterations_mean)/that.uc, that.veff)/that.uc;
       });
 
       // Validation
@@ -663,7 +664,8 @@
       this.mc.d_low = Math.abs(this.y - this.U - this.mc.sci_limits[0])
       this.mc.d_high = Math.abs(this.y + this.U - this.mc.sci_limits[1])
       this.mc.GUF_validated = (this.mc.d_low < num_tolerance) && (this.mc.d_high < num_tolerance);
-
+      this.mc._simulation_time = (Date.now() - this.mc._init_time);
+      console.log("Simulation time: " + this.mc._simulation_time);
       console.log(this.mc)
     }
     return(void 0);

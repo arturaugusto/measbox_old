@@ -485,7 +485,7 @@ jQuery ->
         plot_chart()
         $('#chart').modal('toggle')
       if key is "permalink"
-        url = 'http://lab1.lvh.me:3000/spreadsheets/'
+        url = 'https://share.measbox.com/spreadsheets/'
         content = {}
         content.input = JSON.parse($("#spreadsheet_spreadsheet_json").val()).map((x) ->
           x._results = {}
@@ -847,7 +847,7 @@ jQuery ->
                 #  text: 'MCM high: ' + mc.sci_limits[1].toExponential(3)
                 #  style: color: 'black'
               }, {
-                value: -calc.U
+                value: calc.y-calc.U
                 color: '#FF1000'
                 dashStyle: 'shortdash'
                 width: 2
@@ -855,7 +855,7 @@ jQuery ->
                 #  text: 'GUM low: ' + -calc.U.toExponential(3)
                 #  style: color: 'black'
               }, {
-                value: calc.U
+                value: calc.y+calc.U
                 color: '#FF1000'
                 dashStyle: 'shortdash'
                 width: 2
