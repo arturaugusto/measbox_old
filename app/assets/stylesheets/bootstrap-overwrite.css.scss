@@ -46,3 +46,19 @@
   
 }
 //@import "bootstrap/theme";
+
+#mcLoading{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -50px;
+    margin-left: -50px;
+    width: 100px;
+    height: 20px;
+    background-color: #F1F1F1;
+    font-weight: bolder;
+    display: none;
+}
+#mcLoading > p{
+  margin-left: 10px;
+}

@@ -355,7 +355,14 @@ window.uncertaintiesSchema = uncertainties:
           "arcsine"
         ]
         default: "uniform"
-      ###
+
+      custom_pdf:
+        title: "Custom distribution"
+        type: "string"
+        format: "textarea"
+        default: "uniform(-value, value)"
+        height: "100px"
+
       k:
         type: "number"
         title: "k"
@@ -365,14 +372,14 @@ window.uncertaintiesSchema = uncertainties:
         type: "number"
         title: "ci"
         default: 0.95
-      ###
+
       formula:
         title: "Formula"
         type: "string"
         format: "textarea"
         default: "u = 0.01 * readout"
         height: "100px"
-
+    defaultProperties: ["name", "description", "distribution", "formula"]
   default: [
     {
       name: "Resolution"
@@ -688,18 +695,26 @@ window.assetFormSchema =
             options:
               hidden: true
     automation:
-      type: "code"
-      title: "Automation Feats"
-      format: "python"
-      propertyOrder: 4
+      type: "object"
+      title: "Automation"
       options:
-        height: "100px"
-      default: "@Feat(None)\n" + 
-      "def readout(self):\n" + 
-      "    return (self.query('OUT?'))\n\n" +
-      "@readout.setter\n" +
-      "def readout(self, value):\n" +
-      " self.write('OUT {:.8f} V'.format(value))"
+        collapsed: true     
+        disable_edit_json: true
+        disable_properties: false
+      properties:
+        code:
+          type: "code"
+          title: "Code"
+          format: "python"
+          propertyOrder: 4
+          options:
+            height: "100px"
+          default: "@Feat(None)\n" + 
+          "def readout(self):\n" + 
+          "    return (self.query('OUT?'))\n\n" +
+          "@readout.setter\n" +
+          "def readout(self, value):\n" +
+          " self.write('OUT {:.8f} V'.format(value))"
 
 window.choosenSnippetsSchema =
   type: "array"

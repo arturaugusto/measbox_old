@@ -400,7 +400,8 @@
         "type": "B",
         "distribution": u.distribution,
         "df": u.df,
-        "k": u.k
+        "k": u.k,
+        "custom_pdf": u.custom_pdf
       }
       that.uncertainties.push(unc);
     });
@@ -537,11 +538,10 @@
     // UNDER DEVELOPMENT ***************************************
     // Monte Carlo
     // 
-    if(this.obj.mc){
-    //if(true){
+    this.mcm = function(){
       this.mc = {};
       this.mc._init_time = Date.now();
-      this.mc.M = 30000;
+      this.mc.M = 100000;
       
       this.mc._iterations = [];
       // Compute simulations for model
@@ -563,13 +563,15 @@
         this.mc._scope = rep(this._scope, this.mc.M);
         // MC distributions inputs simulations
         this.uncertainties.map(mc_simulations.bind(this));
+
         for (var i = this.mc.M - 1; i >= 0; i--) {
           this.mc._iterations.push(this._xfunc.iterate(this.mc._scope[i], true));
         };
         // Mean value
         this.mc._iterations_mean = sum(this.mc._iterations) / (this.mc.M * h);
+        
         // ref: 7.6 Estimate of the output quantity and the associated standard uncertainty JCGM_101_2008_E.pdf
-        this.mc.uc = Math.sqrt(jStat.sumsqrd( inc_arr(this.mc._iterations, this.mc._iterations_mean)) * (1/((this.mc.M * h)-1)));
+        this.mc.uc = Math.sqrt(jStat.sumsqrd( inc_arr(this.mc._iterations, -this.mc._iterations_mean) ) * (1/((this.mc.M * h)-1)));
         // parameter to monitor on adaptative MC
         results_of_interest.s_u.push(this.mc.uc);
         results_of_interest.s_y.push(this.mc._iterations_mean);
@@ -587,7 +589,7 @@
         results_of_interest.s_y_high.push(this.mc.sci_limits[1]);
         **/
 
-        if (h > check_stable_h){
+        if (h >= check_stable_h){
           // Define numerical tolerance
           // ref: 7.9.2 Numerical tolerance associated with a numerical value JCGM_101_2008_E.pdf
           num_tolerance = parseFloat("1e"+(this.mc.uc/(Math.pow(10,n_dig-1))).toExponential().split("e")[1])/2;
@@ -666,40 +668,15 @@
       this.mc.GUF_validated = (this.mc.d_low < num_tolerance) && (this.mc.d_high < num_tolerance);
       this.mc._simulation_time = (Date.now() - this.mc._init_time);
       console.log("Simulation time: " + this.mc._simulation_time);
-      console.log(this.mc)
+      console.log(this.mc);      
     }
+    
+    if(this.obj.mc){
+      this.mcm();
+    }
+
     return(void 0);
   }
-
-
-    // Translated from https://gist.github.com/endolith/255291#file-parabolic-py
-    var parabolic = function(f, x){
-      var xv = 1/2. * (f[x-1] - f[x+1]) / (f[x-1] - 2 * f[x] + f[x+1]) + x;
-      var yv = f[x] - 1/4. * (f[x-1] - f[x+1]) * (xv - x);
-      return [xv, yv];
-    }
-
-
-  // Ref: http://www.hevi.info/2012/03/interpolating-and-array-to-fit-another-size/
-  function interpolateArray(data, fitCount) {
-    var linearInterpolate = function (before, after, atPoint) {
-      return before + (after - before) * atPoint;
-    };
-
-    var newData = new Array();
-    var springFactor = new Number((data.length - 1) / (fitCount - 1));
-    newData[0] = data[0]; // for new allocation
-    for ( var i = 1; i < fitCount - 1; i++) {
-      var tmp = i * springFactor;
-      var before = new Number(Math.floor(tmp)).toFixed();
-      var after = new Number(Math.ceil(tmp)).toFixed();
-      var atPoint = tmp - before;
-      newData[i] = linearInterpolate(data[before], data[after], atPoint);
-    }
-    newData[fitCount - 1] = data[data.length - 1]; // for new allocation
-    return newData;
-  };
-
 
   // Determine The shortest coverage interval
   // JCGM 101:2008, item D.7
@@ -719,57 +696,91 @@
     }
     */
 
-    var size_to_interpolate = 0;
-    if (values.length < size_to_interpolate) {
-      console.log("Interpolate...");
-      values = interpolateArray(values, size_to_interpolate);
-      console.log("Interpolate... Done!");
-    };
-
     var M = values.length;
     this.alpha = alpha === undefined ? 0.05 : alpha;
     var cov_interv = values.slice(0,M-Math.round((1-this.alpha)*M)).map(function(_, i) {
       return values[Math.round((1-this.alpha)*M)+i]-values[i];
     })
-    var lower_cl_i = cov_interv.indexOf(Math.min.apply(void 0, cov_interv));
+    //var lower_cl_i = cov_interv.indexOf(Math.min.apply(void 0, cov_interv));
+    var lower_cl_i = cov_interv.indexOf(jStat.min(cov_interv));
     var lower_cl = values[lower_cl_i];
-    var upper_cl_i = Math.round((1-this.alpha)*M)+(cov_interv.indexOf(Math.min.apply(void 0, cov_interv))-1);
+    var upper_cl_i = Math.round((1-this.alpha)*M)+(cov_interv.indexOf(jStat.min(cov_interv))-1);
     var upper_cl = values[upper_cl_i];
     //return [lower_cl, upper_cl, cov_interv];
     return [lower_cl, upper_cl];
   }
 
+
+
   // Set monte carlo inputs simulations, binded to main mc scope
   var mc_simulations = function(u, i){
     var that = this;
+    if (u.value === 0){
+      return;
+    }
     var args = [];
     this.var_name = that.uncertainties_var_names[i];
-    var val = that.mc._scope[i][that.var_name];
+    //var val = that.mc._scope[i][that.var_name];
     var effective_dist = u.distribution
-    if(u.distribution === "uniform"){
-      args = [-u.value, u.value];
-    }else if(u.distribution === "triangular"){
-      args = [-u.value, 0, u.value];
-    }else if(u.distribution === "studentt"){
-      args = [u.df];
-    }else if(u.distribution === "beta"){
-      args = [u.alpha, u.beta];
-    }else if(u.distribution === "arcsine"){
-      // Arcsine is a specific case of beta distribution
-      effective_dist = "beta";
-      args = [-0.5, 0.5];
-    }else{ 
-      args = [0, u.value]; // Arguments for normal distribution
-    }
-    var pdf = jStat[effective_dist];
-    this.samples = rand_array(that.mc.M, pdf, args);
-    // Sum samples to expectation/modified expectation
-    // and update scope value for the iteration
-    for (var i = this.mc._scope.length - 1; i >= 0; i--) {
-      this.mc._scope[i][this.var_name] += this.samples[i];
-    };
-  }
 
+
+    var pdf_sampler = undefined;
+    if (u.custom_pdf === undefined) {
+      if(u.distribution === "uniform"){
+        args = [-u.value, u.value];
+      }else if(u.distribution === "triangular"){
+        args = [-u.value, u.value, 0];
+      }else if(u.distribution === "studentt"){
+        args = [u.df];
+      }else if(u.distribution === "beta"){
+        args = [u.alpha, u.beta];
+      }else if(u.distribution === "arcsine"){
+        // For arcsin, values will be post-processed from uniform (0,1) distribution
+        effective_dist = "uniform";
+        args = [0, 1];
+      }else{ 
+        args = [0, u.value]; // Arguments for normal distribution
+      }
+    } else {
+      try {
+        pdf_sampler_mathjs = math.compile(u.custom_pdf).eval;
+        pdf_sampler = function(args){
+          var res = pdf_sampler_mathjs(args);
+          if (typeof res === "object") {
+            return res.entries[res.entries.length - 1];
+          }else{
+            return res;
+          };
+        }
+        args = [u];
+      }
+      catch(err) {
+        console.warn("Could not parse custom pdf: " + u.custom_pdf + ". Failback to " + u.distribution);
+      }      
+    }
+
+    if (pdf_sampler === undefined) {
+      pdf_sampler = jStat[effective_dist].sample;
+    }
+
+    var sample;
+    for (var i = that.mc.M - 1; i >= 0; i--) {
+      sample = pdf_sampler.apply(void 0, args);
+      // Sum samples to expectation/modified expectation
+      // and update scope value for the iteration
+      this.mc._scope[i][this.var_name] += sample;
+    };
+
+    // Transform the previous uniform distribution on a arcsin distribution
+    // Ref: Item 6.4.6.4 from JCGM_101_2008_E.pdf
+    if(u.distribution === "arcsine"){
+      for (var i = that.mc.M - 1; i >= 0; i--) {
+        sample = this.mc._scope[i][this.var_name];
+        this.mc._scope[i][this.var_name] = ((-u.value + u.value)/2)+((u.value + u.value)/2) * Math.sin(2*Math.PI*sample);
+      };
+    }
+
+  }
 
   window.GUM = GUM;
 })();

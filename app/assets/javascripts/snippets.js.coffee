@@ -34,7 +34,6 @@ jQuery ->
         # Dfine as standalone
         if typeof content.data is "object" then window.standaloneMode = true
         window.standaloneContent = content
-        console.log content
       catch e
         console.log e
 
@@ -145,7 +144,7 @@ jQuery ->
               $.get "../../snippets/get_json?id=" + s_id + "&model_id=" + model_id + "&asset_id=" + asset_id, (data) ->
                 # Alert that the asset is not avaliable
                 # and ask to confirm using it
-                if not data.asset.asset_avaliable
+                if not data.asset.avaliable
                   confirm = window.confirm("Warning: The asset is flagged as unavaliable to use. Choose it anyway?")
                   if not confirm then return
                 # build text for choosen snippet

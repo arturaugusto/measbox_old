@@ -84,16 +84,36 @@ jQuery ->
       x = window._convert_if_not_big_num(x)
       return x.toFixed(n).toString()
 
-
     prefix_val: prefix_val
+
+    
   )
 
-  # Fix unformated hot when math model change
-  $("#spreadsheet").click (e) ->
-    e.preventDefault()
+  # Import jStat pdfs to mathjs
+  dists_to_import = {}
+  ('beta centralF cauchy chisquare exponential gamma invgamma kumaraswamy ' + \
+  'lognormal noncentralt normal pareto studentt weibull uniform binomial ' + \
+  'negbin hypgeom poisson triangular').split(' ').map( (dist_name) ->
+    sample_fn = jStat[dist_name].sample
+    if sample_fn isnt undefined
+      dists_to_import[dist_name] = jStat[dist_name].sample
+  )
+  math.import(dists_to_import);
+
+
+  render_hot_fix = () ->
+    $("#hot_container").hide()
     setTimeout (->
       window.hot.render()
+    ), 10
+    setTimeout (->
+      $("#hot_container").fadeIn()
     ), 200
+    
+  # Fix unformated hot when math model change
+  $(".nav-tabs a").click (e) ->
+    e.preventDefault()
+    render_hot_fix()
 
 
   # Spreadsheet specific
@@ -496,6 +516,7 @@ jQuery ->
         
         url += '?data=' + encoded
         console.log url
+        window.open(url, '_blank')
       if key is "run_automation"
         console.log "Automation task data:"
         task = {}
@@ -594,9 +615,6 @@ jQuery ->
       $(td).css "background": "#EEE"
 
     mathjs_eval_res = (formula, scope, res_var) ->
-      #console.log "-----------"
-      #console.log formula
-      #console.log scope
       if formula is undefined then return 0
       if typeof formula is "number" then return formula
       eval_res = mathjs.eval(formula, scope)
@@ -610,22 +628,220 @@ jQuery ->
         res = eval_res
       return res
 
+
+    handle_gum_response = (calc, mc) ->
+      that = this
+      _results = 
+        "U": calc.U
+        "ci": calc.ci
+        "df": calc.df
+        "k": calc.k
+        "uc": calc.uc
+        "ui": calc.ui
+        "ci_ui": calc.ci_ui
+        "uncertainties": calc.uncertainties
+        "uncertainties_var_names": calc.uncertainties_var_names
+        "veff": calc.veff
+        "y": calc.y
+        "uut_name": this._uut_name
+        "uut_readout": this.base_scope.uut_readout
+        "correct_value": this.base_scope.uut_readout - calc.y
+        "scope": that.base_scope
+        "uut_unit": worksheet_snippet.value.unit
+        "uut_prefix": window.hot.getDataAtRowProp(row_num, this._uut_name).prefix
+        "mpe": this._mpe
+        "units": this._units
+        #"_uut_id": this._uut_id
+        #"_range_id": this._range_id
+
+      if this.unc_source_obj.mc is true
+        $("#mcLoading").toggle()
+        $('#mcPlot').modal('toggle')
+        # Unit on tooltip
+        tooltip_unit = if _results.uut_unit isnt '-' then _results.uut_unit else ''
+        y_ax_unit = if _results.uut_unit isnt '-' then _results.uut_unit else 'unit'
+        mc = calc.mc
+        mc_chart = new (Highcharts.Chart)(
+          credits: enabled: false
+          title: text: "Probability density function"
+          chart:
+            renderTo: 'mc_container'
+            type: 'column'
+          xAxis: 
+            title: text: y_ax_unit
+            plotLines: [ {
+              value: mc.sci_limits[0]
+              color: 'blue'
+              width: 2
+              #label:
+              #  text: 'MCM low: ' + mc.sci_limits[0].toExponential(3)
+              #  style: color: 'black'
+            }, {
+              value: mc.sci_limits[1]
+              color: 'blue'
+              width: 2
+              #label:
+              #  text: 'MCM high: ' + mc.sci_limits[1].toExponential(3)
+              #  style: color: 'black'
+            }, {
+              value: calc.y-calc.U
+              color: '#FF1000'
+              dashStyle: 'shortdash'
+              width: 2
+              #label:
+              #  text: 'GUM low: ' + -calc.U.toExponential(3)
+              #  style: color: 'black'
+            }, {
+              value: calc.y+calc.U
+              color: '#FF1000'
+              dashStyle: 'shortdash'
+              width: 2
+              #label:
+              #  text: 'GUM high: ' + calc.U.toExponential(3)
+              #  style: color: 'black'                
+            } ]
+            #categories: calc.mc.histogram.x
+            labels: formatter: ->
+              @value.toExponential(2)
+          yAxis:
+            title: text: "Probability density/(1/" + y_ax_unit + ")"
+          series: [
+            {
+              name: 'MC'
+              data: calc.mc.histogram.y 
+              pointStart: calc.mc.histogram.x[0]
+              pointInterval: calc.mc.histogram.x[1] - calc.mc.histogram.x[0]
+              tooltip:
+                headerFormat: '<b>{series.name}</b><br>'
+                pointFormatter: () ->
+                  return '<b>U:</b> ' + this.x.toExponential(2) + ' ' + tooltip_unit
+            },{
+              name: 'GUM'
+              data: calc.mc.gum_curve
+              color: '#FF1000'
+              type: 'spline'
+              pointStart: calc.mc.histogram.x[0]
+              pointInterval: calc.mc.histogram.x[1] - calc.mc.histogram.x[0]
+              tooltip:
+                headerFormat: '<b>{series.name}</b><br>'
+                pointFormatter: () ->
+                  return '<b>U:</b> ' + this.x.toExponential(2) + ' ' + tooltip_unit
+            }
+          ]
+          plotOptions: column:
+            shadow:false
+            borderWidth:.5
+            borderColor:'blue'
+            pointPadding:0
+            groupPadding:0
+            color: 'rgba(204,204,204,.65)'
+        )
+        _results.mc = _.omit(mc, ['_scope', '_iterations', '_iterations_mean', 'histogram', 'histogram_x', 'gum_curve']);
+        gum_text = 
+          '<table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-striped"><caption><b>RESULTS</b></caption>' + \
+          '<tr><td>M</td><td> <b>' + mc.M + '</b></td></tr>' + \
+          '<tr><td>y</td><td> <b>' + mc._iterations_mean.toExponential(2) + '</b></td></tr>' + \
+          '<tr><td>u(y)</td><td> <b>' + mc.uc.toExponential(2) + '</b></td></tr>' + \
+          '<tr><td>~' + Math.round((1 - mc.p)*100) + ' % coverage interval</td><td> <b>[' + mc.sci_limits[0].toExponential(2) + ', ' + mc.sci_limits[1].toExponential(2) + ']</b></td></tr>' + \
+          '<tr><td>d<sub>low</sub></td><td> <b>' + mc.d_low.toExponential(2) + '</b></td></tr>' + \
+          '<tr><td>d<sub>high</sub></td><td> <b>' + mc.d_high.toExponential(2) + '</b></td></tr>' + \
+          '<tr><td>GUF validated (δ = ' + mc.num_tolerance + ')?</td><td> <b>' + mc.GUF_validated + '</b></td></tr>' + \
+          '</table>'
+        $("#gum_text").html(gum_text);
+        
+
+      # Copy var values to results
+      _.extend(_results, calc._scope, that.base_scope)
+
+      # Register resolutions on _results
+      _resolution_keys = _.allKeys(this._resolutions)
+      for key in _resolution_keys
+        _results[key] = this._resolutions[key]
+
+      # If only two varibles exists, its a direct comparison measurement
+      # so in this case we use the secont variable as the reference and register to _results
+      # the resolution of it
+      measurand_variables = _.filter( variables_editor.getValue(), {influence: false} )
+      if measurand_variables.length is 2
+        _results["reference_resolution"] = this._resolutions[_resolution_keys[1]]
+      else
+        _results["reference_resolution"] = 0
+      
+      ################################################################################
+      # Eval post porocessing
+      ################################################################################
+
+      mathjs.eval(model_data.additional_options.post_processing, _results)
+      # Output
+      console.log "Output"
+      console.log _results
+      
+      # parse results prevew 
+      _results._preview_content = swig.render(model_data.additional_options.results_preview, locals: _results)
+      _results._preview_content = kramed.parse(_results._preview_content)
+
+      # Refresh chart content
+
+      point_val = _results.scope[_results.uut_name]
+    
+      correct_value = point_val - _results.y
+      bottom_u = correct_value - _results.U 
+      upper_u = correct_value + _results.U 
+      
+      bottom_mpe = point_val - _results.mpe
+      upper_mpe = point_val + _results.mpe
+
+      max_value = Math.max(upper_u, upper_mpe)
+      offset = Math.min(bottom_u, bottom_mpe)
+      u_y = 8
+      mpe_y = 18
+
+      ################################################################################
+      # Chart elements
+      # TODO sanatize this
+      ################################################################################
+
+      _results._error_chart = '<svg height="22px" width="300px">
+
+      <circle cx="' + ((correct_value - offset) / (max_value - offset))*100 + '%" cy="' + u_y + '" r="3" fill="#00628C" stroke="none"></circle>
+      <line x1="' + ((bottom_u - offset) / (max_value - offset))*100 + '%" y1="' + u_y + '" x2="' + ((upper_u - offset) / (max_value - offset))*100 + '%" y2="' + u_y + '" style="stroke:#00628C;stroke-width:1.5" />
+
+      
+      <circle cx="' + ((point_val - offset) / (max_value - offset))*100 + '%" cy="' + mpe_y + '" r="3" fill=rgb(170,0,0) stroke="none"></circle>
+      <line x1="' + ((bottom_mpe - offset) / (max_value - offset))*100 + '%" y1="' + mpe_y + '" x2="' + ((upper_mpe - offset) / (max_value - offset))*100 + '%" y2="' + mpe_y + '" style="stroke:rgb(170,0,0);stroke-width:1.5;" />
+
+      <div class="data_info" style="display: none;">
+          ' + _results._preview_content + '
+      </div>
+      </svg>'                  
+      
+      window.hot.setDataAtRowProp(row_num, "_results", _results, "set_results")
+
+      # Parameter used to query results history
+      window.hot.setDataAtRowProp(row_num, "_uut_id", this._uut_id, "set_results")
+      window.hot.setDataAtRowProp(row_num, "_range_id", this._range_id, "set_results")
+
+      # Trigger on change on json-editor
+      spreadsheetEditor.onChange()
+
+
+
     process_entries = (changes, mc) ->
       that = this
       ################################################################################
       # When changes exists and its not seting results
       ################################################################################
       for change in changes
-        row_num = change[0]
+        this.row_num = change[0]
         # variables editor
-        variables_editor = spreadsheetEditor.getEditor("root.model.variables")
+        this.variables_editor = spreadsheetEditor.getEditor("root.model.variables")
         # uut is the first variable
-        this._uut_name = variables_editor.getValue()[0].name              
+        this._uut_name = this.variables_editor.getValue()[0].name              
         # UUT value without prefix
         this._uut_val_wo_prefix = NaN
         # object to build and send to uncertanty calc framework
         # set it initialy with variables and influence_quantities
-        unc_source_obj = 
+        this.unc_source_obj = 
           variables: []
           influence_quantities: []
 
@@ -633,58 +849,58 @@ jQuery ->
         # filter model variables object
         ################################################################################
 
-        variables_editor.getValue().map (v, i) ->
+        this.variables_editor.getValue().map (v, i) ->
           variable = Object.create(v)
           variable.name = v.name
           delete variable.color
           is_influence = variable.influence
           if is_influence
-            if window.hot.getDataAtRowProp(row_num, variable.name) isnt undefined
-              variable.value = window.hot.getDataAtRowProp(row_num, variable.name).readout
-              variable.prefix = window.hot.getDataAtRowProp(row_num, variable.name).prefix
-            unc_source_obj.influence_quantities.push variable
+            if window.hot.getDataAtRowProp(that.row_num, variable.name) isnt undefined
+              variable.value = window.hot.getDataAtRowProp(that.row_num, variable.name).readout
+              variable.prefix = window.hot.getDataAtRowProp(that.row_num, variable.name).prefix
+            that.unc_source_obj.influence_quantities.push variable
           else
-            value = window.reject_non_numbers(window.hot.getDataAtRowProp(row_num, variable.name).readouts)
+            value = window.reject_non_numbers(window.hot.getDataAtRowProp(that.row_num, variable.name).readouts)
             # if first, is uut. Set variable
             if i is 0
               that._uut_val_wo_prefix = jStat.mean( value.map (r) -> return parseFloat(r) )
             variable.value = value
-            variable.prefix = window.hot.getDataAtRowProp(row_num, variable.name).prefix
-            unc_source_obj.variables.push variable
+            variable.prefix = window.hot.getDataAtRowProp(that.row_num, variable.name).prefix
+            that.unc_source_obj.variables.push variable
         
 
         # snippet editor
-        snippets_editor = spreadsheetEditor.getEditor("root.choosen_snippets")
+        this.snippets_editor = spreadsheetEditor.getEditor("root.choosen_snippets")
         
         ################################################################################
         # Create scope to use when parsing expression with math.js
         ################################################################################
 
         this.base_scope = {}
-        this.base_scope.uut_readout = this._uut_val_wo_prefix * prefix_val(window.hot.getDataAtRowProp(row_num, this._uut_name).prefix)
+        this.base_scope.uut_readout = this._uut_val_wo_prefix * prefix_val(window.hot.getDataAtRowProp(this.row_num, this._uut_name).prefix)
 
-        unc_source_obj.influence_quantities.map (iq) ->
+        this.unc_source_obj.influence_quantities.map (iq) ->
           that.base_scope[iq.name] = parseFloat(iq.value)*prefix_val(iq.prefix)
         
-        unc_source_obj.variables.map (v) ->
+        this.unc_source_obj.variables.map (v) ->
           # determine mean
           # default is 0
           that.base_scope[v.name] = 0
           # If on snippet, the var is set as readout, overwrite with the mean
           if v.readout
             mean_value = jStat.mean( v.value.map (r) -> return parseFloat(r) )
-            that.base_scope[v.name] = mean_value * prefix_val(window.hot.getDataAtRowProp(row_num, v.name).prefix)
+            that.base_scope[v.name] = mean_value * prefix_val(window.hot.getDataAtRowProp(this.row_num, v.name).prefix)
 
         # init max permissive error
         this._mpe = 0
         # Hold resolution for each variable
         this._resolutions = {}
         this._units = {}
-        var_range_unc = {}
-        var_range_scope = {}
-        unc_source_obj.variables.map (v, var_index) ->
+        this.var_range_unc = {}
+        this.var_range_scope = {}
+        this.unc_source_obj.variables.map (v, var_index) ->
           # get snippet by label
-          snippet = _.findWhere(snippets_editor.getValue(), {label: window.hot.getDataAtRowProp(row_num, v.name).snippet} )
+          snippet = _.findWhere(that.snippets_editor.getValue(), {label: window.hot.getDataAtRowProp(that.row_num, v.name).snippet} )
           # didnt found any snippet, stop here
           if snippet is undefined then return
           # save the uuid of the snippet,
@@ -727,26 +943,29 @@ jQuery ->
                 uncertainties = r.uncertainties
               # Range found, break loop
               break
-            
           # Set fixed values and corrections
           total_correction = 0
-          var_range_unc[v.name] = uncertainties
+          that.var_range_unc[v.name] = uncertainties
           uncertainties.map (range_u) ->
             c_res = mathjs_eval_res(range_u.correction, scope, "c")
             total_correction = total_correction + c_res
           # If is fixed, need to set the readout value to GUM variable entry
           corr_value = scope.readout + total_correction
           if scope.is_fixed
-            unc_source_obj.variables[var_index].value = corr_value
+            that.unc_source_obj.variables[var_index].value = corr_value
           that.base_scope[v.name] = corr_value
-          var_range_scope[v.name] = scope
+          that.var_range_scope[v.name] = scope
 
         # Now with a updated scope, set uncertanties
-        unc_source_obj.variables.map (v, var_index) ->
+        this.unc_source_obj.variables.map (v, var_index) ->
           # Set scope
-          scope = $.extend({}, var_range_scope[v.name], that.base_scope)
+          scope = $.extend({}, that.var_range_scope[v.name], that.base_scope)
           scope.readout = scope[v.name]
-          u_list = var_range_unc[v.name].map (range_u) ->
+          
+          # If did not found range
+          if that.var_range_unc[v.name] is undefined then return
+
+          u_list = that.var_range_unc[v.name].map (range_u) ->
             u_res = mathjs_eval_res(range_u.formula, scope, "u")
             # Get possible max permissive error increment
             if range_u.name is "MPE"
@@ -763,229 +982,44 @@ jQuery ->
             if range_u.k isnt undefined then u_obj.k = range_u.k
             if range_u.df isnt undefined then u_obj.df = range_u.df
             if range_u.ci isnt undefined then u_obj.ci = range_u.ci
+            if range_u.custom_pdf isnt undefined then u_obj.custom_pdf = range_u.custom_pdf
             return u_obj
           # add uncertainties
-          unc_source_obj.variables[var_index].uncertainties = u_list
+          that.unc_source_obj.variables[var_index].uncertainties = u_list
 
         # Get snippet object
-        worksheet_snippet = _.findWhere(snippets_editor.getValue(), {label: window.hot.getDataAtRowProp(row_num, this._uut_name).snippet})
+        this.worksheet_snippet = _.findWhere(this.snippets_editor.getValue(), {label: window.hot.getDataAtRowProp(this.row_num, this._uut_name).snippet})
         # Set label text
-        #uut_val_label = this._uut_val_wo_prefix.toString() + " " + window.hot.getDataAtRowProp(row_num, this._uut_name).prefix + worksheet_snippet.value.unit + this._uut_range_label
+        #uut_val_label = this._uut_val_wo_prefix.toString() + " " + window.hot.getDataAtRowProp(this.row_num, this._uut_name).prefix + this.worksheet_snippet.value.unit + this._uut_range_label
 
         ################################################################################
         # Call GUM
         ################################################################################
 
-        model_data = spreadsheetEditor.getEditor("root.model").getValue()
-        unc_source_obj.func = model_data.func
-        unc_source_obj.cl = model_data.additional_options.cl
+        this.model_data = spreadsheetEditor.getEditor("root.model").getValue()
+        this.unc_source_obj.func = this.model_data.func
+        this.unc_source_obj.cl = this.model_data.additional_options.cl
 
-        # Entry data
-        console.log "Entry data"
 
         # Check for monte carlo
         if mc is true
-          unc_source_obj.mc = true
+          this.unc_source_obj.mc = true
         else
-          unc_source_obj.mc = false
-
+          this.unc_source_obj.mc = false
         try
+          if this.unc_source_obj.mc is true
+            $("#mcLoading").toggle()
+
+          # Entry data
+          console.log "Entry data"
+          console.log unc_source_obj
+          
           calc = new GUM(unc_source_obj)
+          handle_gum_response(calc)
         catch e
           console.log e
           spreadsheetEditor.onChange()
 
-        _results = 
-          "U": calc.U
-          "ci": calc.ci
-          "df": calc.df
-          "k": calc.k
-          "uc": calc.uc
-          "ui": calc.ui
-          "ci_ui": calc.ci_ui
-          "uncertainties": calc.uncertainties
-          "uncertainties_var_names": calc.uncertainties_var_names
-          "veff": calc.veff
-          "y": calc.y
-          "uut_name": this._uut_name
-          "uut_readout": this.base_scope.uut_readout
-          "correct_value": this.base_scope.uut_readout - calc.y
-          "scope": that.base_scope
-          "uut_unit": worksheet_snippet.value.unit
-          "uut_prefix": window.hot.getDataAtRowProp(row_num, this._uut_name).prefix
-          "mpe": this._mpe
-          "units": this._units
-          #"_uut_id": this._uut_id
-          #"_range_id": this._range_id
-
-        if mc is true
-          $('#mcPlot').modal('toggle')
-          # Unit on tooltip
-          tooltip_unit = if _results.uut_unit isnt '-' then _results.uut_unit else ''
-          y_ax_unit = if _results.uut_unit isnt '-' then _results.uut_unit else 'unit'
-          mc = calc.mc
-          mc_chart = new (Highcharts.Chart)(
-            credits: enabled: false
-            title: text: "Probability density function"
-            chart:
-              renderTo: 'mc_container'
-              type: 'column'
-            xAxis: 
-              title: text: y_ax_unit
-              plotLines: [ {
-                value: mc.sci_limits[0]
-                color: 'blue'
-                width: 2
-                #label:
-                #  text: 'MCM low: ' + mc.sci_limits[0].toExponential(3)
-                #  style: color: 'black'
-              }, {
-                value: mc.sci_limits[1]
-                color: 'blue'
-                width: 2
-                #label:
-                #  text: 'MCM high: ' + mc.sci_limits[1].toExponential(3)
-                #  style: color: 'black'
-              }, {
-                value: calc.y-calc.U
-                color: '#FF1000'
-                dashStyle: 'shortdash'
-                width: 2
-                #label:
-                #  text: 'GUM low: ' + -calc.U.toExponential(3)
-                #  style: color: 'black'
-              }, {
-                value: calc.y+calc.U
-                color: '#FF1000'
-                dashStyle: 'shortdash'
-                width: 2
-                #label:
-                #  text: 'GUM high: ' + calc.U.toExponential(3)
-                #  style: color: 'black'                
-              } ]
-              #categories: calc.mc.histogram.x
-              labels: formatter: ->
-                @value.toExponential(2)
-            yAxis:
-              title: text: "Probability density/(1/" + y_ax_unit + ")"
-            series: [
-              {
-                name: 'MC'
-                data: calc.mc.histogram.y 
-                pointStart: calc.mc.histogram.x[0]
-                pointInterval: calc.mc.histogram.x[1] - calc.mc.histogram.x[0]
-                tooltip:
-                  headerFormat: '<b>{series.name}</b><br>'
-                  pointFormatter: () ->
-                    return '<b>U:</b> ' + this.x.toExponential(2) + ' ' + tooltip_unit
-              },{
-                name: 'GUM'
-                data: calc.mc.gum_curve
-                color: '#FF1000'
-                type: 'spline'
-                pointStart: calc.mc.histogram.x[0]
-                pointInterval: calc.mc.histogram.x[1] - calc.mc.histogram.x[0]
-                tooltip:
-                  headerFormat: '<b>{series.name}</b><br>'
-                  pointFormatter: () ->
-                    return '<b>U:</b> ' + this.x.toExponential(2) + ' ' + tooltip_unit
-              }
-            ]
-            plotOptions: column:
-              shadow:false
-              borderWidth:.5
-              borderColor:'blue'
-              pointPadding:0
-              groupPadding:0
-              color: 'rgba(204,204,204,.65)'
-          )
-          _results.mc = _.omit(mc, ['_scope', '_iterations', '_iterations_mean', 'histogram', 'histogram_x', 'gum_curve']);
-          gum_text = 
-            '<table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-striped"><caption><b>RESULTS</b></caption>' + \
-            '<tr><td>M</td><td> <b>' + mc.M + '</b></td></tr>' + \
-            '<tr><td>y</td><td> <b>' + mc._iterations_mean.toExponential(2) + '</b></td></tr>' + \
-            '<tr><td>u(y)</td><td> <b>' + mc.uc.toExponential(2) + '</b></td></tr>' + \
-            '<tr><td>~' + Math.round((1 - mc.p)*100) + ' % coverage interval</td><td> <b>[' + mc.sci_limits[0].toExponential(2) + ', ' + mc.sci_limits[1].toExponential(2) + ']</b></td></tr>' + \
-            '<tr><td>d<sub>low</sub></td><td> <b>' + mc.d_low.toExponential(2) + '</b></td></tr>' + \
-            '<tr><td>d<sub>high</sub></td><td> <b>' + mc.d_high.toExponential(2) + '</b></td></tr>' + \
-            '<tr><td>GUF validated (δ = ' + mc.num_tolerance + ')?</td><td> <b>' + mc.GUF_validated + '</b></td></tr>' + \
-            '</table>'
-          $("#gum_text").html(gum_text);
-          
-
-        # Copy var values to results
-        _.extend(_results, calc._scope, that.base_scope)
-
-        # Register resolutions on _results
-        _resolution_keys = _.allKeys(this._resolutions)
-        for key in _resolution_keys
-          _results[key] = this._resolutions[key]
-
-        # If only two varibles exists, its a direct comparison measurement
-        # so in this case we use the secont variable as the reference and register to _results
-        # the resolution of it
-        measurand_variables = _.filter( variables_editor.getValue(), {influence: false} )
-        if measurand_variables.length is 2
-          _results["reference_resolution"] = this._resolutions[_resolution_keys[1]]
-        else
-          _results["reference_resolution"] = 0
-        
-        ################################################################################
-        # Eval post porocessing
-        ################################################################################
-
-        mathjs.eval(model_data.additional_options.post_processing, _results)
-        # Output
-        console.log "Output"
-        console.log _results
-        
-        # parse results prevew 
-        _results._preview_content = swig.render(model_data.additional_options.results_preview, locals: _results)
-        _results._preview_content = kramed.parse(_results._preview_content)
-
-        # Refresh chart content
-
-        point_val = _results.scope[_results.uut_name]
-      
-        correct_value = point_val - _results.y
-        bottom_u = correct_value - _results.U 
-        upper_u = correct_value + _results.U 
-        
-        bottom_mpe = point_val - _results.mpe
-        upper_mpe = point_val + _results.mpe
-
-        max_value = Math.max(upper_u, upper_mpe)
-        offset = Math.min(bottom_u, bottom_mpe)
-        u_y = 8
-        mpe_y = 18
-
-        ################################################################################
-        # Chart elements
-        # TODO sanatize this
-        ################################################################################
-
-        _results._error_chart = '<svg height="22px" width="300px">
-
-        <circle cx="' + ((correct_value - offset) / (max_value - offset))*100 + '%" cy="' + u_y + '" r="3" fill="#00628C" stroke="none"></circle>
-        <line x1="' + ((bottom_u - offset) / (max_value - offset))*100 + '%" y1="' + u_y + '" x2="' + ((upper_u - offset) / (max_value - offset))*100 + '%" y2="' + u_y + '" style="stroke:#00628C;stroke-width:1.5" />
-
-        
-        <circle cx="' + ((point_val - offset) / (max_value - offset))*100 + '%" cy="' + mpe_y + '" r="3" fill=rgb(170,0,0) stroke="none"></circle>
-        <line x1="' + ((bottom_mpe - offset) / (max_value - offset))*100 + '%" y1="' + mpe_y + '" x2="' + ((upper_mpe - offset) / (max_value - offset))*100 + '%" y2="' + mpe_y + '" style="stroke:rgb(170,0,0);stroke-width:1.5;" />
-
-        <div class="data_info" style="display: none;">
-            ' + _results._preview_content + '
-        </div>
-        </svg>'                  
-        
-        window.hot.setDataAtRowProp(row_num, "_results", _results, "set_results")
-
-        # Parameter used to query results history
-        window.hot.setDataAtRowProp(row_num, "_uut_id", this._uut_id, "set_results")
-        window.hot.setDataAtRowProp(row_num, "_range_id", this._range_id, "set_results")
-
-        # Trigger on change on json-editor
-        spreadsheetEditor.onChange()
       return # THIS RETURN HERE IS IMPORTANT! (probems with undo)
 
     ################################################################################
@@ -1019,7 +1053,7 @@ jQuery ->
             data: v.name+".snippet"
             color: v.color
             renderer: colorRenderer
-            type: 'autocomplete'
+            type: 'dropdown'
             strict: true
             allowInvalid: false
             source: snippets_autocomplet_source
@@ -1043,7 +1077,7 @@ jQuery ->
             data: v.name+".prefix"
             color: v.color
             renderer: prefixCellRenderer
-            type: 'autocomplete'
+            type: 'dropdown'
             strict: false
             allowInvalid: false
             source: prefixes_autocomplet_source
@@ -1054,6 +1088,7 @@ jQuery ->
       that.col_headers.push "Chart"
       that.dataSchema["_chart"] = null
       that.columns.push
+        #width: 310
         data: "_chart"
         renderer: chartRenderer
 
@@ -1285,7 +1320,8 @@ jQuery ->
               process_entries(changes)
             catch e
               console.log e
-            
+          window.hot.render()
+          $("#hot_container").fadeIn()  
         ################################################################################
         # Auto save
         ################################################################################
@@ -1416,12 +1452,13 @@ jQuery ->
         obj = x._results
         serie_keys = []
         influence_vars.map((v) ->
-          if (x[v].readout isnt null) and (x[v].readout isnt undefined)
-            if (x[v].prefix is undefined) or (x[v].prefix is null)
-              prefix = ''
-            else
-              prefix = x[v].prefix
-            serie_keys.push(v + ': ' + if x[v].readout is undefined then '' else x[v].readout.toString() + if prefix is undefined then '' else ' ' + prefix.toString())
+          if x[v] isnt undefined
+            if (x[v].readout isnt null) and (x[v].readout isnt undefined)
+              if (x[v].prefix is undefined) or (x[v].prefix is null)
+                prefix = ''
+              else
+                prefix = x[v].prefix
+              serie_keys.push(v + ': ' + if x[v].readout is undefined then '' else x[v].readout.toString() + if prefix is undefined then '' else ' ' + prefix.toString())
         )
         obj.serie_name = serie_keys.toString()
         return obj
