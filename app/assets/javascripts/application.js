@@ -50,7 +50,6 @@
 //= require highcharts-more.js
 //= require exporting.js
 //= require measbox_automation.js
-//= require jThread.js
 //= require require.js
 //= require turbolinks
 //= require_tree .
