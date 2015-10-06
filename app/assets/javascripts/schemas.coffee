@@ -480,7 +480,7 @@ window.mathFormSchema =
       title: 'Additional Options'
       options:
         disable_edit_json: true
-        disable_properties: true
+        disable_properties: false
         disable_collapse: false
         collapsed: true
       properties:
@@ -531,6 +531,15 @@ window.mathFormSchema =
 
             'k: {{k_fmt}}  \n' +
             '<i>v</i><sub>eff</sub>: {{veff_fmt}}  \n'
+        inline_graph:
+          type: 'boolean'
+          title: 'Inline charts'
+          default: true
+        readout_field_width:
+          type: 'number'
+          title: 'Readout field width (px)'
+          default: 80
+
     ###            
     procedure:
       propertyOrder: 5

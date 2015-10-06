@@ -365,7 +365,7 @@
       if(n === 0){
         mean_value = 0;
       }else if (n === 1){
-        mean_value = parseFloat(readout[0]) * prefix;
+        mean_value = parseFloat(readout[0]);
       }else{
         mean_value = (sum(readout)/n);
 
@@ -388,6 +388,8 @@
       }
     }
     this._scope[v.name] = mean_value * prefix;
+    console.log(v.name);
+    console.log(this._scope[v.name]);
   }
 
   var type_b_uncertainties = function(v){

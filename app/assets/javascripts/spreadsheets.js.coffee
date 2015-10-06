@@ -579,6 +579,8 @@ jQuery ->
       Handsontable.renderers.TextRenderer.apply this, arguments
       $(td).css background: columns[col]['color']
       $(td).css "font-weight": "bolder"
+      $(td).css "border-right": "#C1C1C1";
+      $(td).css "border-right-style": "double";
 
 
     # original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
@@ -1022,6 +1024,7 @@ jQuery ->
 
       return # THIS RETURN HERE IS IMPORTANT! (probems with undo)
 
+
     ################################################################################
     # Generate deffinition hot settings
     ################################################################################
@@ -1048,32 +1051,37 @@ jQuery ->
         else
           # Snippet col
           that.dataSchema[v.name]["snippet"] = null
-          that.col_headers.push v.name+' inst.'
+          that.col_headers.push "<b><i class='fa fa-caret-right'></i> "+v.name+'</b> <sub>instrument</sub>'
           that.columns.push
+            width: 100
             data: v.name+".snippet"
-            color: v.color
-            renderer: colorRenderer
+            #color: v.color
+            #renderer: colorRenderer
             type: 'dropdown'
             strict: true
             allowInvalid: false
+            wordWrap: false
             source: snippets_autocomplet_source
           if v.readout
             that.dataSchema[v.name]["readouts"] = []
             for i in [1..that.data.n_read] by 1
-              col_name = v.name + " " + i
+              col_name = v.name + " <sub> " + i + "</sub>"
               # Feed schema columns color and type
               that.col_headers.push col_name
               that.dataSchema[v.name]["readouts"].push null
               that.columns.push
+                width: data.additional_options.readout_field_width
                 data: v.name+".readouts."+(i-1).toString()
                 color: v.color
                 renderer: colorRenderer
         if v.readout
           # Prefix
           # Feed schema columns color and type
-          that.col_headers.push "×"
+          #that.col_headers.push "×"
+          that.col_headers.push " "
           that.dataSchema[v.name]["prefix"] = null
           that.columns.push
+            width: 40
             data: v.name+".prefix"
             color: v.color
             renderer: prefixCellRenderer
@@ -1084,13 +1092,15 @@ jQuery ->
             className: "htCenter"
       )
       that.dataSchema["_results"] = {}
+      
       # Error bar chart
-      that.col_headers.push "Chart"
-      that.dataSchema["_chart"] = null
-      that.columns.push
-        #width: 310
-        data: "_chart"
-        renderer: chartRenderer
+      if data.additional_options.inline_graph
+        that.col_headers.push "Chart"
+        that.dataSchema["_chart"] = null
+        that.columns.push
+          width: 310
+          data: "_chart"
+          renderer: chartRenderer
 
       settings = 
         data: []
