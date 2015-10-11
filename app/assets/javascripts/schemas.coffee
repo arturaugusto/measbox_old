@@ -533,12 +533,17 @@ window.mathFormSchema =
             '<i>v</i><sub>eff</sub>: {{veff_fmt}}  \n'
         inline_graph:
           type: 'boolean'
-          title: 'Inline charts'
+          title: 'Inline graphic'
           default: true
+        custom_inline_graph:
+          type: 'string'
+          format: 'textarea'
+          title: 'Custom inline graphic'
         readout_field_width:
           type: 'number'
           title: 'Readout field width (px)'
           default: 80
+      defaultProperties: ["cl", "automation", "post_processing", "results_preview", "inline_graph", "readout_field_width"]
 
     ###            
     procedure:

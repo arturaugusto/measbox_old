@@ -19,78 +19,198 @@
 </head>
 <body class='<%= if not ((controller_name == "reports") and (action_name == "show")) then "body_do_padding" else "body_dont_do_padding" end %>'>
   <% if not ((controller_name == "reports") and (action_name == "show")) then %>
-    <!--<div class="navbar navbar-inverse navbar-fixed-top">-->
-    <div class="navbar navbar-default navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <%= if current_laboratory != nil then (link_to(current_laboratory.name, edit_laboratory_path(current_laboratory), :class => "navbar-brand")) else (link_to(raw("Measbox <sub>beta</sub>"), "#", :class => "navbar-brand")) end %>
-        </div>
-        <div class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <% if user_signed_in? %>
-              
-              <%= content_tag(:li, link_to("Services", services_path), class: "#{ controller_name=="services"? "active" : "" }" ) %>
-
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Instrumentation <span class="caret"></span></a>
-                <ul class="dropdown-menu" role="menu">
-                  
-                  <%= content_tag(:li, link_to("Assets", assets_path), class: "#{ controller_name=="assets"? "active" : "" }" ) %>
-                  
-                  <%= content_tag(:li, link_to("Models", models_path), class: "#{ controller_name=="models"? "active" : "" }" ) %>
-
-                  <%= content_tag(:li, link_to("Manufacturers", manufacturers_path), class: "#{ controller_name=="manufacturers"? "active" : "" }" ) %>
-                  
-                  <%= content_tag(:li, link_to("Types", kinds_path), class: "#{ controller_name=="kinds"? "active" : "" }" ) %>
-                </ul>
-              </li>
-
-              <%= content_tag(:li, link_to("Templates", snippets_path), class: "#{ controller_name=="snippets"? "active" : "" }" ) %>
-            <% end %>
-            <% if user_signed_in? %>
-              <%= content_tag(:li, link_to( content_tag(:i, "", class: "glyphicon glyphicon-user") + " " +current_user.email, edit_user_path(current_user) ), class: "#{ (controller_name=="users" and current_user.id == params[:id])? "active" : "" }" ) %>
-              <li><%= link_to content_tag(:i, "", class: "glyphicon glyphicon-off") + ' Sign out', destroy_user_session_path, :method=>'delete' %></li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-cog"></i></a>
-                <ul class="dropdown-menu" role="menu">
-                  <%= content_tag(:li, link_to("Report Templates", report_templates_path), class: "#{ controller_name=="report_templates"? "active" : "" }" ) %>              
-                  <%= content_tag(:li, link_to("Users", users_path), class: "#{ (controller_name=="users" and current_user.id != params[:id])? "active" : "" }" ) %>
-                  <%= content_tag(:li, link_to("Companies", companies_path), class: "#{ controller_name=="companies"? "active" : "" }" ) %>
-                  <%= content_tag(:li, link_to("Roles", roles_path), class: "#{ controller_name=="roles"? "active" : "" }" ) %>
-                </ul>
-              </li>
-            <% else %>
-              <% if current_laboratory != nil then %>
-                <%= content_tag(:li, link_to("Sign in", new_user_session_path), class: "#{ controller_name=="sessions"? "active" : "" }" ) %>
-                <%= content_tag(:li, link_to("Sign up", new_user_registration_path), class: "#{ controller_name=="registrations"? "active" : "" }" ) %>
-              <% else %>
-                <%#= content_tag(:li, link_to("None", "#"), class: "" ) %>
-              <% end %>
-            <% end %>
-          </ul>
-        </div>
-      </div>      
-    </div>
-  
-    <% if current_laboratory == nil then %>
-      <div class="bg"></div>
-      <div class="jumbotron hello_intro">
+      <!--<div class="navbar navbar-inverse navbar-fixed-top">-->
+    <% if not params[:data] then %>
+      <div class="navbar navbar-default navbar-fixed-top">
         <div class="container">
-          <h3>Measbox project</h3>
-          <p>Resources and tools for Metrologists</p>
-        </div>
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <%= if current_laboratory != nil then (link_to(current_laboratory.name, edit_laboratory_path(current_laboratory), :class => "navbar-brand")) else (link_to(raw("Measbox <sub>beta</sub>"), "#", :class => "navbar-brand")) end %>
+          </div>
+          <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+              <% if user_signed_in? %>
+                
+                <%= content_tag(:li, link_to("Services", services_path), class: "#{ controller_name=="services"? "active" : "" }" ) %>
+
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Instrumentation <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                    
+                    <%= content_tag(:li, link_to("Assets", assets_path), class: "#{ controller_name=="assets"? "active" : "" }" ) %>
+                    
+                    <%= content_tag(:li, link_to("Models", models_path), class: "#{ controller_name=="models"? "active" : "" }" ) %>
+
+                    <%= content_tag(:li, link_to("Manufacturers", manufacturers_path), class: "#{ controller_name=="manufacturers"? "active" : "" }" ) %>
+                    
+                    <%= content_tag(:li, link_to("Types", kinds_path), class: "#{ controller_name=="kinds"? "active" : "" }" ) %>
+                  </ul>
+                </li>
+
+                <%= content_tag(:li, link_to("Templates", snippets_path), class: "#{ controller_name=="snippets"? "active" : "" }" ) %>
+              <% end %>
+              <% if user_signed_in? %>
+                <%= content_tag(:li, link_to( content_tag(:i, "", class: "glyphicon glyphicon-user") + " " +current_user.email, edit_user_path(current_user) ), class: "#{ (controller_name=="users" and current_user.id == params[:id])? "active" : "" }" ) %>
+                <li><%= link_to content_tag(:i, "", class: "glyphicon glyphicon-off") + ' Sign out', destroy_user_session_path, :method=>'delete' %></li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-cog"></i></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <%= content_tag(:li, link_to("Report Templates", report_templates_path), class: "#{ controller_name=="report_templates"? "active" : "" }" ) %>              
+                    <%= content_tag(:li, link_to("Users", users_path), class: "#{ (controller_name=="users" and current_user.id != params[:id])? "active" : "" }" ) %>
+                    <%= content_tag(:li, link_to("Companies", companies_path), class: "#{ controller_name=="companies"? "active" : "" }" ) %>
+                    <%= content_tag(:li, link_to("Roles", roles_path), class: "#{ controller_name=="roles"? "active" : "" }" ) %>
+                  </ul>
+                </li>
+              <% else %>
+                <% if current_laboratory != nil then %>
+                  <%= content_tag(:li, link_to("Sign in", new_user_session_path), class: "#{ controller_name=="sessions"? "active" : "" }" ) %>
+                  <%= content_tag(:li, link_to("Sign up", new_user_registration_path), class: "#{ controller_name=="registrations"? "active" : "" }" ) %>
+                <% else %>
+                  <%#= content_tag(:li, link_to("None", "#"), class: "" ) %>
+                <% end %>
+              <% end %>
+            </ul>
+          </div>
+        </div>      
       </div>
+      <% if current_laboratory == nil then %>
+        <div class="bg"></div>
+        <div class="jumbotron hello_intro">
+          <div class="container">
+            <h3>Measbox project</h3>
+            <p>Resources and tools for Metrologists</p>
+          </div>
+        </div>
+
+        <div>
+            <center><p></p></center>
+        </div>
+
+
+        <!-- INIT PAGE -->
+        <div>
+          <!--
+          <p class="lead">Features:</p>
+          <ul>
+            <li class="fa fa-check"></li>Estimation of Uncertanty of Measurements, in accordance with iso GUM<br>
+            <li class="fa fa-check"></li>Monte Carlo Estimation of Uncertanty and validation<br>
+            <li class="fa fa-check"></li>Ready to use procedures and instruments templates<br>
+            <li class="fa fa-check"></li>PDF Certificate generation<br>
+            <li class="fa fa-check"></li>Control charts and calibration error visualization</li><br>
+            <li class="fa fa-check"></li>Users privileges control</li><br>
+            <li class="fa fa-check"></li>Web based with clean and uncomplicated design</li><br>
+          </ul>
+          -->
+
+          <div class="container-full test">
+            <div class="container">
+              <div class="row">
+                <div class="col-md-6 col-a" style="padding-right:20px; border-right: 1px solid #eee;">
+                <br>
+                  <p><b>Composable workflow for calibration/test laboratories</b></p>
+                  <object type="image/svg+xml" data="2d_blocks.svg" id="blocks">Your browser does not support SVG</object>
+                </div>
+                <div class="col-md-6 col-b">
+                  <br>
+                  <p class="" id="block_description"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="container">
+          <br>
+            <p class="lead">Calibration spreadsheets published from Measbox:</p>
+            <div class="row">
+              <div class="col-sm-6 col-md-3">
+                <div class="thumbnail">
+                  <div class="caption">
+                    <span class="item-caption">Additive model</span>
+                    <a target="_blank" href='https://demo.measbox.com/spreadsheets/?data=N4IglgdgDgrgLiAXAbVADQIxNAZwmKKAUwURExAF8AacgJmxDwONPqtrQGZHnCSk5HjXIAWXvn5s04kQH0Y8OWAAmglQDYA7CoAcATjoAzALQBjLqJUnRAVgCG9k-tsrrus-oBGRjERUADFpG9iC0cgBORDgwADZwONjyEfYQAOZEymqIGKKidFq6AaIYtlp0XDToWIi4kqxIEHGxImgMtUz1AohNsS2cPB18DT3NreJDXaS9-SByZgAW9hHTzeFRMfGJtZSUALq0KvZwoR0AtgD2KkSxjFmCGi4GdJ4mGrZeXDZe+vomulxHDYPKIvEQuEcuFxbGE5ic0nJYmAcGwAIJuMBwMAAN0yACkAMIAcQAsnJ9AA6Bi0bHLMD2LyxaJIVAgCD2M5EQQUWhmC6xC4RQQAYiMYqMRC0sMgRliMCIEDMXMQIViOCItCi9hUF3gSFV6qqbI5yvYvP5gpFRmMGDF0ogsvliuVBo1IC1Or1KvsaqIRvZnO5PHNAqFZFFRmu13tjoVSv1PvVmqI2t1pFd-pN3PEIct4aMXHFMNoMrlcZdibdHrTCd9+1oEEiKeyoloRhgiu5GAA1G1e1xezmQNqVJiwBd2bE5BcoFiJ9tQGZbogAhT9KJdLR7PALmdjuOIIJYVALii5FAIhclTgcJA0oIANZyIxnOAAAg-n6-37fAF43y+cByHAFzPmAAAe-gABQPtQb50AAlAAOk0SgXkQRgQXItKxD+f5vuhmHgdhPpQYoQGERByEQAAqs+r54Yx+GAcBoHoWYyIHlBNFvgA9G+5HnlEREkbEcGIShdHsUxP7-tcHF7lOUCxPY17cfRcDUYJ1ZKIBskAa+rFgZBKhkUoOnvvxgmUcROFwfJYCKeeKlqdp0T8vAB58QJaHCVhOEIW+1F8hEURmEBOHyhpX7-ixIHGdBIVhRFPryt51l+bZPpwVJYXUUQoXRTJn6xYZ8VEdBACe6W+Rh-nZW+uVEGY1FnMQRXFcxZWgRVpltUQNUUZlok5UJzXUbiYodTJ-6TUYb4AHxvr8vxvgA-G+SEgIAeERbW+iBvpeHamXNCGwhscQJGN2JgEQADugg0QdwDAHRgG7B+KEAKKhYKz3AAVEQaR9m0QChJgQyhKEPv9T7vZQn0QAAZMKGB0AEGj5AA3AAPDEXgLRhRg47x+MLf9c3AwjoP2kiECZGkKRQAsSBwBE8q7LyCwXKeCpyMMJDbKywH2AiSIooI6KjliuJyISpLklScFS2OuKwipYLLuQWBbjue5zoeHQ3Tg9hyCOGzbCAsJ8tGZBLvYN5vgAIhEOIFVBJLRCbGQAEIO-4LtuxECGIChX5O19ABiqI0QAMgAKgAyvhwAAOSoonABKsep89n6px6wEFWckD7hOudvqnSEoan1Bh51DcfqnXjbiokTHEQFd0KIAQBLs9cfgAApHKZwFB1Fftc80zgVHdQeqsRGCHA-fgvRgUndrtwEQUGpwA8gACl9mep9RK-D6P48r1Pb4oqkKheJV883EvocQIxa8b1vO+p4n8c+wATVPlDOAICL7HCggAOQnEQM+cAb4WWfovZeYN3yfiiHAGAER35IPXgAR3lBEJ++8aLxzWqfOBYCLIUnVHAbeEQQEIObGmXBcFIqwLfkhd8n9N6Yh-nvUhb5gCIApLoIwCMABqqcKRGEFPrKC7CEJnREA7Wh9wyCaB0M8UwFgrA2AcE4Fwbh-ieB8H4QIwRQi0AFkBVQgg-BaC4J4dcJgCh0DoN8fQRB-h0CIN4ugtgAj6CcV4QoHgpS0EuNcKcdiyDaC4GI+wohTAFgwLoGwvwNAmC8LofIbwzC6HsC4LwKgMBeC8BoY8p4xwTnsXkAougMBo30AEXQ1IQDsMYAGU0aBYQdkxIIEwsIHyQGyCASOEF-DnVSBkIWoAkQlwSLwE4KwkABFoAqbI6yQDtj6DgMwPplTbO3CBFI6RMh8ggNLA8lsoJQQsotf8ZyMj8xWZpN8983z3OYfAN8OMnkzMyJspRb5BRvmRAlNQyYcAeQNoIVcvc-AmGEA2XcpcpydLIA8-8ELerrTfAEfah0fkIFoB2JUKx7CQCxMyFAoBumSzMGYLBqlKqwlHCiV2XhPK1LIBAORPpYSyIiGcOIpwQAwHwlgescxVAKixJhAqSBcj5EKMUUo5RKh7E5qAEWYtkRogxDLfExIySUjoMrI1bt1YMhuNydpJzdxl0NqAY2ptzZeyPOaW2IB7aO0DriCIHsvaiyIH7dUKgA0FRQeHKOMcE7J3-GnDO2cK7AHzoXehJd2QGwrlXGudd36Nwbs3Vu7dt5dx7n3Sg58R4QInp+G+M8Ujb1wTGvCPDv670PsfYBYMi1DzrWPBtH4b53yuY-Ntb8P4vy-nw3ef9AF9q4WAodUCYFwKYameAU6QFfgwVgnBn8CEFWIQIshFCQFUJJTQkg9DGEYWJdusea82GpQ4Xuzt86SHxyESIsRkjpHCvkYo5RW4bwkHUSATRehDA6MsNYOwQIjHuFMb4fwQQQiwhsVBhxTjfiiFceUDxoIvE+L8a4wJwSzChN0OE2EUSbhQfiYk5JJhUnpNEJk7JuSPEaAKUUj4pTymVNoCeW8cKyAqoaU0ugLS2mwkxfSrMZBelkvwGwIZtARlXMEBMky0zzlzJAAszEC4mBvLWRs3TK42zNH2Ycqzw4dzPIuROa585BB3IeQtAF5zXnLHeZ875z6-l+ZecCwKYLcWTKhe6dycpJMgARQEJFKK2RosnKJeUghsXgpwJC-FhKDoWT6c6Sl1LbrGYZWQVETKWVmDZYcA1XKeWGwyyKwVbY5FisEJK-80qDiyuuBABVt0wzSbVSUMoFR9g6rhKLREBrJZWtlvLM1Ss3wq2NTazWQZYSOv1geRgbqzZuAtl631VxTR+pwM7V2gbg03lDeGgOD3o3Ts-BHaOcck4p3TlnHOecm6ZuLqXXNB180QFrivYtTFS0wDbi2zuB1u6937gOt84Dh3X0fc2uea920-i-a2-eR8T5n0x9jq+mOx0nAnU-Qnn3iezt4aTxdQDKGoOp9A+mm7H2IKZ3u9BJBD1fOPYQs9pDyFKKvdz6htD72oK3Z6F9L831lhQVw2+rOu0-r-aI8Rb4pEyIFWPUDHBhwQdsWMmD2jzAIf0ch1wqHvDoYsVh6xUxcOSnwy4txJGfjeLaRRgJQSQlhLMBEkAjGYljJYyENjHGMn6CyTkvJ-HCnFOExUqpEnjtSfqYUWT8n2lKeNIGVTZWBlkC0yAHTYz9NTM1IC4zpmllDEs7ZkAmynO7LVAcpkTnHWufmO5mpEBbkhdV48w6gKAsrECsFh5-y5-+ci6CiI+XIXnQS21+FFJEXePS-y7NPpsumjyzFkyRWiWlfUxSk4lXaWshqyAOrzKUiNfZS1sA3Kkv9LAZCo9YqR9ZSpUBDZZDypgCKoTZF5FDTaapzZGh6pLYSy1arYmoKzmqWrXJqy0Aax2qqZDiHbOonbIjurnaepkDWzXaCC3b3ZBxPbexhr+yRrvbBzM7Oxxq-aJpCIA6prA6Vyg4irg4Hh5rVzQ6Fpw6dQI5I4dyVro41pU5rojpvhNrEDI67qY5fgk78Lk7LoqGXxqF073yTpC46Gfh6ELr-yc5y5cI84boPrzSC4vxa5oIfgHrYLi6zonpELdrS6XqoLXrPq3p0IFTOFPqq6sJviKKcLcK67frnoG4AbG5AZm4KLvpKKW6qKQaxLQbaCwbGAO56JIaGIu4mJu7mKYZWKdAsB5FjJ4bOKEYB6eLB6+L+JUYR50ZR4MbXZx4PCOKsYpJcBpIp5p68b5JZ5CZlK55ibVJJaTaNLNKtJl7vpdIqbkDV6abDKjJ6axaGazIsjzKORmbLKBZOa97d794OZD7d4j7z6XIeaT5ebT5piz6j53yL4fJXJfIr7hZApXIgrRYFa9S74wqJYF7JaH6pbH6W6n7ooX65Ykr4TX7+C34lYkplaP5UqjZVbHEV6mgf4NZNbQa-7-5QmAFyLAEiq9ZkD9ZvgYABAQHhByp4mwHKrwHqozZaq7DaqUBAA&desc=Based on item 9.2.4 from JCGM 101:2008 Supplement 1 - "Propagation of distributions using a Monte Carlo method". Right click the first row of spreadsheet and click on "Monte Carlo" to perform simulation.' class="fa fa-external-link" role="button"></a>
+                  </div>
+                  <img src="mc.png" alt="mc.png">
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="thumbnail">
+                  <div class="caption">
+                    <span class="item-caption">10 kΩ standard resistor</span>
+                    <a target="_blank" href='https://demo.measbox.com/spreadsheets/?data=N4IglgdgDgrgLiAXAbVAJQM5NBiYpQCmCiIaACgAQBOhGYGcA9tSAL4A0ZAHtiLviIkeNOg2atOIagEM4YJnyi0AZmF6kQXAQWJIQAEQCyRrdMIyAJk3hZEoAAz6AjADoHHh84cAWM85d3T28AdjMAJkDPLwcANjMAZijghySuP1I3aO8AVnYpAH0YeAKwS30VBIBOAA5wgCNLcIBaHIsc5p9LEIdmmXrYwmaEhJVYkJDLFR8AY0qzAtoMGAAbODtgQtkIAHNCUvLEZx8fZyrnWOcQqtiPTnQN-jxdEghVlak0DRxnoSQ3lYfLiyeSKewgZSENQaAErbS-PSIWHAizWWxIZDIrHvDjYwEAXUKMwAFjJqK8cSBFnRVutsGw2PiuJY5DI+ABbJiWQgrPgHfSEHoNQixFTNAYyXo+eoqZzNGqEer1ZqWDwhGo+EIJbw+FQLOAyHYFFbifRoMSMFgAYRkvK4ADcyWB+is6BjQBAZOzCGbeFwZkwVix9ABiFThWUqPVcSAqFYwQgQGY+xAqW0YQgoqw2EhplYZ+4gT3es1Yf2B4OkMMqQjc8oxiBxhNJlN5jNZtG59OEQvFlPSOQKMwBoOsKtRqOCsyx+OJ5NINuZ8zZ+BIODUBOMrgQalWJA5LgqGBJ32UZqUTCUABUNEHii4VksYFBnpWBSYUBfjxmvMQDlcVQ5AkD7wEw7J3hA+hmFATCMAUyhMMmGD0Ls+gANYFCo7JwJQuF4fhBGUAAvJQWFwAUzCYeotYABRoRwlDhAAlAAOm8JSQtCBSOishHEZQnHqNxto0cU5GCdwrEQAAqph2F8Qp-FkRRTDwbQMwMAoEA0dJlAAPSUGJalQkJPEMcxbGyZCMyKYRJHchp4FvlAKwyEhOlyXAUlGbQK7kWRdmkdhKlUdwtGUDRXxnpQACeTH6YZHGqKZtoMVZ6lSQG1DqeRPEJp5+EkcplHQrRl4GUZEnCXClDpYQMxSfaUIqAVtm4SRTVRpQAB8lBVP1VSUAA-JQLEgIAeERjZQiA0DYECWDRnUqFJIaUAAMsQsWUPUhCUA4DEYEwlAkmSOE7ZQeDJisMWUBgxJMAA7hAo0QDdJFOCiyxrBgxn2mAhAPfoAA8GBQDIz2MDFrpEWNI4sIgIYeLE4Q1FaY3deaNa0C2M3AMAWU5dV+VkQylB45VyXcAy5MlMez6ky90m48Askk2wZPABTJlU2wNPkXTcAMmxQN6aD4PdWxwtixDcBQ4QMMgHD1CINQOz1DRVz7VrrEgBLEB8wUfYMszPmojmnmkwbEnU5ztN4IL7MvSL0u9S9bHNB7ksQGhzMYWzuFsQAZCGzjhHEPjhAA3CDMD1N1zXO7H3XM0tFuO2x04QCaED7DsshQMSa4bkuvmdlRPKWAUD1lHAheIDUDgMv692wYmBQ6EIdioFSBpGiajBmhaEg2jVNQ5A4NQAIJmK5O2-oYJhmDIoHgS+fB-RgMgFI+Sx2CAw5cv2P4yMhlAGNQYBNdQNFGHQm97AAQiftbn5fhDUExiBsfhBgAKIAGKT2kmtAAKgAZX4sAAA5JPMBaA1pQNxnhKBpcKLv3ZJACCiDKBQJYmxKBHBv5tWIfhKB9Rl6VxBIQbB4QfB3DYEQ3CAABf+Fg4A0SkvhbkKhKAfnfnIQgNEMwrGWl-Z6fFhEqFcA9C+cBBFQIAPLkF-mgKBUlGGUBYWwjhGjuG3QNPNeoMUhE8lERo-CkjpGyPkWAkBD8ACaajJZwGcVouQNEAByTAc7qLgHo0uOYTEiM-s4-CtA4AwGoM9IJUiACOCZqDGMUdJEBQ01G+NcQE+ArgMxwDkdQZx-izbwBiQxPKhAQkQBYjhSxMjnzyIUSksmiBXA1BUOzAAalA1wKgWCr0WraBMTEmLsAfMhYg-JMghHqDkchzgOgzFmUME4OQqjNAGnKeozhFSEDqD4GQVQZgfSeIICZZR9A9DOJYFkCQVQzBmHKXUOQOhVASDkHw8pTj1H6qqbk+yzCcm5G+c5pBJg5BqBcSozRvAWE6Ns2I6zZQtB6CEcI4QtQyGec4esEJYLPi0i4E44RYiARCLEEYPQzDlL4H2M0d4zAC30M0MwaFICHBALffJZhth7C7qAE0GC6TgkYKdJA+0QCJkOOEQ87wMAzFtCmaVIBl4SHBnsAoAZ5r4u8XvGiNEsk4W6iRHl+wRXkniuDSwEUDWUCBsatV+xJXDN4dQSgDBQq1m5XQQM8ACWkH-NEYIoyixgUwW+alpAbUkXdaVK1I0HDTVEH5BlLZyQyEgPIN0KAPRen7OaQ68YXyUAANQCTJCffFNl7SBl7m6Zk4gL71F9d4-Q65nS7FWGSMwvTqDsk7foGA-FtnNHiFuKkZREzyDUO-JAxwI4kueWPfqIRGRN1ABRQ0xpTSkHzeIa0qUz7eLgAAaQgI9Ge-QeRmioEsPdrAQLMFXn60AG8t47zvlBcs3J9DH1Pq-K+N876GkIE-DMlh-3v0qT-ABQDQEQJItA2B8DsHAGQag-JGDPQvmwbg-BhDxEkJIWQihiwBE0LoY3BhBHNGsPcZwvCei+FUJiVBiRpirH1Jooo5Rqj1HUbcew+juE9EisMcYyRrHCK1OsVx2xDinFVJcYpgTnjvEVMKVCJNnYWNiOqWE4gkTomWPie-JJjTUnpOcZk4pcAcnEHyRpnhBrSmUHKZUvT0nOPJJAc01p7TKBdJ6X09xbmRlSBPrkyZIBYhdAcEciMfQaiWBmJ0bUYo2k1ARbEeoCRBTSnqucY5HcznsumElmoCRyXNGuCoGocLph9EVLcmoMhRSEAcDkWIlhxj1ABYfYF7LCA5BrAkRZKWphzE6P0D5NQqgzOhZ1lQIR2vbISI0aCeK16ZCJSSy44QKVVCpYMlMOaSyZEoIASuAU3Pn0FdrgrL5r6H-tRHFJq+UgAFc+R4ZqSDeE8FwSVs7ogysBHKhVQP-vKtAiajV3inxfn0Hqm1Rrby7FNQac1lBLXWps7a+1aOChOviiwN1P1Y1eoLc2yC-qgjDqSFIM9mHbRE37FG0nHq42UBhQkRNBqU3JjTRm-673aWkEnvcyJbkYpmCfIwRtVOB14B7eybtfT+2kEHe9II4RrxaZzOwJk47uQQCnf9Mcc6zgXCuDcDwKJf30DUPKrb3dRcgHFzMSXMxpf1rl2AJtW2Q29ttKr3t6uQCa8oG0YYB9sr1QD2z7wQQPBAUIAkNiNl3osqQOEXsub9CvxUAgH3bb-d+vD0rvpIe+2uQHUOhwQw0iKxYDlMvGfGL1+j7ns7IAQGEHZEQEEkTdoBmamADSk6ZcNr9wrjXFfe1V7DxH8IrgQhR8bwTOPrf+JOFXYSQsG6+7brIEPfdNVnAXD8FwWeV6d3cFEPQS096oePoguvBgb7rm70-U379pB7dnwvgA1vmQmA1AxfkAMgzEWg0AWAXAUgRgTgQQSQVwhQVRDQV7UwWwxmlwwgAIXMUI0UmIxgEoTIxmloXoQ0RUyE0oEYwHwER03wNwk8zkS4yURUQU0oNo0E10U01E0sCMQYOowsXYzqRYKgTk0cQyWUy4NUx8Ucz1xKQk10xwjwnCUMwimMwSTMxSTSWGSs2UwNTszyXfnkOc0kTKWO3cxqREJk2818zaU6W6WVxC0sLCzGUixBRAEqFqAaCaFaHaE6G6F6H6EGGGFGHGEmGmDmEb2K3Ik8PqBCBmDJXazWRRkVE6FiFm3WUGCGGcASFOC6xCBUBmHyLyC4EBR5CiwuCsBmAjhmxUHBU6GGzq36jGD6CqFq1oRyAm0mA23oADznWJVJR6AbgCAdGOxpTz3Ozu3Lxu1IBmIe3ZWezClewdXe0+yFRwAx1+2BwlUeyOF2KPFB3lVdAh1t2fxYAdVhy1QR1ICR1xxRxhx+wtXmhxz8jx1R3VSJxdXZ3J0+h9QDwDS8Ab2DUZzDRZ30DZxjRe2Gi53rx5xmj5y4GPAFwNCFyzRdymJ7z7zoIiVoGOiYFH3HxN0n191LxbVnzAGVwXxrw134hyFcDX1GVO37CMGURlzoBmAvk-DLyMBkG4DAD7XZEoHIHQQYHoHqFdEoF-mymDGL3lwDzpmpMPDV1pPD34joQb0oANy4AOEnSpLN1nROEt0uGuFuEbj3z3yAA&desc=Extracted from EA-4/02 M: 2013, S3.1, shows how Measbox deals with multiple quantities and automatically performs the sensitivity coefficient calculation for each input.' class="fa fa-external-link" role="button"></a>
+                  </div>
+                  <img src="rp.png" alt="rp.png">
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="thumbnail">
+                  <div class="caption">
+                    <span class="item-caption">DMM</span>
+                    <a target="_blank" href='https://demo.measbox.com/spreadsheets/?data=N4IglgdgDgrgLiAXAbVAJQKYDMmgM4RhRQYKIgDCAhgDYgA0IAThlQCYD28euIADEn4A6AEwMQARkF9R4seRliAvksYBVNQBVeBIiTIgAIgFlj4luy5weiUAIWi+YxlIfOQ84ctUgAYiwBHXgtOeEEAVgEfAH0YeGiwNkEAY2SATgAWAA4qAHY2AFosDAyAZgKMviw+AqosyoLSqlK+CVysKhEM3NLxaJY8GBprXBimKggAcwwEpMQJDIyRUolwxb5w8NLVdGxeKBYsMAAPJAghmkZdYlJBajpGEKsbZGEpRhl3t5AAXR8NbS2EAHbAnM4XK6EG4GExmR6sUIjFDfD5CL6fX4+fwYIJAp5hciREAxZIACyoTDI5xolxAsXiiRS6WyeUKxTKFSqNTqDSaLTaHS6PT6AyGSOAYwm01mSAWSxWa0qm229F2OCBIKOp0Q1Np130d1o5gRzyQrxkvVRluEvT+6i0+0OYPI4n1t3IsONlm4Zpt4gtfCc-qEtqxgWCJoJICJJPJlPBNMY9LgMvIqUyOXyRRK5Uq1Vq9RqfNa7U63Wt-Qwg2GNglSfGUxmjPmi2Wq3Wyp2IEw6tAmudushendlCN8O9SPNQgywZnqJndpAAMdoO1IFdUINHtMXsRL2Ec4PgcPMgXYZxEYnESiSbJFKpELpcRTzZA6ZZWfZua5Bd5zRLgrliKVZirWkqNqmcptoqGxbF2PYrlqCZ6pu7qDswkaToO2EXIuy4ak62roW6D6JhhE4vDhia6ou0R3vGOqPpW1biioPyMGwVBwFQvAALYcGwGB0ECqYgGw4nhBgbS5LUpRsAAbBUpTyVkBQAEZpBgaQFPJ8lUMkGQSMkEgSHwnR9NxkzRDQYB4DCFAAGriAAbhSYBUGpNBVmaoAQFQvEYIIy6MMkHA0BwTCCAAxFgsXFLk4iQFgNAwBgEDJIFiAdDQeAYOOiJIHATCpV2fkBYICEhWFEXRVgIhYBIsWJRAyWpelmXZbl+VWIVxUYKV-mZX44ZVeFkXkDFcVNYwSUpWlGW9al3UEkVJXsSAECVuwSClIwWAwOlQVaAABAUx2VSA7BsGAcBgBwfk0NEHBQLd921m+wkyGkWyMFQ8AcLxXF3RAgjiFAHB2dEBwcBleB4JAkyCAA1tEWC8XAx2Y1j2M48dAC8x1oymcAcKjJwYGwAAUSP0MdIgAJQADrnPE-bHNErk0Lj+PHWzHO0JTz5Q4RTMQGoqPo9zUs80T0Qk8LGDJLZwOU2ox0APTHULfOc7TDPM+LILJNLuME4JSuA49UA0PpVaqxLcCi0L+IpkTpuE+jcuk1qFOC-ELsa1rrOEfzlzHebYCW1DNuw37KYDGF8DA4H2sh5z9PHaLoVMCwyQppzqUO9jBOy-LPtU9nuf57QqUp8Hq6h7Thu56LGA50XJtYyXntl+TVMAJ51ymOu0E3CvJKLvEkB3ncyz33t95TU8YEPCtao3x3N4rovOdgWAzybBO77Fx0AHzHWkl9pMdAD8x2MyAgB4RA-x2IMdTBcBAVPH1g9PGixeAFbOTABgAA7oIAAPHgKAExjp2X7l5PGD9QpjUQFFQM8kRBZAoA-U+PY27zQwG-YAwBK6K2rnNB2KhjokNTquFQtD4gHRutQ++YtiHAHFkTahjDh6EQYcAIWzC4AqGZhA9W0CJin2ZmIyREA4FwAQRgJBb5qpMEQEwSYalKZtD4PQPRfAmYgGkRAXh0Qyr9SUBw52mEqFKBoYI+uWoBFCMICI+xbDjAAAUACiHDl52IcXQ5xSgzHCNYWIiRMCIAmOZj4nOEUOFtyYIEsxbMXFMLcREiAzMCh5JkRAJGHCUbcI8czAAZFFCQIg+DySWAAbigTANSp897iMGC0jhP9AlsOajZCAMxJjjCgKSRaeVyKIjJkJNg0RQGJDgKMxAWQ+AqBCqSDgEM0rRBIi8UAcsqBWRsnZQQhhHK02MP3AAyv5a2GB7jiBtmpIShoHiXX+oDV6IMgTALwFQaIV0Bg2HXFVQSKQbZw2OoYJgYBd5MEpsYKsvzpgACEqC5TYFCmFbd6aIGZtjQwPjfAAEE1AABlNCXJ5sAAA5ESy5aBSXUuIVjalIQ5Zt14pAIG90mXHWpYzZm1L6B4tnqKzG1K1J-RmeMOAGBeVdEDKI+RWMAACvhWBwEpqLbGgksDHWem3LiGBKa5RoL-XFyrcamqwEIUB0LZWU2pQAeV8WgalosRWYzVRqrVnrw7YAURMNgal+4mqEuav12NrW2vtca6llzNDIoAJrupkXANN3quKUwAHL3QwB6uAur36YTDWanFabsYsDgDAJg8jS02oCKlJgobnVaBvu6gtGaXZCFynAWVTA01FpdvW2mBd80WsZhjaNdqbpxqdSdYAiAhBZCwPYhy1KhBYAih8ymY76Z-x8Gi3tokTJ6VyMsbSTR5ISAqMG8oaljLJAKMsPSfAsilBEPVDI4QNzDhfHMS6uQshqV0spIoVBVgVCyMZAowH6oFD4BgEQ8kMBIfkrkcIbBrT8UEo9V8VB5IrEMhINSBRMhUAwBUZIVAMjqTYMkGS9V0NpAfWwd9bQwYQxusDQQUEFThFMmkTBLka6ZV8oNXjx0nKMGEYIaTIAkaQAA5crgTAFqPClN5FAoAbKcvFCAOy94kB6JAGlOYEg9oXDwNRryspRC-X+g2aUoUv7cbeoISmlMA6nwJk5mYhnKQZyDcdLzmFjoQN85p6IZn936qYMdWyZNjgU3-onT50ghCBlaMSRgEAAZcsemOwQAcCaJfLrfY6fBX7FqvDJ9qlIqCQFulp1AG0JPkEwHgNLPGOJVmSNCl6PHyAAAlaB6o4HqzlhBeIwF4gojAUA4FgAAF6BQ4rZIqYA1JJ3uoIZhW6mC8XEAdmbNs9s8wTilT5gdlCqja+Vcg3ifHiEEtZgb6XHtUGOJHWbx0vEctsvDTyK94kf0iutuy0LtsfZAPt7dx3t1DB4uQGAPMZCBnCMdAAVDVgqSh1qzDSrdI4bdZSthEOENIH7Ki5Hkvj1ZezLLWQ2ycs5x0LnXKnl5T0jBHnPO3HCN5JMPlDdAD8v5ALEWgxBUNZI4K8CQuhbC+FiKDkYFReizFsLy2WshYSkl5LKUExpXShlvLgAsrZf2qb3KIC8v5YK4VuuxUmwlVK-oRr5WVBWUoP1mbNXaqxkWg1MrjXWp11LadsbHUup8W6j1uv-e+t10WwzX8Q31oj9zKPs7HUJuTamnJ6ai9J9zQMgtQ6S3h4nRjLGVaa11ujY2tuLb52aHbfutNXbMI9tIP2wdAbh3WtHaJnXk64Hhpjbn1tmgaFLpXWujdJ2s17oPb9OGpBRLvkzGyHMnJ8w8iLP+AUZZhRDmhCe0omxkhYNo-pNgIgqMEbI2wLAMk+DUbUhsDIr-6jJHEDhkJFvnwApAxhpM+hgF-hUCIOerBlpNpMkHwKUGpLkFQFgCBhgMJowODPDDDnxqsAJiIBIFkD+owEVkCBYpJvJrJuQPJopl-IIAiv2uYJprsiALpjdO9AFmQCZmZrKJZjSNZrQJlBIPZkLhFFFi5tdJ8kCp5t5pFhBNwUFl-CFgHBFu-FFjFhnBFAloAuXKlldkNsIIGFID4HljboVqJsVmFqVnoX3BVlVm-C7OIAdBlA1k1iAmwZQR1lWN1rtr1m9kQDDqNmavqpNpAD9nNnZAtktqti9htlDjtl8rDoQCdgjodkjudr5r4YYfdDdjluJg9iAE9i9n1u9kYcYF9pEX9gDnDFtl5MdKDjVBDpttDkYXDodukadsjrDmjplhINjrjj1PjkmIkETmACTuNPgTBMqPCHLkehMWANRh9q1t4d2DkUkaUYEYNrtiNmNmEcdFNtUdEYtvDHES0YkTDh0UdntIjmdijhdhsddprO4GQnnEYcbATDeIUUNCUQEf1kERUVUTNnNv9odoDvUSDgkuDmJAkVtpsSjqkfDrcRkfcb0V8ZlhsIMc4VVDnOQh8WjsSH8OtH9MLrbqMGxCoEAA&desc=Simple direct comparison model, used to calibrate a digital multimeter voltage range against a standard calibrator.' class="fa fa-external-link" role="button"></a>
+                  </div>
+                  <img src="dmm.png" alt="dmm.png">
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="thumbnail">
+                  <div class="caption">
+                    <span class="item-caption">Non-linear problem</span>
+                    <a target="_blank" href='https://demo.measbox.com/spreadsheets/?data=N4IglgdgDgrgLiAXAbVADQIxNAZwmKKAUwURExABoQAnIgQwBMB7eHbEABiS5AF9qUOgDMwADx79qaAEwc8BYqXJzqdJqzjtEobmW58B5AMzz8hEjzSmjaACxnFlsvakgA+jHjuwjHowA2AHZGAA4AThlhAFoAY2M7Rmi7AFZ6emjwlMYk0NjwgCNhDCJGTiDheioPOhwYABstbCN3GnoIAHMiHz9EDDs7GSDQzjsMFKCZYwF0LB0QBQtlCjUGFjYkZC4AOk4sAF1BEXFJWzl5xaUrVVo1zW0t7kOQISJRCUQIBvqW2oamnQtWIAC3oNFIX3q9Wonm8vn8wTCkRi8USyTSGSyOWieUKxVK5Uq1Va7S6PSQ-UGw1G40m00os0cSysWFWGg2KB2nBSIGer3eSEhP2k51w5iuLhu6nWAMevKObxOn2+vyIdUa2mAQNB4MF3xhXjg5LIgRCESicQSSVS6Uy2Vy+SKJTKFSqMLanW68L6AyGIzGEymM3IczFTgh+tu7NlQr5xw+QrOTIlQrZMoesYVAuVUNV6oBWphILBEdzz0Y9DgVXmAFtmIwiPUOMaQAEsub8tEAikCsZkgVwuEccZbXY8nYCkRjBXjMYeTCqx13PUwDhlABBHJgOBgABu3QAUgBhADiAFl3OFtjdd2CwPQCvU1ZtQBB6DWiCzqrFmPVmDQeAAYmEEDhCIIJqkgYR6hgIgIFiT9EEqeocCINNNCQOAaFg4M3w-a5v1-f8gOEKIMBAyCIGg2D4MQ5DUPQ+BMOwog+GeCBWjWClqGEGB4J4AAKTAACpMAASgAAgAagkoSZFEmQxOqJhGG3MBmDfep3GYKAdw0zUQFiJtEE4bZwjHah6HgZga0rdSIEkQRmDXdwhGYBCcBwSAOh4ABrdxhBrOAJJC0KwvCiSAF4JMCo04GYALxFKATfMoCTFIAHS+bx+XEdxb3qCKook3KxHy+h6gEw1XPjMSsoAVQCoKipa4rYvceKaqIWJV3sgT6okgB6CTqtK8roXSuqIEa15YlaiLoobHrbK0qB6noDz+qauApuq6VNG2haYqCjqEveZK9rueAhpGnL43GtKlrAFbXPWzbLpwX94Hsm7RvugrJKmn8aDoWIjQK2DDtC6L2s687GAE4HQfBirYN+u7FTKgq0pm0GpqIEGofmkKYZOuGkoRgBPdGjTG7GJNx7qpprYgieJ0m4rOimBJZogaa694HoZrrYim-cQLZ1rovF4QJIAPgkwdBwkgB+CSMpAQA8Ig1iTEAkmhWAgBGZaU1Z8xwLrdzAIgAHceHqvXgGARrYsMEKsoAURB-9HeAAmaG2t31YgLLojDrKst833-Ndvh3YgAAeMA5d3BPBuThO6gKOW3mENOs7l32ZcDuPg-4IwQWYZy4PcS4SAeUAOvoJcVzXHhN1Und93cY9z0va80o7tT92qdbJ2MkNlOs2y9Ic+YrZweh3BU2ptBAQiGx4Iz6E8iSABEaD3AmBLPNVF66AAhHfSgPo+aDExAsrCvePYAMXXeqABkABUAGViuAAAcnXL-AASp-QBjtQqAOlB1AmNZIB2Q0pAiSgCMpZUAZQJ+xMcFhUAQUKyjASRwCICgmQdhOCcEMNgkKAABV+DA4ACSmmFBsssdIE0rEQASqF6jCAfjQ8KvDhDbBtofEhAlAEAHkAAKHtQGAKmoI+hjDmGCLYRJNc7RGAFEpjwxs-DH4QBasI0R4juGAN-t-C+ABNRREc4AOJUZWASAA5DSRAlFwA0fteA+i+ECJDsFUKdA4AwBoMY-xIiACOsEaB6OkfVb+KtFFeKcb4uA2xUJwBITQBxPirpMOEWlCGnijEZWCqYsR24LFSKSRJYAiBtihGEHHAAaoA7Ywh-wzwEqUsSSkjA72yS2U0SILSomtBiO02JcROgJK6aodcjTehACUIIxh8jmWiEMGQMh+zhCIDiGQRAjkyBSJwcImyCjDDyBBagdYGxaVWcEYwLT6B2BiMIYwGBQjJEHAEaIBRQiDC7LEUI9AsgFEYBgAoBQAjVCgM5NSGkeCUj9BgDAMhwicFCDeVGiFXzvkQuQaofFtw8GiNUXykBeggFPrk6oHougNxACuBBBYFhVl1CZagcFegYB4t8HAsQKqIRkJZayzLug-iNiiiAa8BICQyfLaK0ra7cp2hJbRskVUJzVaSbo-KBkSX-BJVciUxClCZWqL6s8eCmUoSUaINhqAQBsogrSpSeAquiha+GqsJKcF1vrQpZLaLgnoJAHcz4UBEvwmQdcsRYjhI2pTaoqk1yHwKN9VFZB3U0BWtUbphaGjVhADAYqjruT8GeD0OCO5RAEwpL6akAY6RsUMAyDwi5lyrg3FuLuh5TwXivBKiSQ8h2jwfI2Aikr4oz3shwBeS8V5n0coZesJLt671vvuGgJ8z7NyIFfVCjA90E0Cc-N+H8f7-2ikAkB4CUHAGgbA3JCC3yzxQWgjBWDjG4MA-gwhxDSF63IZQ6hAG6EMJcSw0KGiOFtAkcIq9RUqnmMkbI+R9iQ7QYks4ph8GQoaK0UbXRUS0MRQwzUyRVjbG4YqU42DTD3EQE8fkt4oboyUfKcEkKoTwmRNMbEgmCS6nJNSQ49JhSskkFyZx2WGSoklIJYEipmiDFmNo4k7+DSmktPaZ0ktvT+mDMsp5EgozETmhRFadEtosQOjxM6QkboFjiis6s9ZmzBx2B2ZMfZE5DnHNOTsi5VzYg3NCHc6ojzGwtlee8z50Rvm-P+eEQFwLQUBHBZCnsMK4UIqcl5e1ZB0XDExdi3F+KYKEpAHhElaBw0UrIFS6gNKjY8AZc2tQhrWXsu3AZLRPLOB8q630IVUIRViqQBKkAVl4rqtlZ3eyirlWFNVfrQ1GqSySR1Rt6MEl9Xbc9O4Y1kkzX+opjaz6MEytcj2Ec11DWPWaXGrBH1m2-UWwDWrYNesMnhoQpG6N1tWWNfbsm1NsR03UEzVhMAOaHsFqLTxHpZaeCVuitWnkbEYS+AbWAJtAEfRUn9LSIM+xDDU74EAA&desc=Based on item 9.4 from JCGM 101:2008 Supplement 1. How a output quantity can be characterized using numeric simulation, instead of failing with the GUM framework and partial derivatives on a non-linear model function.' class="fa fa-external-link" role="button"></a>
+                  </div>
+                  <img src="mc2.png" alt="mc2.png">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="container-full test">
+            <div class="container">
+              <div class="row">
+                <div class="col-md-6 col-a" style="padding-right:20px; border-right: 1px solid #eee;">
+                  <h3>Learning</h3>
+                  <p><a target="_blank" href="https://www.youtube.com/watch?v=wx0R1OfwH4s"><i class="fa fa-youtube-play"></i> Watch the introductory video <i class="fa fa-external-link"></i></a></p>
+                  <center>
+                    <div class="embed-responsive embed-responsive-16by9">
+                      <iframe class="embed-responsive-item" width="427" height="240" src="https://www.youtube.com/embed/wx0R1OfwH4s" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                  </center>
+                  <p>Access the <a target="_blank" href="https://www.youtube.com/user/arturaugusto/videos">youtube channel</a> for further videos and tutorials.</p>
+                </div>
+                <div class="col-md-6 col-b">
+                  <h3>Updates and information:</h3>
+                  <a target="_blank" href="https://br.linkedin.com/pub/artur-augusto-martins/24/658/1b0" style="text-decoration:none;"><span style="font: 80% Arial,sans-serif; color:#0783B6;"><img src="https://static.licdn.com/scds/common/u/img/webpromo/btn_in_20x15.png" width="20" height="15" alt="View Artur Augusto Martins's LinkedIn profile" style="vertical-align:middle;" border="0">&nbsp;View my profile</span></a>                  
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      <!-- INIT PAGE -->
+
+      <% end %>
+    <% else %>
+      <div class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <%= (link_to(raw("Measbox <sub>beta</sub>"), "https://www.measbox.com", :class => "navbar-brand")) %>
+          </div>
+        </div>
+      </div>    
     <% end %>
   <% end %>
 
   <div class="container">
     <div id="flash_messages">
+      <% if params[:desc] then flash[:notice] = params[:desc] end %>
       <% flash.each do |name, msg|
         if msg.class == String # regular flash notices, alerts, etc. will be strings
           msg = [msg]
@@ -106,5 +226,25 @@
     </div><!-- flash_messages -->
     <%= yield %>
   </div>
+
+  <script>
+
+
+    // Nav bar hide
+    $(".navbar-fixed-top").autoHidingNavbar({
+
+    });
+
+
+    // Google
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-18837681-3', 'auto');
+    ga('send', 'pageview');
+
+  </script>
 </body>
 </html>

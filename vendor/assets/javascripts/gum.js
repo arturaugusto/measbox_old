@@ -388,8 +388,6 @@
       }
     }
     this._scope[v.name] = mean_value * prefix;
-    console.log(v.name);
-    console.log(this._scope[v.name]);
   }
 
   var type_b_uncertainties = function(v){

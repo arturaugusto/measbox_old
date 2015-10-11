@@ -25,6 +25,32 @@
 }
 
 
+.thumbnail{
+  border: 0 none;
+  box-shadow: none;
+}
+
+.item-caption{
+  text-transform: uppercase;
+  text-decoration: none;
+  text-align: center;
+  font-size: 14px;
+  line-height: 16px;
+}
+
+.container-full {
+  margin: 0 auto;
+  text-align: center;
+  width: 100%;
+  background-color: #FBFBFB;
+  border:solid 1px #eee;
+
+}
+#block_description{
+  text-align: left;
+}
+
+
 .results_wraper .dataTables_wrapper {
     display: inline-table;
 }
@@ -62,3 +88,4 @@
 #mcLoading > p{
   margin-left: 10px;
 }
+

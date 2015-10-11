@@ -100,21 +100,19 @@ jQuery ->
   )
   math.import(dists_to_import);
 
-
+  ###
   render_hot_fix = () ->
-    $("#hot_container").hide()
-    setTimeout (->
-      window.hot.render()
-    ), 10
-    setTimeout (->
-      $("#hot_container").fadeIn()
-    ), 200
+    #window.hot.hide()
+    window.hot.render()
+    #setTimeout (->
+    #  $("#hot_container").fadeIn()
+    #), 0
     
   # Fix unformated hot when math model change
   $(".nav-tabs a").click (e) ->
     e.preventDefault()
     render_hot_fix()
-
+  ###
 
   # Spreadsheet specific
   $(".spreadsheet_feature").each ->
@@ -574,6 +572,13 @@ jQuery ->
       Handsontable.renderers.TextRenderer.apply this, arguments
       $(td).css background: columns[col]['color']
       $(td).css "font-style": columns[col]['font_style']
+      
+    colorDropdownRenderer = (instance, td, row, col, prop, value, cellProperties) ->
+      Handsontable.renderers.AutocompleteRenderer.apply this, arguments
+      $(td).css background: columns[col]['color']
+      $(td).css "font-style": columns[col]['font_style']
+      #$(td).find("div").css "display: inline;"
+      #$(td).append '<div class="htAutocompleteArrow">▼</div>'
 
     prefixCellRenderer = (instance, td, row, col, prop, value, cellProperties) ->
       Handsontable.renderers.TextRenderer.apply this, arguments
@@ -629,6 +634,45 @@ jQuery ->
       else
         res = eval_res
       return res
+
+
+    ################################################################################
+    # Function to generate default comparision bars for MPE and cal U
+    ################################################################################
+
+    default_inline_chart = (_results) ->
+      # Refresh chart content
+      point_val = _results.scope[_results.uut_name]
+    
+      correct_value = point_val - _results.y
+      bottom_u = correct_value - _results.U 
+      upper_u = correct_value + _results.U 
+      
+      bottom_mpe = point_val - _results.mpe
+      upper_mpe = point_val + _results.mpe
+
+      max_value = Math.max(upper_u, upper_mpe)
+      offset = Math.min(bottom_u, bottom_mpe)
+      u_y = 8
+      mpe_y = 18
+
+      ################################################################################
+      # Chart elements
+      # TODO sanatize this
+      ################################################################################
+
+      res = '<svg height="22px" width="300px">' + \
+      '<circle cx="' + ((correct_value - offset) / (max_value - offset))*100 + '%" cy="' + u_y + '" r="3" fill="#00628C" stroke="none"></circle>' + \
+      '<line x1="' + ((bottom_u - offset) / (max_value - offset))*100 + '%" y1="' + u_y + '" x2="' + ((upper_u - offset) / (max_value - offset))*100 + '%" y2="' + u_y + '" style="stroke:#00628C;stroke-width:1.5" />' + \
+      '<circle cx="' + ((point_val - offset) / (max_value - offset))*100 + '%" cy="' + mpe_y + '" r="3" fill=rgb(170,0,0) stroke="none"></circle>' + \
+      '<line x1="' + ((bottom_mpe - offset) / (max_value - offset))*100 + '%" y1="' + mpe_y + '" x2="' + ((upper_mpe - offset) / (max_value - offset))*100 + '%" y2="' + mpe_y + '" style="stroke:rgb(170,0,0);stroke-width:1.5;" />' + \
+      '</div>' + \
+      '</svg>'
+      return res
+
+    ################################################################################
+    # GUM response postprocessing
+    ################################################################################
 
 
     handle_gum_response = (calc, mc) ->
@@ -782,41 +826,16 @@ jQuery ->
       _results._preview_content = swig.render(model_data.additional_options.results_preview, locals: _results)
       _results._preview_content = kramed.parse(_results._preview_content)
 
-      # Refresh chart content
-
-      point_val = _results.scope[_results.uut_name]
-    
-      correct_value = point_val - _results.y
-      bottom_u = correct_value - _results.U 
-      upper_u = correct_value + _results.U 
-      
-      bottom_mpe = point_val - _results.mpe
-      upper_mpe = point_val + _results.mpe
-
-      max_value = Math.max(upper_u, upper_mpe)
-      offset = Math.min(bottom_u, bottom_mpe)
-      u_y = 8
-      mpe_y = 18
-
-      ################################################################################
-      # Chart elements
-      # TODO sanatize this
-      ################################################################################
-
-      _results._error_chart = '<svg height="22px" width="300px">
-
-      <circle cx="' + ((correct_value - offset) / (max_value - offset))*100 + '%" cy="' + u_y + '" r="3" fill="#00628C" stroke="none"></circle>
-      <line x1="' + ((bottom_u - offset) / (max_value - offset))*100 + '%" y1="' + u_y + '" x2="' + ((upper_u - offset) / (max_value - offset))*100 + '%" y2="' + u_y + '" style="stroke:#00628C;stroke-width:1.5" />
-
-      
-      <circle cx="' + ((point_val - offset) / (max_value - offset))*100 + '%" cy="' + mpe_y + '" r="3" fill=rgb(170,0,0) stroke="none"></circle>
-      <line x1="' + ((bottom_mpe - offset) / (max_value - offset))*100 + '%" y1="' + mpe_y + '" x2="' + ((upper_mpe - offset) / (max_value - offset))*100 + '%" y2="' + mpe_y + '" style="stroke:rgb(170,0,0);stroke-width:1.5;" />
-
-      <div class="data_info" style="display: none;">
-          ' + _results._preview_content + '
-      </div>
-      </svg>'                  
-      
+      # User can use default unc bars chart on results preview, or custom code
+      if model_data.additional_options.inline_graph
+        custom_template = model_data.additional_options.custom_inline_graph
+        if custom_template is undefined
+          _results._error_chart = default_inline_chart(_results)
+        else
+          _results._error_chart = swig.render(custom_template, locals: _results)
+        # ALwais add mouse over content
+        _results._error_chart += '<div class="data_info" style="display: none;">' + _results._preview_content
+        
       window.hot.setDataAtRowProp(row_num, "_results", _results, "set_results")
 
       # Parameter used to query results history
@@ -1024,6 +1043,19 @@ jQuery ->
 
       return # THIS RETURN HERE IS IMPORTANT! (probems with undo)
 
+    ################################################################################
+    # Control color to instruments colum
+    ################################################################################
+
+    increase_brightness = (color, percent) ->
+      f = parseInt(color.slice(1), 16)
+      t = if percent < 0 then 0 else 255
+      p = if percent < 0 then percent * -1 else percent
+      R = f >> 16
+      G = f >> 8 & 0x00FF
+      B = f & 0x0000FF
+      '#' + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + Math.round((t - B) * p) + B).toString(16).slice(1)
+
 
     ################################################################################
     # Generate deffinition hot settings
@@ -1039,6 +1071,7 @@ jQuery ->
       data.variables.map((v) ->
         that.dataSchema[v.name] = {}
         # Readouts
+        bright_color = increase_brightness(v.color, 0.3)
         if v.influence
           col_name = v.name
           # Feed schema columns color and type
@@ -1046,17 +1079,17 @@ jQuery ->
           that.dataSchema[v.name]["readout"] = null
           that.columns.push
             data: v.name+".readout"
-            color: v.color
+            color: bright_color
             renderer: colorRenderer
         else
           # Snippet col
           that.dataSchema[v.name]["snippet"] = null
           that.col_headers.push "<b><i class='fa fa-caret-right'></i> "+v.name+'</b> <sub>instrument</sub>'
           that.columns.push
-            width: 100
+            width: 120
             data: v.name+".snippet"
-            #color: v.color
-            #renderer: colorRenderer
+            color: v.color
+            renderer: colorDropdownRenderer
             type: 'dropdown'
             strict: true
             allowInvalid: false
@@ -1072,18 +1105,18 @@ jQuery ->
               that.columns.push
                 width: data.additional_options.readout_field_width
                 data: v.name+".readouts."+(i-1).toString()
-                color: v.color
+                color: bright_color
                 renderer: colorRenderer
         if v.readout
           # Prefix
           # Feed schema columns color and type
-          #that.col_headers.push "×"
-          that.col_headers.push " "
+          that.col_headers.push "×"
+          #that.col_headers.push " "
           that.dataSchema[v.name]["prefix"] = null
           that.columns.push
             width: 40
             data: v.name+".prefix"
-            color: v.color
+            color: bright_color
             renderer: prefixCellRenderer
             type: 'dropdown'
             strict: false
@@ -1095,7 +1128,7 @@ jQuery ->
       
       # Error bar chart
       if data.additional_options.inline_graph
-        that.col_headers.push "Chart"
+        that.col_headers.push "Results"
         that.dataSchema["_chart"] = null
         that.columns.push
           width: 310
@@ -1351,6 +1384,9 @@ jQuery ->
 
     window.filter_snippet_data = (data) ->
       data.snippet.label = data.model.name + " " + data.snippet.value.unit + " " + data.snippet.value.kind + " - " + data.asset.identification
+      data.snippet.label = data.model.name
+      if data.snippet.value.unit isnt "" then data.snippet.label += " (" + data.snippet.value.unit + ")"
+
       data.snippet.asset_id = data.asset.id
       data.snippet.snippet_id = data.snippet.id
       data.snippet.model_id = data.model.id
