@@ -38,6 +38,7 @@ class ServicesController < ApplicationController
       format.html
       format.json { 
         render :json => {
+          :laboratory => current_laboratory.as_json(),
           :service => @service.as_json(:include => :user),
           :spreadsheets => @spreadsheets,
           :assets => @assets.as_json(

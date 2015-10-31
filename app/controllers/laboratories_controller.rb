@@ -39,6 +39,7 @@ class LaboratoriesController < ApplicationController
 
   def create
     @laboratory = Laboratory.new(laboratory_params)
+    @laboratory.custom_forms = '{"services":"{\n  \"type\": \"object\",\n  \"title\": \"Calibration Information\",\n  \"properties\": {\n    \"certificates\": {\n      \"type\": \"array\",\n      \"options\": {\n        \"collapsed\": true\n      },\n      \"title\": \"Certificates\",\n      \"format\": \"table\",\n      \"uniqueItems\": true,\n      \"items\": {\n        \"type\": \"object\",\n        \"title\": \"Certificate\",\n        \"properties\": {\n          \"cert_number\": {\n            \"title\": \"Number\",\n            \"type\": \"string\"\n          },\n          \"description\": {\n            \"title\": \"Description\",\n            \"type\": \"string\"\n          }\n        }\n      }\n    },\n    \"enviromental_conditions\": {\n      \"type\": \"object\",\n      \"title\": \"Enviromental\",\n      \"properties\": {\n        \"temperature\": {\n          \"type\": \"string\",\n          \"title\": \"Temperature\"\n        },\n        \"humidity\": {\n          \"title\": \"Humidity\",\n          \"type\": \"string\"\n        },\n        \"pressure\": {\n          \"title\": \"Pressure\",\n          \"type\": \"string\"\n        }\n      },\n      \"options\": {\n        \"collapsed\": \"undefined\"\n      }\n    },\n    \"notes\": {\n      \"type\": \"array\",\n      \"options\": {\n        \"collapsed\": true\n      },\n      \"title\": \"Notes\",\n      \"uniqueItems\": true,\n      \"items\": {\n        \"type\": \"object\",\n        \"title\": \"Note\",\n        \"properties\": {\n          \"note\": {\n            \"title\": \"Note\",\n            \"type\": \"string\",\n            \"format\": \"textarea\"\n          }\n        }\n      }\n    },\n    \"procedures\": {\n      \"type\": \"array\",\n      \"title\": \"Procedures\",\n      \"uniqueItems\": true,\n      \"items\": {\n        \"type\": \"object\",\n        \"title\": \"Procedure\",\n        \"properties\": {\n          \"procedure\": {\n            \"title\": \"Procedure\",\n            \"type\": \"string\",\n            \"enum\": [\n              \"aa\",\n              \"bb\"\n            ]\n          }\n        }\n      },\n      \"options\": {\n        \"collapsed\": true\n      }\n    }\n  }\n}","styles":"\n/**\n * Remove most spacing between table cells.\n */\n\ntable {\n    border-collapse: collapse;\n    border-spacing: 0;\n}\n\n\n/* Github css */\n\nhtml,body {\n    max-width: 44em;\n    color: black;\n}\nbody {\n    font: 13.34px helvetica,arial,freesans,clean,sans-serif;\n    -webkit-font-smoothing: subpixel-antialiased;\n    line-height: 1.4;\n    padding: 3px;\n    background: #fff;\n    border-radius: 3px;\n    -moz-border-radius: 3px;\n    -webkit-border-radius: 3px}\np {\n    margin: 1em 0}\na {\n    color: #4183c4;\n    text-decoration: none}\nbody {\n    background-color: #fff;\n    padding: 30px;\n    margin: 15px;\n    font-size: 14px;\n    line-height: 1.6}\nh1 {\n    font-size: 28px;\n    color: #000}\nh2 {\n    font-size: 24px;\n    border-bottom: 1px solid #ccc;\n    color: #000}\nh3 {\n    font-size: 18px;\n    color: #333}\nh4 {\n    font-size: 16px;\n    color: #333}\nh5 {\n    font-size: 14px;\n    color: #333}\nh6 {\n    color: #777;\n    font-size: 14px}\np,blockquote,table,pre {\n    margin: 15px 0}\nul {\n    padding-left: 30px}\nol {\n    padding-left: 30px}\nol li ul: first-of-type {\n    margin-top: 0}\nh1+p,h2+p,h3+p,h4+p,h5+p,h6+p,ul li\u003e:first-child,ol li\u003e:first-child {\n    margin-top: 0}\ntable {\n    border-collapse: collapse;\n    border-spacing: 0;\n    font-size: 100%;\n    font: inherit}\ntable th {\n    font-weight: bold;\n    border: 1px solid #ccc;\n    padding: 6px 13px}\ntable td {\n    border: 1px solid #ccc;\n    padding: 6px 13px}\ntable tr {\n    border-top: 1px solid #ccc;\n    border-left: 0;\n    border-right: 0;\n    border-bottom: 0;\n    background-color: #fff}\ntable tr:nth-child(2n) {\n    background-color: #f8f8f8}\nimg {\n    max-width: 100%}"}' 
     if (verify_recaptcha) or (Rails.env.development?)
       respond_to do |format|
         if @laboratory.save
@@ -91,17 +92,41 @@ Description              | Model              | Serial
 {{a.model.kind.name}}    | {{a.model.name}}   | {{a.serial}} 
 {%- endfor %}   
 
-'''
-Calibration Information
-'''
-   |    |   |    |
---:|:--|--:|:--|
-**Customer Name:**   |   {{ uut_assets[0].company.name }}  | **Certificate Number:** | {{service.information.certificates[0].cert_number}} 
-**Address:**                |   {{ uut_assets[0].company.address }} | **Calibration Date:** | {{service.calibration_date|date('M d, Y')}}
-**PO Number:**          |   {{service.order_number}}                | **Certificate Date:** | {{ now|date('M d, Y') }}  
-**Procedures:**           | {% for p in service.information.procedures -%}{{p.procedure}}, version {{p.version}}{%- endfor %} | **Temperature:** | {{service.information.enviromental_conditions.temperature}} &plusmn; 3 ºC
-**Notes:**  | {%- for n in service.information.notes -%} - {{n.note}} <br> {%- endfor -%} | **Relative humidity:**  |  {{service.information.enviromental_conditions.humidity}}  &plusmn; 10 %
-
+<table>
+<caption>Calibration Information</caption>
+<tbody>
+<tr>
+<td style='text-align:right'><strong>Customer Name:</strong></td>
+<td style='text-align:left'>{{ uut_assets[0].company.name }}</td>
+<td style='text-align:right'><strong>Certificate Number:</strong></td>
+<td style='text-align:left'>{{service.information.certificates[0].cert_number}} </td>
+</tr>
+<tr>
+<td style='text-align:right'><strong>Address:</strong></td>
+<td style='text-align:left'>{{ uut_assets[0].company.details }}</td>
+<td style='text-align:right'><strong>Calibration Date:</strong></td>
+<td style='text-align:left'>{{service.calibration_date|date('M d, Y')}}</td>
+</tr>
+<tr>
+<td style='text-align:right'><strong>PO Number:</strong></td>
+<td style='text-align:left'>{{service.order_number}}</td>
+<td style='text-align:right'><strong>Certificate Date:</strong></td>
+<td style='text-align:left'>{{ now|date('M d, Y') }}  </td>
+</tr>
+<tr>
+<td style='text-align:right'><strong>Procedures:</strong></td>
+<td style='text-align:left'>{{p.procedure}}, version {{p.version}}</td>
+<td style='text-align:right'><strong>Temperature:</strong></td>
+<td style='text-align:left'>{{service.information.enviromental_conditions.temperature}} ± 3 ºC</td>
+</tr>
+<tr>
+<td style='text-align:right'><strong>Notes:</strong></td>
+<td style='text-align:left'>- {{n.note}} <br></td>
+<td style='text-align:right'><strong>Relative humidity:</strong></td>
+<td style='text-align:left'>{{service.information.enviromental_conditions.humidity}}  ± 10 %</td>
+</tr>
+</tbody>
+</table>
 
 **Calibrated By:** {{service.user.title}} {{service.user.name}}  
 
@@ -110,10 +135,10 @@ Calibration Information
 '''
 Assets:
 '''
-   Description         | Model            | SN           | Certificate       | Due  
+   Description         | Model            | SN           | Certificate    | Calibrated By   | Due  
 :---------------------:|:----------------:|:------------:|:-----------------:|:----:
 {% for r in ref_assets -%}
-{{r.model.kind.name}}  | {{r.model.name}} | {{r.serial}} | {{r.certificate}} |  {{r.due_date|date('M d, Y')}}
+{{r.model.kind.name}}  | {{r.model.name}} | {{r.serial}} | {{r.certificate}} | {{r.calibrated_by}}  | {{r.due_date|date('M d, Y')}}
 {%- endfor %}
 
 
@@ -123,7 +148,7 @@ Assets:
 {{ r.end_fmt }} {{ r.last_prefix }}{{ r.unit }}  
 $$ {{ r.mpe_TeX }} $$
 '''
- UUT | Reference | Error | Admissive Error | Uncertainty | k  | <i>v</i><span style='font-size:0.6em;'>eff</span>
+ UUT | Reference | Error | Admissive Error | Uncertainty | k  | <i>v</i><sub>eff</sub>
 :---:|:---------:|:-----:|:---------------:|:-----------:|:--:|:--:
 {% for p in r.points -%}
 {% if p.prefix_transition -%}
@@ -134,6 +159,7 @@ $$ {{ r.mpe_TeX }} $$
 {% endfor %}
 "
           )
+
           @main_company = Company.new(:laboratory => @laboratory, name: @laboratory.name)
           if (@main_company.save and @admin_role.save and @technican_role.save and @inactive_role.save) and (@report_template.save)
             format.html { redirect_to(controller: 'my_devise/registrations', action: 'new', subdomain: @laboratory.subdomain) }

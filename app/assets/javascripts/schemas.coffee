@@ -105,38 +105,7 @@ window.laboratoryCustomForms =
       type: 'code'
       format: 'css'
       title: 'Report styles'
-      default: '''
-.report_view p table div {
-    font-family: "times";
-    font-size: 14px;
-}
-.report_view table{
-    min-width:50%;
-    max-width:90%;
-    font: inherit;
-    text-align:left;
-    margin:0;
-}
-
-.report_view td, tr, th{
-    padding:2px 10px;
-    margin:0;
-    font-weight:normal;
-}
-
-.report_view th{
-    border-bottom:1px solid #bbb;
-}
-
-.report_view table{
-    margin:12px;
-    padding-top: 25px;
-    padding-right: 25px;
-    padding-bottom: 25px;
-    padding-left: 25px;    
-}
-
-'''    
+      default: ""
 
 
 window.pdfOptionsSchema =
@@ -758,7 +727,7 @@ window.choosenSnippetsSchema =
       automation:
         type: "object"
         title: "Automation"
-        propertyOrder: 2
+        propertyOrder: 3
         options:
           collapsed: true
         properties:
@@ -789,10 +758,10 @@ window.choosenSnippetsSchema =
         propertyOrder: 7
       value:
         type: "object"
-        title: "Value"
+        title: "Definitions"
         options:
           collapsed: true
-        propertyOrder: 5
+        propertyOrder: 2
         properties:
           $.extend true, {}, window.assetFormSchema.properties, 
             ranges:
@@ -800,6 +769,7 @@ window.choosenSnippetsSchema =
                 properties: 
                   reclassification: 
                     $.extend({}, window.reclassificationUncertantiesSchema.uncertainties, {title: "Reclassification"})
+                defaultProperties: ["limits", "nominal_value", "uncertainties", "_identifier"]
 
 
 window.spreadsheetEntriesSchema =

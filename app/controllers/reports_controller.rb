@@ -15,7 +15,7 @@ class ReportsController < ApplicationController
 
     respond_to do |format|
       @laboratory = Laboratory.find(@report.laboratory_id)
-      pdf_options = @report.report_template.pdf_options
+      pdf_options = @report.pdf_options
       opts = {:pdf => "", :javascript_delay => "1000", :disable_smart_shrinking => false}.merge(pdf_options).deep_symbolize_keys
 
       format.html

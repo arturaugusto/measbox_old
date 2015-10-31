@@ -470,6 +470,12 @@ jQuery ->
         $("#spreadsheet_tag_list").tagsinput('removeAll')
         $("#spreadsheet_tag_list").tagsinput('add', intersection.toString())
 
+        # Define text on header to show user a description of what is about the spreadsheet
+        title = uut_name_list_uniq.toString()
+        $("#spreadsheet_data_description").text(uut_name_list_uniq.toString())
+        $("#spreadsheet_data_description_tags").text(intersection.toString())
+        window.document.title = title
+
         $("#spreadsheet_spreadsheet_json").val(JSON.stringify(hot.getData()))
 
         $(".spreadsheet_feature").submit()
@@ -577,6 +583,7 @@ jQuery ->
       Handsontable.renderers.AutocompleteRenderer.apply this, arguments
       $(td).css background: columns[col]['color']
       $(td).css "font-style": columns[col]['font_style']
+      $(td).css "font-weight": "bold"
       #$(td).find("div").css "display: inline;"
       #$(td).append '<div class="htAutocompleteArrow">▼</div>'
 
@@ -826,6 +833,7 @@ jQuery ->
       _results._preview_content = swig.render(model_data.additional_options.results_preview, locals: _results)
       _results._preview_content = kramed.parse(_results._preview_content)
 
+      
       # User can use default unc bars chart on results preview, or custom code
       if model_data.additional_options.inline_graph
         custom_template = model_data.additional_options.custom_inline_graph
@@ -987,14 +995,14 @@ jQuery ->
           if that.var_range_unc[v.name] is undefined then return
 
           u_list = that.var_range_unc[v.name].map (range_u) ->
-            u_res = mathjs_eval_res(range_u.formula, scope, "u")
             # Get possible max permissive error increment
-            if range_u.name is "MPE"
+            if (range_u.name is "MPE") and scope.is_uut
+              u_res = mathjs_eval_res(range_u.formula, scope)
               that._mpe += u_res
               # When unc is MPE and variable is UUT, dont add uncertanty to budget
-              if scope.is_uut
-                u_res = 0
-
+              u_res = 0
+            else
+              u_res = mathjs_eval_res(range_u.formula, scope)
             u_obj = 
               name: range_u.name
               value: u_res
@@ -1344,6 +1352,7 @@ jQuery ->
           settings = window.entries_hot_settings(data)
           #console.log settings
           window.hot = new Handsontable( $("#hot_container")[0], settings )
+
           #window.hot.loadData(window.spreadsheetEditor.getEditor("root.worksheet").getValue())
           window.hot.loadData(JSON.parse($("#spreadsheet_spreadsheet_json").val()))
 
@@ -1397,7 +1406,7 @@ jQuery ->
       data.snippet.automation = {}
       data.snippet.automation.visa_address = data.asset.visa_address
       code = data.model.code.automation
-      code = code + ("\n\n" + data.snippet.value.automation).replace(/\n/g, "\n\t")
+      code = code + ("\n\n" + data.snippet.value.automation.code).replace(/\n/g, "\n\t")
 
       data.snippet.automation.code = code
 

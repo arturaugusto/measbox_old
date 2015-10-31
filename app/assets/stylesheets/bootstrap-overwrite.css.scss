@@ -12,6 +12,11 @@
   display: none;
 }
 
+.report_value_html, #lab_style{
+  display: none;
+}
+
+
 .hello_intro{
 	margin-top: -10px;
     margin-bottom: 0px;
@@ -71,7 +76,6 @@
 .chart-modal .modal-content {
   
 }
-//@import "bootstrap/theme";
 
 #mcLoading{
     position: absolute;
@@ -89,3 +93,4 @@
   margin-left: 10px;
 }
 
+@import "bootstrap/theme";

@@ -86,6 +86,6 @@ class AssetsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def asset_params
-      params.require(:asset).permit(:serial, :company_id, :identification, :certificate, :calibration_date, :due_date, :visa_address, :model_id, :reclassification, :use_reclassification, :avaliable)
+      params.require(:asset).permit(:serial, :company_id, :identification, :certificate, :calibration_date, :due_date, :visa_address, :model_id, :reclassification, :use_reclassification, :avaliable, :calibrated_by)
     end
 end

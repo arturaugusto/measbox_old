@@ -11,10 +11,11 @@
     <%= javascript_include_tag "https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js", "https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js" %>
   <![endif]-->
 
+<% if not ((controller_name == "reports") and (action_name == "show")) then %>
   <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
   <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+<% end %>
   <%= csrf_meta_tags %>
-
   <%#= mathjax_tag %>
 </head>
 <body class='<%= if not ((controller_name == "reports") and (action_name == "show")) then "body_do_padding" else "body_dont_do_padding" end %>'>
@@ -94,19 +95,6 @@
 
         <!-- INIT PAGE -->
         <div>
-          <!--
-          <p class="lead">Features:</p>
-          <ul>
-            <li class="fa fa-check"></li>Estimation of Uncertanty of Measurements, in accordance with iso GUM<br>
-            <li class="fa fa-check"></li>Monte Carlo Estimation of Uncertanty and validation<br>
-            <li class="fa fa-check"></li>Ready to use procedures and instruments templates<br>
-            <li class="fa fa-check"></li>PDF Certificate generation<br>
-            <li class="fa fa-check"></li>Control charts and calibration error visualization</li><br>
-            <li class="fa fa-check"></li>Users privileges control</li><br>
-            <li class="fa fa-check"></li>Web based with clean and uncomplicated design</li><br>
-          </ul>
-          -->
-
           <div class="container-full test">
             <div class="container">
               <div class="row">

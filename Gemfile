@@ -90,3 +90,5 @@ gem 'wkhtmltopdf-heroku', :group => :production
 gem 'mathjax-rails'
 
 gem "non-stupid-digest-assets" # Ref: https://github.com/rails/sprockets-rails/issues/49#issuecomment-24835988, https://github.com/mileszs/wicked_pdf/issues/188, http://stackoverflow.com/questions/7275636/rails-3-1-0-actionviewtemplateerror-application-css-isnt-precompiled/7278355#7278355
+
+#gem "wysiwyg-rails", "2.0.0.pre.rc.3"

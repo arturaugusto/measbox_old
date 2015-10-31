@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150822190020) do
+ActiveRecord::Schema.define(version: 20151026200341) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(version: 20150822190020) do
     t.jsonb    "reclassification",                 default: {}, null: false
     t.boolean  "use_reclassification"
     t.boolean  "avaliable"
+    t.string   "calibrated_by"
   end
 
   add_index "assets", ["laboratory_id"], name: "index_assets_on_laboratory_id", using: :btree

@@ -18,6 +18,8 @@
 
     <%= render "shared/datepicker", f: f, :field => :due_date %>      
 
+    <%= f.input :calibrated_by, input_html: { class: 'form-control' } %>
+
     <%= f.input :visa_address, input_html: { class: 'form-control' } %>
 
     <br>

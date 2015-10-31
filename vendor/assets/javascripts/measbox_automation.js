@@ -8,7 +8,6 @@
     var that = this;
     this.socket = null;
     this.isopen = false;
-
     this.socket = new WebSocket(addr);
     this.socket.binaryType = "arraybuffer";
 
@@ -19,8 +18,9 @@
 
     this.socket.onmessage = function(e) {
       if (typeof e.data == "string") {
-        console.log("Data received: " + e.data);
-        var data = JSON.parse(e.data)
+        //console.log("Data received: " + e.data);
+        var data = JSON.parse(e.data);
+        //recive callback from automation server
         hot[data.func].apply(null, data.args);
       }
     }
@@ -38,7 +38,7 @@
         function () {
           if (that.socket.readyState === 1) {
             if(callback != null){
-                callback();
+              callback();
             }
             return;
           } else {
