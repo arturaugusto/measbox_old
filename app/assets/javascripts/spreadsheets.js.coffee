@@ -353,7 +353,7 @@ jQuery ->
               (+u.value).toExponential(3)
               u.distribution
               (+_results.ui[i]).toExponential(3)
-              Math.round(_results.ci[i])
+              (+_results.ci[i]).toExponential(3)
               (+_results.ci_ui[i]).toExponential(3)
               "<svg width='100px' height='7px'><rect width='" + bar_size.toString() + "px' height='7px' style='fill:" + color + ";stroke-width:0;stroke:rgb(0,0,0)' /></svg>"
             ])

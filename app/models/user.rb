@@ -1,5 +1,6 @@
 class User < ActiveRecord::Base
   #attr_reader :raw_invitation_token
+  attr_reader :reset_password_token, :reset_password_sent_at
   include TheRole::Api::User
   belongs_to :laboratory
   belongs_to :company

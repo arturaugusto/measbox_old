@@ -18,11 +18,11 @@ class UsersController < ApplicationController
     rand_password = ('0'..'z').to_a.shuffle.first(8).join
     @user.password = rand_password
     @user.skip_confirmation!
-    raw, enc = Devise.token_generator.generate(User, :reset_password_token)
-    @user.reset_password_token = enc
-    @user.reset_password_sent_at = Time.now.utc
-    if @user.save
-      UserMailer.welcome_email(@user, raw).deliver
+    #raw, enc = Devise.token_generator.generate(@user.class, :reset_password_token)
+    #@user.update_attributes(reset_password_token: enc, reset_password_sent_at: Time.now)
+    if @user.save(validate: false)
+      #UserMailer.welcome_email(@user, raw).deliver_now
+      @user.send_reset_password_instructions
       redirect_to users_path, notice: "Invitation sent!"
     else
       flash.now[:error] = @user.errors.to_a

@@ -360,7 +360,7 @@ window.uncertaintiesSchema = uncertainties:
       name: "MPE"
       description: "Maximum Permissible Error"
       distribution: "Rect."
-      formula: "u = 0.005 * readout"
+      formula: "MPE = 0.005 * readout"
     }
   ]
 
