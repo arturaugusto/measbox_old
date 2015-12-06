@@ -476,6 +476,7 @@ window.mathFormSchema =
             'correct_value_fmt    = fmt_to_fixed(correct_value / uut_prefix_val, U_prec)\n' +
             'err_fmt              = fmt_to_fixed(y / uut_prefix_val, U_prec)\n' +
             'mpe_fmt              = fmt_to_fixed(mpe / uut_prefix_val, U_prec)\n' +
+            'tur                  = fmt_to_fixed(mpe/U, 2)\n' +
             'veff_fmt             = veff > 9999 ? "∞" : round(veff)'
           options:
             height: '100px'
@@ -495,7 +496,7 @@ window.mathFormSchema =
             '</span>\n\n' +
 
             'Error: {{err_fmt}} {{uut_prefix}}{{uut_unit}}  \n\n' +
-
+            'TUR: {{tur}}  \n\n' +
             '---\n\n' +
 
             'k: {{k_fmt}}  \n' +

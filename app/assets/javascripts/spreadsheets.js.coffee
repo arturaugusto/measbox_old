@@ -8,6 +8,7 @@ jQuery ->
   ################################################################################
 
   window.prefix_val = (k) ->
+    window.afterChangeTimeoutID = 0
     prefixes =
       'Y': 1000000000000000000000000
       'Z': 1000000000000000000000
@@ -448,7 +449,7 @@ jQuery ->
       try
         uut_name = spreadsheetEditor.getEditor("root.model.variables.0.name").getValue()
 
-        uut_name_list = window.hot.getData().map( (r) ->
+        uut_name_list = window.hot.getSourceData().map( (r) ->
           return r[uut_name].snippet
         )
 
@@ -476,7 +477,7 @@ jQuery ->
         $("#spreadsheet_data_description_tags").text(intersection.toString())
         window.document.title = title
 
-        $("#spreadsheet_spreadsheet_json").val(JSON.stringify(hot.getData()))
+        $("#spreadsheet_spreadsheet_json").val(JSON.stringify(hot.getSourceData()))
 
         $(".spreadsheet_feature").submit()
       catch e
@@ -526,7 +527,7 @@ jQuery ->
         task = {}
         task.selection = hot.getSelected()
         if task.selection is undefined then return
-        task.input = hot.getData()
+        task.input = hot.getSourceData()
         task.data = window.spreadsheetEditor.getValue()
         console.log task
         task_handler = new MBAuto("ws://127.0.0.1:9000", hot)
@@ -540,7 +541,8 @@ jQuery ->
         auto_save()
       if key is "details"
         # Ret selected row
-        curr_data = hot.getData()[options.end.row]
+        console.log options
+        curr_data = hot.getSourceData()[options.end.row]
         build_unc_table(curr_data._results, curr_data._range_id, curr_data._uut_id)
         $('#rowDetails').modal('toggle')
       if key is "mc"
@@ -1159,8 +1161,13 @@ jQuery ->
           if (changes is null) or (source is "set_results") or (source is "snippet_change")
             return
           try
-            console.log "Changes:"
-            process_entries(changes)
+            console.log "Processing changes..."
+            clearTimeout window.afterChangeTimeoutID
+            window.afterChangeTimeoutID = setTimeout (->
+              console.log "Changes:"
+              #window.hot.updateSettings({undo:false})
+              process_entries(changes)
+            ), 1500
           catch e
             console.log e
 
@@ -1217,7 +1224,7 @@ jQuery ->
     treat_snippet_changes = (changes) ->
       that = this
       # Iterate over hot objects
-      hot.getData().map (_, row) ->
+      hot.getSourceData().map (_, row) ->
         replace_autocomplete_text(changes, row)
 
     ################################################################################
@@ -1359,7 +1366,7 @@ jQuery ->
           # If its on standalone mode
           if standaloneMode
             changes = []
-            hot.getData().map (x, i) ->
+            hot.getSourceData().map (x, i) ->
               changes.push [
                 i
                 null
@@ -1503,7 +1510,7 @@ jQuery ->
       influence_vars = model_influence_vars()
 
       # Get results, and set serie name
-      data = hot.getData().map((x) ->
+      data = hot.getSourceData().map((x) ->
         obj = x._results
         serie_keys = []
         influence_vars.map((v) ->

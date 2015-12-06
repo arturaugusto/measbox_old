@@ -1,6 +1,9 @@
-@import "bootstrap";
 @import "font-awesome-sprockets";
+
+// For themes
+//@import "bootswatch/united/variables";
 @import "font-awesome";
+@import "bootstrap";
 .body_do_padding{ padding-top: 60px; }
 .handsontableInput{
 	-webkit-box-sizing: initial;
@@ -92,5 +95,12 @@
 #mcLoading > p{
   margin-left: 10px;
 }
+
+.navbar-inner {
+  background:transparent;
+}
+
+// For themes
+//@import "bootswatch/united/bootswatch";
 
 @import "bootstrap/theme";

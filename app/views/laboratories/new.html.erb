@@ -1,4 +1,4 @@
 <%- model_class = Laboratory -%>
 <br>
-<p class="lead"><%=t '.title', :default => [:'helpers.titles.create', 'Register your %{model}:'], :model => model_class.model_name.human.titleize %></p >
+<p class="lead" id="register"><%=t '.title', :default => [:'helpers.titles.create', 'Register your %{model}:'], :model => model_class.model_name.human.titleize %></p >
 <%= render :partial => 'form' %>
