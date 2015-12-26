@@ -19,7 +19,6 @@
 //= require dataTables/extras/dataTables.responsive
 //= require dataTables/jquery.dataTables
 //= require dataTables/bootstrap/3/jquery.dataTables.bootstrap
-//= require handsontable.full
 //= modalchoosevalue.js
 //= require underscore-min.js
 //= require bootstrap-datepicker
@@ -51,6 +50,7 @@
 //= require exporting.js
 //= require measbox_automation.js
 //= require jquery.bootstrap-autohidingnavbar.min.js
+//= require handsontable.full
 //= require require.js
 //= require turbolinks
 //= require_tree .
