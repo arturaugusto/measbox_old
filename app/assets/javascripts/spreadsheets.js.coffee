@@ -845,17 +845,17 @@ jQuery ->
           _results._error_chart = swig.render(custom_template, locals: _results)
         # ALwais add mouse over content
         _results._error_chart += '<div class="data_info" style="display: none;">' + _results._preview_content
-        
+
+      
+      window.hot.undoRedo.ignoreNewActions = true
       window.hot.setDataAtRowProp(row_num, "_results", _results, "set_results")
 
       # Parameter used to query results history
       window.hot.setDataAtRowProp(row_num, "_uut_id", this._uut_id, "set_results")
       window.hot.setDataAtRowProp(row_num, "_range_id", this._range_id, "set_results")
-
       # Trigger on change on json-editor
+      window.hot.undoRedo.ignoreNewActions = false
       spreadsheetEditor.onChange()
-
-
 
     process_entries = (changes, mc) ->
       that = this
@@ -1158,18 +1158,18 @@ jQuery ->
         ################################################################################
 
         afterChange: (changes, source) ->
-          if (changes is null) or (source is "set_results") or (source is "snippet_change")
+          if (changes is null) or (source is "set_results") or (source is "snippet_change")# or (source is "undo") or (source is "redo")
             return
           try
             console.log "Processing changes..."
             clearTimeout window.afterChangeTimeoutID
             window.afterChangeTimeoutID = setTimeout (->
               console.log "Changes:"
-              #window.hot.updateSettings({undo:false})
               process_entries(changes)
             ), 1500
           catch e
             console.log e
+          return
 
 
         ################################################################################
