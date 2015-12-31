@@ -309,8 +309,13 @@
   }
 
   var get_distribution_div = function(val){
+    // Use uniform by default if its undefined
+    if(val === undefined){
+      val = "uniform"
+    }
     var dist_val = distributions[val];
     if(dist_val === undefined){
+      // Case is set a numeric val
       return(parseFloat(val));
     }else{
       return(dist_val);

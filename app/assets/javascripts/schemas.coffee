@@ -353,13 +353,13 @@ window.uncertaintiesSchema = uncertainties:
     {
       name: "Resolution"
       description: "Half of minimum step size"
-      distribution: "Rect."
+      distribution: "uniform"
       formula: "u = resolution / 2"
     }
     {
       name: "MPE"
       description: "Maximum Permissible Error"
-      distribution: "Rect."
+      distribution: "uniform"
       formula: "MPE = 0.005 * readout"
     }
   ]
