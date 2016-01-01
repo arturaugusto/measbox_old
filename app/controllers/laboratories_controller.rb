@@ -11,15 +11,15 @@ class LaboratoriesController < ApplicationController
 
   def new
 
-    #if (request.subdomain != '')
-    #  redirect_to :controller=> 'my_devise/sessions', :action => 'new'
-    #else
+    if (request.subdomain != '')
+      redirect_to 'http:\\\\' + MeasWeb::Application.config.host
+    else
       @laboratory = Laboratory.new
       respond_to do |format|
         format.html # new.html.erb
         format.json { render :json => @laboratory }
       end
-    #end
+    end
   end
 
   def edit
