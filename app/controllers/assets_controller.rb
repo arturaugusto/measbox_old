@@ -32,10 +32,17 @@ class AssetsController < ApplicationController
 
   # GET /assets/1/edit
   def edit
-    @avaliable_ranges = @asset.model.nil? ? nil : Snippet.tagged_with(@asset.model.models[0].name, :on => :models)
+    @avaliable_ranges = nil
+    if not @asset.model.nil? then
+      first_model_tag = @asset.model.models[0]
+      if first_model_tag != nil then
+        @avaliable_ranges = Snippet.tagged_with(first_model_tag.name, :on => :models)
+      end
+    end
+
+    return @avaliable_ranges
+    #@avaliable_ranges = @asset.model.nil? ? nil : Snippet.tagged_with(@asset.model.models[0].name, :on => :models)
     #@ranges = Snippet.tagged_with([params[:tag]], :wild => true, :any => true)
-
-
   end
 
   # POST /assets

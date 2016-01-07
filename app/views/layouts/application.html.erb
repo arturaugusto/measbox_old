@@ -55,7 +55,7 @@
 
                 <%= content_tag(:li, link_to("Templates", snippets_path), class: "#{ controller_name=="snippets"? "active" : "" }" ) %>
               <% else %>
-                <li><%= link_to content_tag(:i, "", class: "") + ' Register', "#register" %></li>
+                <% if current_laboratory == nil then %> <li><%= link_to content_tag(:i, "", class: "") + ' Register', "#register" %></li> <% end %>
               <% end %>
               <% if user_signed_in? %>
                 <%= content_tag(:li, link_to( content_tag(:i, "", class: "glyphicon glyphicon-user") + " " +current_user.email, edit_user_path(current_user) ), class: "#{ (controller_name=="users" and current_user.id == params[:id])? "active" : "" }" ) %>
@@ -71,7 +71,7 @@
                 </li>
               <% else %>
                 <% if current_laboratory != nil then %>
-                  <%= content_tag(:li, link_to("Sign in", new_user_session_path), class: "#{ controller_name=="sessions"? "active" : "" }" ) %>
+                  <%= content_tag(:li, link_to(" Sign in", new_user_session_path, class: "fa fa-sign-in"), class: "#{ controller_name=="sessions"? "active" : "" }" ) %>
                   <%= content_tag(:li, link_to("Sign up", new_user_registration_path), class: "#{ controller_name=="registrations"? "active" : "" }" ) %>
                 <% else %>
                   <%#= content_tag(:li, link_to("None", "#"), class: "" ) %>
@@ -161,13 +161,8 @@
               <div class="row">
                 <div class="col-md-6 col-a" style="padding-right:20px; border-right: 1px solid #eee;">
                   <h3>Learning</h3>
-                  <p><a target="_blank" href="https://www.youtube.com/watch?v=wx0R1OfwH4s"><i class="fa fa-youtube-play"></i> Watch the introductory video <i class="fa fa-external-link"></i></a></p>
-                  <center>
-                    <div class="embed-responsive embed-responsive-16by9">
-                      <iframe class="embed-responsive-item" width="427" height="240" src="https://www.youtube.com/embed/wx0R1OfwH4s" frameborder="0" allowfullscreen></iframe>
-                    </div>
-                  </center>
-                  <p>Access the <a target="_blank" href="https://www.youtube.com/user/arturaugusto/videos">youtube channel</a> for further videos and tutorials.</p>
+                  <p><a target="_blank" href='https://github.com/arturaugusto/measbox_wiki/wiki' class="fa fa-external-link"> Introduction</a></p>
+                  <p><a target="_blank" href='https://github.com/arturaugusto/measbox_wiki/wiki/How-To-Use' class="fa fa-external-link"> Measbox Walk-through</a></p>
                 </div>
                 <div class="col-md-6 col-b">
                   <h3>Updates and information:</h3>
