@@ -240,7 +240,7 @@
   // string is returned if math model is single line, and object with entries property if multiline
   var math_res = function(fun, scope){
     var res = fun.eval(scope);
-    return typeof res === "number" ? res : res.entries[res.entries.length];
+    return typeof res === "number" ? res : res.entries[res.entries.length-1];
   }
 
   var Xfunc = function(func, math_scope, target_var_name){
@@ -276,11 +276,14 @@
       if ((arg_type === "number") || (arg_type === "string")){
         scope_updt[that.target_var_name] = x;
       }
+      var res;
       if(typeof that.func === "string"){
-        return math_res(that.math_func, scope_updt);
+        res = math_res(that.math_func, scope_updt);
       }else{
-        return(that.func.call(void 0, scope_updt));
+        res = that.func.call(void 0, scope_updt);
       }
+      console.log(res);
+      return res;
     }
   }
 
