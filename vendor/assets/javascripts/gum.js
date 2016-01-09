@@ -282,7 +282,6 @@
       }else{
         res = that.func.call(void 0, scope_updt);
       }
-      console.log(res);
       return res;
     }
   }

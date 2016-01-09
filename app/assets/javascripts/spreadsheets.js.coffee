@@ -87,8 +87,6 @@ jQuery ->
 
     prefix_val: prefix_val
 
-    console: (x) ->
-      console.log(x)
   )
 
   # Import jStat pdfs to mathjs
