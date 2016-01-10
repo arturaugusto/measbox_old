@@ -3,9 +3,9 @@
 # You can use CoffeeScript in this file: http://coffeescript.org/
 jQuery ->
 
-  ################################################################################
+  #######################################################################
   # Get prefix aux func
-  ################################################################################
+  #######################################################################
 
   window.prefix_val = (k) ->
     window.afterChangeTimeoutID = 0
@@ -48,9 +48,9 @@ jQuery ->
     return ['M', x, y, 'L', x + w, y + h, 'M', x + w, y, 'L', x, y + h, 'z']
 
 
-  ################################################################################
+  #######################################################################
   # Extend mathjs to post-processing functions
-  ################################################################################
+  #######################################################################
 
   
   window._convert_if_not_big_num = (x) ->
@@ -141,9 +141,9 @@ jQuery ->
     $("#spreadsheet_tag_list").tagsinput
 
 
-    ################################################################################
+    #######################################################################
     # Init uncertanties datatables
-    ################################################################################
+    #######################################################################
 
     window.unc_table = $("#uncertanties_table").dataTable
       #sDom: 'TRr<"inline"l> <"inline"f>t<"inline"p><"inline"i>'
@@ -180,9 +180,9 @@ jQuery ->
       #pagingType: 'full_numbers'
       bAutoWidth: false
 
-    ################################################################################
+    #######################################################################
     # Percent to RGP, borrowed from http://stackoverflow.com/questions/340209/generate-colors-between-red-and-green-for-a-power-meter/340214#340214
-    ################################################################################
+    #######################################################################
 
     percentToRGB = (percent) ->
       if percent == 100
@@ -219,9 +219,9 @@ jQuery ->
         _chart_unit = ""
       return _chart_unit
 
-    ################################################################################
+    #######################################################################
     # Set series and tooltip handlers for charts
-    ################################################################################
+    #######################################################################
 
     set_chart_series = (data, x_key, x_key_parser) ->
       _chart_unit = get_chart_unit(data)
@@ -327,9 +327,9 @@ jQuery ->
         999
       ])[0]
 
-    ################################################################################
+    #######################################################################
     # Function to populate unc table
-    ################################################################################
+    #######################################################################
 
     build_unc_table = (_results, _range_id, _uut_id) ->
       if _results.U isnt undefined
@@ -439,9 +439,9 @@ jQuery ->
               series: series
       return
 
-    ################################################################################
+    #######################################################################
     # Save data
-    ################################################################################
+    #######################################################################
 
     window.auto_save = () ->
       # build tags based on wat was used on spreadsheet
@@ -484,9 +484,9 @@ jQuery ->
         console.log e
 
 
-    ################################################################################
+    #######################################################################
     # Callbacks for handsontable context menu items
-    ################################################################################
+    #######################################################################
 
     handsontableContextMenuCallbacks = (key, options) ->
       if key is "readouts"
@@ -570,10 +570,10 @@ jQuery ->
       return process snippets_autocomplet_source().concat(prefixes_autocomplet_source())
 
 
-    ################################################################################
+    #######################################################################
     # Functions to update hot editors.
     # Colors, headers and schemas
-    ################################################################################
+    #######################################################################
 
     colorRenderer = (instance, td, row, col, prop, value, cellProperties) ->
       Handsontable.renderers.TextRenderer.apply this, arguments
@@ -644,9 +644,9 @@ jQuery ->
       return res
 
 
-    ################################################################################
+    #######################################################################
     # Function to generate default comparision bars for MPE and cal U
-    ################################################################################
+    #######################################################################
 
     default_inline_chart = (_results) ->
       # Refresh chart content
@@ -664,10 +664,10 @@ jQuery ->
       u_y = 8
       mpe_y = 18
 
-      ################################################################################
+      #######################################################################
       # Chart elements
       # TODO sanatize this
-      ################################################################################
+      #######################################################################
 
       res = '<svg height="22px" width="300px">' + \
       '<circle cx="' + ((correct_value - offset) / (max_value - offset))*100 + '%" cy="' + u_y + '" r="3" fill="#00628C" stroke="none"></circle>' + \
@@ -678,9 +678,9 @@ jQuery ->
       '</svg>'
       return res
 
-    ################################################################################
+    #######################################################################
     # GUM response postprocessing
-    ################################################################################
+    #######################################################################
 
 
     handle_gum_response = (calc, mc) ->
@@ -821,9 +821,9 @@ jQuery ->
       else
         _results["reference_resolution"] = 0
       
-      ################################################################################
+      #######################################################################
       # Eval post porocessing
-      ################################################################################
+      #######################################################################
 
       mathjs.eval(model_data.additional_options.post_processing, _results)
       # Output
@@ -856,11 +856,16 @@ jQuery ->
       window.hot.undoRedo.ignoreNewActions = false
       spreadsheetEditor.onChange()
 
+
+    parse_newline_values = (v) ->
+      v.split(/[\n,;]+/).map (v) ->
+        parseFloat v
+
     process_entries = (changes, mc) ->
       that = this
-      ################################################################################
+      #######################################################################
       # When changes exists and its not seting results
-      ################################################################################
+      #######################################################################
       for change in changes
         this.row_num = change[0]
         # variables editor
@@ -875,9 +880,9 @@ jQuery ->
           variables: []
           influence_quantities: []
 
-        ################################################################################
+        #######################################################################
         # filter model variables object
-        ################################################################################
+        #######################################################################
 
         this.variables_editor.getValue().map (v, i) ->
           variable = Object.create(v)
@@ -891,35 +896,60 @@ jQuery ->
             that.unc_source_obj.influence_quantities.push variable
           else
             value = window.reject_non_numbers(window.hot.getDataAtRowProp(that.row_num, variable.name).readouts)
+
+            #DONT NEED
             # if first, is uut. Set variable
+            ###
             if i is 0
               that._uut_val_wo_prefix = jStat.mean( value.map (r) -> return parseFloat(r) )
+            ###
+            
             variable.value = value
             variable.prefix = window.hot.getDataAtRowProp(that.row_num, variable.name).prefix
             that.unc_source_obj.variables.push variable
-        
 
         # snippet editor
         this.snippets_editor = spreadsheetEditor.getEditor("root.choosen_snippets")
         
-        ################################################################################
+        #######################################################################
         # Create scope to use when parsing expression with math.js
-        ################################################################################
+        #######################################################################
 
         this.base_scope = {}
-        this.base_scope.uut_readout = this._uut_val_wo_prefix * prefix_val(window.hot.getDataAtRowProp(this.row_num, this._uut_name).prefix)
+
+        #DONT NEED
+        #this.base_scope.uut_readout = this._uut_val_wo_prefix * prefix_val(window.hot.getDataAtRowProp(this.row_num, this._uut_name).prefix)
 
         this.unc_source_obj.influence_quantities.map (iq) ->
           that.base_scope[iq.name] = parseFloat(iq.value)*prefix_val(iq.prefix)
         
-        this.unc_source_obj.variables.map (v) ->
+        this.unc_source_obj.variables.map (v, i) ->
           # determine mean
           # default is 0
           that.base_scope[v.name] = 0
           # If on snippet, the var is set as readout, overwrite with the mean
           if v.readout
+            # Parse a list of values separated by new line
+            # eg: ["111\n111\112","111\n111\,111"] ...
+            # to the average of those values
+            j = v.value.length - 1
+            while j >= 0
+              size = v.value[j].split(/[\n,;]+/).length
+              if size > 0
+                serie_readout = jStat.mean(parse_newline_values(v.value[j]))
+                v.value[j] = serie_readout
+              j--
+            # Now it shoud be like ["111","111"] ...
+
+            # Get the mean
+            console.log "VALUES"
+            console.log v.value
             mean_value = jStat.mean( v.value.map (r) -> return parseFloat(r) )
             that.base_scope[v.name] = mean_value * prefix_val(window.hot.getDataAtRowProp(this.row_num, v.name).prefix)
+
+            # if first, is uut. Set variable
+            if i is 0
+              that.base_scope.uut_readout = that.base_scope[v.name]
 
         # init max permissive error
         this._mpe = 0
@@ -960,9 +990,9 @@ jQuery ->
               # add unique range identifier
               that._range_id = r._identifier
 
-            ################################################################################
+            #######################################################################
             # Test if this is a suitable range
-            ################################################################################
+            #######################################################################
 
             truth_test = mathjs.eval(r.limits.autorange_conditions, scope)
             if truth_test
@@ -1022,14 +1052,15 @@ jQuery ->
         # Set label text
         #uut_val_label = this._uut_val_wo_prefix.toString() + " " + window.hot.getDataAtRowProp(this.row_num, this._uut_name).prefix + this.worksheet_snippet.value.unit + this._uut_range_label
 
-        ################################################################################
+        #######################################################################
         # Call GUM
-        ################################################################################
+        #######################################################################
 
         this.model_data = spreadsheetEditor.getEditor("root.model").getValue()
         this.unc_source_obj.func = this.model_data.func
         this.unc_source_obj.cl = this.model_data.additional_options.cl
 
+        console.log(this.unc_source_obj)
 
         # Check for monte carlo
         if mc is true
@@ -1043,7 +1074,6 @@ jQuery ->
           # Entry data
           console.log "Entry data"
           console.log unc_source_obj
-          
           calc = new GUM(unc_source_obj)
           handle_gum_response(calc)
         catch e
@@ -1052,9 +1082,9 @@ jQuery ->
 
       return # THIS RETURN HERE IS IMPORTANT! (probems with undo)
 
-    ################################################################################
+    #######################################################################
     # Control color to instruments colum
-    ################################################################################
+    #######################################################################
 
     increase_brightness = (color, percent) ->
       f = parseInt(color.slice(1), 16)
@@ -1066,9 +1096,9 @@ jQuery ->
       '#' + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + Math.round((t - B) * p) + B).toString(16).slice(1)
 
 
-    ################################################################################
+    #######################################################################
     # Generate deffinition hot settings
-    ################################################################################
+    #######################################################################
 
     window.entries_hot_settings = (data) ->
       that = this
@@ -1152,9 +1182,9 @@ jQuery ->
         columns: columns
         minSpareRows: 1
 
-        ################################################################################
+        #######################################################################
         # After change hot function callback
-        ################################################################################
+        #######################################################################
 
         afterChange: (changes, source) ->
           if (changes is null) or (source is "set_results") or (source is "snippet_change")# or (source is "undo") or (source is "redo")
@@ -1171,9 +1201,9 @@ jQuery ->
           return
 
 
-        ################################################################################
+        #######################################################################
         # Continue to other hot configs
-        ################################################################################
+        #######################################################################
 
         #manualColumnResize: true
         contextMenu: true
@@ -1202,9 +1232,9 @@ jQuery ->
               name: "Save"
       return settings
 
-    ################################################################################
+    #######################################################################
     # Update handsontable range select text when the label is changed on choosen snippets data
-    ################################################################################
+    #######################################################################
     
     replace_autocomplete_text = (changes, row) ->
       that = this
@@ -1216,9 +1246,9 @@ jQuery ->
             window.hot.setDataAtRowProp(row, p.name+".snippet", c.new, "snippet_change")
             window.hot.render()
 
-    ################################################################################
+    #######################################################################
     # Filter change ocorrences on choosen_snippets editor and call functions to change
-    ################################################################################
+    #######################################################################
 
     treat_snippet_changes = (changes) ->
       that = this
@@ -1226,9 +1256,9 @@ jQuery ->
       hot.getSourceData().map (_, row) ->
         replace_autocomplete_text(changes, row)
 
-    ################################################################################
+    #######################################################################
     # Observe snippets and model for changes
-    ################################################################################
+    #######################################################################
 
     window.SnippetsObserver = () ->
       that = this
@@ -1261,9 +1291,9 @@ jQuery ->
 
       this.init()
 
-    ################################################################################
+    #######################################################################
     # Build editor
-    ################################################################################
+    #######################################################################
     window.auto_save_handler = undefined
     window.spreadsheetEditorBuilder = (data) ->
       # Dont polute db with the text procedure
@@ -1275,9 +1305,9 @@ jQuery ->
         window.spreadsheetEditor.on "ready", () ->
 
           if not standaloneMode
-            ################################################################################
+            #######################################################################
             # Refresh choosen snippets TODO: Clean this, maybe using other aproach, like other json-editor
-            ################################################################################
+            #######################################################################
 
             # add refresh button
             #$(".container-choosen_snippets").find(".json-editor-btn-delete")
@@ -1308,9 +1338,9 @@ jQuery ->
                   window.spreadsheetEditor.getEditor( "root.choosen_snippets."+index.toString()+".automation").setValue(data.snippet.automation)
                   
 
-            ################################################################################
+            #######################################################################
             # Refresh math model
-            ################################################################################
+            #######################################################################
 
             # add refresh button
             #$(".container-model").find(".json-editor-btn-edit")
@@ -1352,9 +1382,9 @@ jQuery ->
           editor.setValue(value)
           window.SnippetsObserver()
 
-          ################################################################################
+          #######################################################################
           # Handsontable
-          ################################################################################    
+          #######################################################################    
           settings = window.entries_hot_settings(data)
           #console.log settings
           window.hot = new Handsontable( $("#hot_container")[0], settings )
@@ -1380,9 +1410,9 @@ jQuery ->
               console.log e
           window.hot.render()
           $("#hot_container").fadeIn()  
-        ################################################################################
+        #######################################################################
         # Auto save
-        ################################################################################
+        #######################################################################
         
         window.spreadsheetEditor.on "change", () ->
           clearTimeout window.auto_save_handler
@@ -1393,9 +1423,9 @@ jQuery ->
           ), 1000)
 
 
-    ################################################################################
+    #######################################################################
     # Filter data to fit choosen snippets schema
-    ################################################################################
+    #######################################################################
 
     window.filter_snippet_data = (data) ->
       data.snippet.label = data.model.name + " " + data.snippet.value.unit + " " + data.snippet.value.kind + " - " + data.asset.identification
@@ -1448,9 +1478,9 @@ jQuery ->
       delete data.snippet.updated_at
       return data
 
-    ################################################################################
+    #######################################################################
     # Create user interface to choose snippets, when click on the search icon next to tags
-    ################################################################################
+    #######################################################################
 
     # actiion to search icon for the assets
     $(".search_fields").click (e) ->
@@ -1476,9 +1506,9 @@ jQuery ->
       $('#myModal').modal('toggle')
 
 
-    ################################################################################
+    #######################################################################
     # Update handsontable settings
-    ################################################################################
+    #######################################################################
 
     window.update_hot_settings = ->
       if window.hot_settings_update_handler isnt undefined
@@ -1501,9 +1531,9 @@ jQuery ->
       ), 1000
 
 
-    ################################################################################
+    #######################################################################
     # Chart function
-    ################################################################################
+    #######################################################################
 
     window.plot_chart = () ->
       influence_vars = model_influence_vars()

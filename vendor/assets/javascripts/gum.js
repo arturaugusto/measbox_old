@@ -351,6 +351,13 @@
     return k_val = (prefixes[k] === void 0 ? 1 : prefixes[k]);
   };
 
+
+  var parse_newline_values = function(v){
+    return v.split(/[\n,;]+/).map(function(v){
+      return parseFloat(v);
+    });
+  }
+
   var build_scope = function(v){
     var mean_value = 0;
     var prefix = get_prefix(v.prefix)
@@ -361,9 +368,7 @@
     }
     if (typeof readout === "string"){
       // If value is a string, split to convert csv or limited by \n to array of numbers
-      readout = readout.split(/[\n,;]+/).map(function(readout){
-        return parseFloat(readout);
-      });
+      readout = parse_newline_values(readout);
     }
     if (typeof readout === "object"){
       var n = readout.length;
@@ -371,28 +376,44 @@
       // so in this case, set readout as only one numeric value
       if(n === 0){
         mean_value = 0;
-      }else if (n === 1){
-        mean_value = parseFloat(readout[0]);
-      }else{
-        mean_value = (sum(readout)/n);
+      } else {
+        // The readout contain multiple lines
+        // parse the data and set readout as the average of data
+        /*
+        for (var i = readout.length - 1; i >= 0; i--) {
+          if (typeof readout[i] === "string") {
+              var size = (readout[i].split(/[\n,;]+/).length)
+              if (size > 0){
+                var serie_readout = ( sum(parse_newline_values(readout[i]))/size );
+                readout[i] = serie_readout;
+              }
+          }
+        };
+        */
+        if (n === 1) {
+          mean_value = parseFloat(readout[0]);
+        } else {
+          mean_value = (sum(readout)/n);
 
-        // The array contain multiple values, 
-        // so add type A uncertanty
-        var values_sd = sd(readout, mean_value) * prefix;
-        // Create a new uncertanty item
-        var unc = {
-          "name": "Repeatability",
-          "value": values_sd,
-          "type": "A",
-          "distribution": "normal",
-          "df": n - 1,
-          "k": 2
+          // The array contain multiple values, 
+          // so add type A uncertanty
+          var values_sd = sd(readout, mean_value) * prefix;
+          // Create a new uncertanty item
+          var unc = {
+            "name": "Repeatability",
+            "value": values_sd,
+            "type": "A",
+            "distribution": "normal",
+            "df": n - 1,
+            "k": 2
+          }
+          // Add uncertanty relative to desviation of values
+          this.uncertainties.push(unc);
+          // repeat var name to array
+          this.uncertainties_var_names.push(v.name);
         }
-        // Add uncertanty relative to desviation of values
-        this.uncertainties.push(unc);
-        // repeat var name to array
-        this.uncertainties_var_names.push(v.name);
       }
+      
     }
     this._scope[v.name] = mean_value * prefix;
   }
