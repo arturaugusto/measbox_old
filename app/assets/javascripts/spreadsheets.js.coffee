@@ -269,7 +269,7 @@ jQuery ->
               return '<b>U:</b> ' + this.low.toExponential(2) +  '<b> .. </b>' +  this.high.toExponential(2) + _chart_unit + '<br>'
 
         upper_point_mpe = series_groups[serie_name].map((p) ->
-          return [x_key_parser(p[x_key]),  + p.mpe]
+          return [x_key_parser(p[x_key]), + p.mpe]
         )
 
         lower_point_mpe = series_groups[serie_name].map((p) ->
@@ -345,13 +345,19 @@ jQuery ->
             bar_size = (+_results.ci_ui[i]/max_contribution) * 100
             color = percentToRGB(bar_size*0.9)
             var_name = _results.uncertainties_var_names[i]
+            dist_or_div = ""
+            if u.k isnt undefined
+              dist_or_div = u.k
+            else if u.distribution isnt undefined
+              dist_or_div = u.distribution
+            
             data.push([
               var_name
               _results.units[var_name]
               u.name
               u.type
               (+u.value).toExponential(3)
-              u.distribution
+              dist_or_div
               (+_results.ui[i]).toExponential(3)
               (+_results.ci[i]).toExponential(3)
               (+_results.ci_ui[i]).toExponential(3)
